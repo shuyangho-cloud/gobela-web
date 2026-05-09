@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Image from "next/image";
 
 const features = [
   {
@@ -82,20 +83,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Phone mockup */}
+            {/* Mascot */}
             <div className="flex justify-center">
-              <div className="relative w-56 h-[460px] bg-white/10 rounded-[2.5rem] border border-white/20 flex items-center justify-center shadow-2xl">
-                <div className="absolute top-4 w-24 h-1.5 bg-white/20 rounded-full" />
-                <div className="text-center px-6">
-                  <div className="text-5xl mb-4">🌟</div>
-                  <p className="text-white font-bold text-lg">Good morning!</p>
-                  <p className="text-white/60 text-sm mt-1">Bela has a plan for your family today</p>
-                  <div className="mt-6 bg-white/10 rounded-2xl p-4 text-left">
-                    <p className="text-[#FFB703] text-xs font-semibold mb-1">BELA SAYS</p>
-                    <p className="text-white text-sm">Hokkien Mee night — all ingredients are in season 🍜</p>
-                  </div>
-                </div>
-              </div>
+              <Image
+                src="/mascot/transparent/Happy.png"
+                alt="Bela mascot"
+                width={220}
+                height={240}
+                className="drop-shadow-2xl"
+                priority
+              />
             </div>
           </div>
         </section>
@@ -163,6 +160,41 @@ export default function Home() {
           </div>
         </section>
 
+        {/* App Screenshots */}
+        <section className="bg-[#F8F9FA] py-20">
+          <div className="max-w-6xl mx-auto px-5">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-4">
+                See GoBela in action
+              </h2>
+              <p className="text-gray-500 max-w-xl mx-auto">
+                Everything your family needs, in one beautifully simple app.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-8">
+              {[
+                { src: "/screenshots/home.png",    label: "Home" },
+                { src: "/screenshots/meal.png",    label: "Meal Planning" },
+                { src: "/screenshots/discover.png",label: "Discover" },
+                { src: "/screenshots/bela.png",    label: "Chat with Bela" },
+              ].map((s) => (
+                <div key={s.label} className="flex flex-col items-center gap-3">
+                  <div className="relative w-[200px] h-[420px] rounded-[36px] overflow-hidden border-[6px] border-[#1A2C4E] shadow-2xl bg-[#1A2C4E]">
+                    <Image
+                      src={s.src}
+                      alt={`GoBela ${s.label} screen`}
+                      fill
+                      sizes="200px"
+                      className="object-cover object-top"
+                    />
+                  </div>
+                  <span className="text-sm font-semibold text-[#1A2C4E]">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* AI moat */}
         <section className="bg-[#1A2C4E] py-20 text-white">
           <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center">
@@ -187,7 +219,14 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 relative">
+              <Image
+                src="/mascot/transparent/Recommending.png"
+                alt="Bela recommending"
+                width={120}
+                height={120}
+                className="absolute -top-12 -right-16 drop-shadow-xl"
+              />
               <p className="text-[#FFB703] font-semibold text-xs uppercase tracking-widest mb-4">Bela in action</p>
               {[
                 { role: "parent", msg: "Endria is hyper today and it's raining 🌧️" },
@@ -226,12 +265,12 @@ export default function Home() {
               >
                 Become a Partner
               </Link>
-              <a
-                href="mailto:hello@gobela.sg"
+              <Link
+                href="/contact"
                 className="border border-[#1A2C4E] text-[#1A2C4E] font-semibold px-8 py-3 rounded-full hover:bg-[#1A2C4E]/5 transition-colors"
               >
                 Talk to us
-              </a>
+              </Link>
             </div>
           </div>
         </section>
