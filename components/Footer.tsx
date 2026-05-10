@@ -40,8 +40,11 @@ export default function Footer() {
           <p className="text-white font-semibold mb-3">Company</p>
           <ul className="space-y-2">
             <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-            <li><a href="mailto:hello@gobela.sg" className="hover:text-white transition-colors">Contact</a></li>
-            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+            <li><a href="mailto:hello@gobela.sg" className="hover:text-white transition-colors">hello@gobela.sg</a></li>
+            <li><a href="mailto:partnerships@gobela.sg" className="hover:text-white transition-colors">partnerships@gobela.sg</a></li>
+            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+            <li><Link href="/support" className="hover:text-white transition-colors">Terms of Service</Link></li>
+            <li><Link href="/privacy" className="hover:text-white transition-colors">Child Safety</Link></li>
           </ul>
         </div>
       </div>

@@ -10,6 +10,15 @@
 
 html { scroll-behavior: smooth; }
 
+.hero-glow {
+  background-image: radial-gradient(circle at 70% 50%, #FFB703 0%, transparent 60%);
+}
+
+.feature-icon-coral   { background: rgba(255, 140, 102, 0.13); }
+.feature-icon-teal    { background: rgba(47,  183, 168, 0.13); }
+.feature-icon-amber   { background: rgba(255, 183,   3, 0.13); }
+.feature-icon-navy    { background: rgba(26,   44,  78, 0.13); }
+
 body {
   background: #fff;
   color: var(--navy);

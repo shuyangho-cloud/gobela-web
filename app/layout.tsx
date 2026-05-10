@@ -24,13 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         {children}
-        {/* Google Analytics — replace GA_MEASUREMENT_ID once you have it from analytics.google.com */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID" strategy="afterInteractive" />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-H4JNED050G" strategy="afterInteractive" />
         <Script id="ga-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'GA_MEASUREMENT_ID');
+          gtag('config', 'G-H4JNED050G');
         `}</Script>
       </body>
     </html>

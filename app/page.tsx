@@ -8,25 +8,25 @@ const features = [
     icon: "🍳",
     title: "Cook at Home",
     desc: "Weekly meal plans built around what's in season in Singapore. AI-powered recipes your kids will actually eat.",
-    color: "#FF8C66",
+    iconBgClass: "feature-icon-coral",
   },
   {
     icon: "🍜",
     title: "Dine Out",
     desc: "Curated family-friendly restaurants. Real reviews from Singapore parents. No more \"where should we eat?\"",
-    color: "#2FB7A8",
+    iconBgClass: "feature-icon-teal",
   },
   {
     icon: "🎡",
     title: "Play & Discover",
     desc: "Classes, events, and weekend plans from Klook, Peatix, Fever and local partners — all in one place.",
-    color: "#FFB703",
+    iconBgClass: "feature-icon-amber",
   },
   {
-    icon: "👨‍👩‍👧",
-    title: "Community",
-    desc: "Share milestones, swap tips, and find your parenting tribe. Because raising kids is a team sport.",
-    color: "#1A2C4E",
+    icon: "📅",
+    title: "Weekend Planning",
+    desc: "Bela curates your weekend based on the kids' mood, weather, and budget. Less searching. More doing.",
+    iconBgClass: "feature-icon-navy",
   },
 ];
 
@@ -34,13 +34,6 @@ const steps = [
   { num: "01", title: "Tell Bela about your family", desc: "Ages, dietary needs, energy levels today. 30 seconds." },
   { num: "02", title: "Get a personalised plan", desc: "Bela, your AI parenting co-pilot, suggests what to cook, where to go, and what to book." },
   { num: "03", title: "Enjoy your weekend", desc: "Book directly in-app, save favourites, and discover something new every week." },
-];
-
-const stats = [
-  { val: "500+", label: "Partner Venues" },
-  { val: "1,200+", label: "Recipes" },
-  { val: "10,000+", label: "Families" },
-  { val: "4.9★", label: "App Rating" },
 ];
 
 export default function Home() {
@@ -51,28 +44,27 @@ export default function Home() {
 
         {/* Hero */}
         <section className="relative bg-[#1A2C4E] text-white overflow-hidden">
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: "radial-gradient(circle at 70% 50%, #FFB703 0%, transparent 60%)" }} />
+          <div className="hero-glow absolute inset-0 opacity-10" />
           <div className="max-w-6xl mx-auto px-5 py-24 md:py-32 grid md:grid-cols-2 gap-12 items-center relative z-10">
             <div>
               <p className="text-[#FFB703] font-semibold text-sm uppercase tracking-widest mb-4">
-                Singapore&apos;s #1 Family App
+                Launching Soon in Singapore
               </p>
-              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-5">
                 The Operating System<br />for Modern Parenting
               </h1>
-              <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-md">
-                Cook smarter. Dine better. Play more. GoBela brings AI-powered meal planning,
-                family dining, activities, and community together — so you can spend less time
-                deciding and more time connecting.
+              <p className="text-white/90 text-lg leading-relaxed mb-3 max-w-md font-medium">
+                No more spending 45 minutes deciding where to bring the kids on a rainy Sunday.
+              </p>
+              <p className="text-white/60 text-base leading-relaxed mb-8 max-w-md">
+                GoBela brings AI-powered meal planning, family dining, activities, and weekend planning together — so you spend less time deciding and more time connecting.
               </p>
               <div className="flex flex-wrap gap-4">
                 <a
-                  id="download"
-                  href="https://apps.apple.com"
+                  href="#waitlist"
                   className="bg-[#FFB703] text-[#1A2C4E] font-bold px-6 py-3 rounded-full hover:bg-yellow-400 transition-colors"
                 >
-                  Download on App Store
+                  Get Early Access — Free
                 </a>
                 <Link
                   href="/partners"
@@ -97,13 +89,18 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats bar */}
+        {/* Launch status bar */}
         <section className="bg-[#FFB703]">
           <div className="max-w-6xl mx-auto px-5 py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((s) => (
+            {[
+              { icon: "🇸🇬", label: "Built for Singapore families" },
+              { icon: "🤖", label: "AI-powered family discovery" },
+              { icon: "🆓", label: "Free to join early access" },
+              { icon: "🚀", label: "Launching 2026" },
+            ].map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-[#1A2C4E] text-2xl font-extrabold">{s.val}</p>
-                <p className="text-[#1A2C4E]/70 text-sm font-medium">{s.label}</p>
+                <p className="text-2xl mb-1">{s.icon}</p>
+                <p className="text-[#1A2C4E]/80 text-sm font-semibold">{s.label}</p>
               </div>
             ))}
           </div>
@@ -117,15 +114,14 @@ export default function Home() {
                 Everything your family needs
               </h2>
               <p className="text-gray-500 max-w-xl mx-auto">
-                One app that handles the hardest questions of family life — what to eat, where to go, and how to grow.
+                One app that handles the hardest questions of family life — what to eat, where to go, and how to spend your weekend.
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((f) => (
                 <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4"
-                    style={{ background: f.color + "20" }}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 ${f.iconBgClass}`}
                   >
                     {f.icon}
                   </div>
@@ -160,8 +156,74 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Waitlist */}
+        <section id="waitlist" className="py-20 bg-[#F8F9FA]">
+          <div className="max-w-xl mx-auto px-5">
+            <div className="text-center mb-10">
+              <p className="text-[#2FB7A8] font-semibold text-sm uppercase tracking-widest mb-3">Early Access</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-4">
+                Be first to try GoBela
+              </h2>
+              <p className="text-gray-500">
+                Join Singapore parents getting early access. We&apos;ll notify you the moment GoBela is ready.
+              </p>
+            </div>
+            <form
+              action="https://formsubmit.co/hello@gobela.sg"
+              method="POST"
+              className="bg-white rounded-3xl shadow-sm p-8 flex flex-col gap-4"
+            >
+              <input type="hidden" name="_subject" value="New GoBela Early Access Request" />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_next" value="https://gobela.sg/?joined=1" />
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1A2C4E] mb-1">Your Name *</label>
+                <input
+                  name="name"
+                  required
+                  placeholder="e.g. Sarah"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2FB7A8]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#1A2C4E] mb-1">Email Address *</label>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="you@email.com"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2FB7A8]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#1A2C4E] mb-1">Child&apos;s Age Range</label>
+                <select
+                  name="child_age"
+                  title="Child's age range"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2FB7A8] bg-white"
+                >
+                  <option value="">Select an age range</option>
+                  <option value="0-2">0–2 years (Infant / Toddler)</option>
+                  <option value="3-5">3–5 years (Preschool)</option>
+                  <option value="6-9">6–9 years (Primary school)</option>
+                  <option value="10+">10+ years (Upper primary)</option>
+                  <option value="multiple">Multiple children</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="bg-[#FFB703] text-[#1A2C4E] font-bold py-4 rounded-full hover:bg-yellow-400 transition-colors text-base mt-2"
+              >
+                Join the GoBela Waitlist →
+              </button>
+              <p className="text-xs text-gray-400 text-center">No spam, ever. We&apos;ll only reach out when GoBela launches.</p>
+            </form>
+          </div>
+        </section>
+
         {/* App Screenshots */}
-        <section className="bg-[#F8F9FA] py-20">
+        <section className="bg-white py-20">
           <div className="max-w-6xl mx-auto px-5">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-4">
@@ -202,9 +264,10 @@ export default function Home() {
               <p className="text-[#FFB703] font-semibold text-sm uppercase tracking-widest mb-3">
                 Powered by AI
               </p>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-6">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
                 Meet Bela, your AI<br />parenting co-pilot
               </h2>
+              <p className="text-white/60 mb-6">Helping parents make better family decisions faster.</p>
               <ul className="space-y-4 text-white/80">
                 {[
                   "Learns your kids' tastes and energy patterns over time",
@@ -248,15 +311,43 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Founder Story */}
+        <section className="py-20 bg-white">
+          <div className="max-w-3xl mx-auto px-5 text-center">
+            <p className="text-[#2FB7A8] font-semibold text-sm uppercase tracking-widest mb-3">Why We Built GoBela</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-10">
+              Built from real parenting frustrations in Singapore
+            </h2>
+            <div className="bg-[#F8F9FA] rounded-3xl p-8 text-left">
+              <p className="text-gray-600 leading-relaxed text-lg mb-5 italic">
+                &ldquo;Every weekend, my wife and I would spend 45 minutes deciding what to do with the kids — then give up and go to the same mall again.&rdquo;
+              </p>
+              <p className="text-gray-600 leading-relaxed mb-4">
+                GoBela was born from that exhaustion. We didn&apos;t want another app that shows you a list of activities. We wanted something that actually understands your child&apos;s mood today, what&apos;s in your fridge, and your budget — and gives you one clear answer.
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                We&apos;re building Singapore&apos;s family decision engine. Because your weekends deserve more than a Google search.
+              </p>
+              <div className="mt-6 pt-6 border-t border-gray-200 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#1A2C4E] flex items-center justify-center text-white font-bold text-sm">S</div>
+                <div>
+                  <p className="font-bold text-[#1A2C4E]">Shuyang</p>
+                  <p className="text-sm text-gray-400">Founder, GoBela · Singapore</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Partner CTA */}
         <section className="py-20 bg-[#F8F9FA]">
           <div className="max-w-3xl mx-auto px-5 text-center">
             <div className="text-4xl mb-4">🤝</div>
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-4">
-              Reach 10,000+ Singapore families
+              Connect with Singapore families<br />at the moment of decision
             </h2>
             <p className="text-gray-500 text-lg mb-8 max-w-xl mx-auto">
-              GoBela connects activity providers, restaurants, and enrichment centres directly with parents who are already looking for you.
+              GoBela connects activity providers, restaurants, and enrichment centres directly with parents who are actively searching for you.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
@@ -275,20 +366,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Download CTA */}
+        {/* Waitlist CTA */}
         <section className="bg-[#FFB703] py-16">
           <div className="max-w-3xl mx-auto px-5 text-center">
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A2C4E] mb-4">
-              Ready to simplify family life?
+              Ready for less deciding,<br />more family time?
             </h2>
             <p className="text-[#1A2C4E]/70 mb-8">
-              Join thousands of Singapore families who have made weekends effortless.
+              Be among the first Singapore families to get GoBela. Early access is free.
             </p>
             <a
-              href="https://apps.apple.com"
+              href="#waitlist"
               className="inline-block bg-[#1A2C4E] text-white font-bold px-8 py-4 rounded-full hover:bg-[#243d6b] transition-colors text-lg"
             >
-              Download GoBela — Free
+              Join the Waitlist — Free
             </a>
             <p className="text-[#1A2C4E]/50 text-sm mt-4">iOS · Android coming soon</p>
           </div>

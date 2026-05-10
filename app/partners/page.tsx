@@ -69,9 +69,9 @@ export default function PartnersPage() {
         <section className="bg-[#FFB703] py-8">
           <div className="max-w-4xl mx-auto px-5 grid grid-cols-3 gap-4 text-center">
             {[
-              { val: "10,000+", label: "Active Families" },
-              { val: "3×", label: "Avg. Weekend Engagement" },
-              { val: "S$0", label: "To Get Listed" },
+              { val: "🇸🇬", label: "Singapore families" },
+              { val: "🤖", label: "AI-powered discovery" },
+              { val: "S$0", label: "To get listed" },
             ].map((s) => (
               <div key={s.label}>
                 <p className="text-[#1A2C4E] text-2xl font-extrabold">{s.val}</p>
