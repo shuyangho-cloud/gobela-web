@@ -80,123 +80,218 @@ function HeroSection({ onJoin, onTryBela }: { onJoin: () => void; onTryBela: () 
   )
 }
 
-function FeaturesSection() {
-  const classes = [
-    { icon: '🏊', label: 'Swimming', sub: 'From $18/trial' },
-    { icon: '💻', label: 'Coding', sub: 'Ages 5–12' },
-    { icon: '🎨', label: 'Art & Craft', sub: 'Drop-in sessions' },
-    { icon: '🎵', label: 'Music', sub: 'Piano, violin, guitar' },
-    { icon: '🤸', label: 'Gymnastics', sub: 'Ages 2–10' },
-    { icon: '⚽', label: 'Sports', sub: 'Football, tennis, more' },
-  ]
-  const meals = [
-    { day: 'Mon', name: 'Hainanese Chicken Rice', time: '25 min', tag: 'Kids fave' },
-    { day: 'Tue', name: 'Aglio Olio with Sausages', time: '15 min', tag: 'Quick' },
-    { day: 'Wed', name: 'Mee Goreng', time: '20 min', tag: 'Hawker-style' },
-    { day: 'Thu', name: 'Nasi Lemak with Egg', time: '35 min', tag: 'Weekend prep' },
-    { day: 'Fri', name: 'Homemade Pizza Night 🍕', time: '20 min', tag: 'Family fun' },
+function FeatCheckItem({ color, title, desc }: { color: string; title: string; desc: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
+      <svg width="18" height="18" viewBox="0 0 18 18" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true">
+        <circle cx="9" cy="9" r="9" fill={color} opacity="0.15" />
+        <path d="M5 9l3 3 5-5" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </svg>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: C.navy, marginBottom: 3 }}>{title}</div>
+        <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.55 }}>{desc}</div>
+      </div>
+    </div>
+  )
+}
+
+function FeatMetrics({ metrics }: { metrics: { value: string; label: string }[] }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, margin: '20px 0' }}>
+      {metrics.map(({ value, label }) => (
+        <div key={label} style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.navy }}>{value}</div>
+          <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FeatPartnerCallout({ bg, bdr, textColor, titleColor, title, body }: { bg: string; bdr: string; textColor: string; titleColor: string; title: string; body: string }) {
+  return (
+    <div style={{ background: bg, border: `1px solid ${bdr}`, borderRadius: 14, padding: 18, marginTop: 20 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: titleColor, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        {title}
+      </div>
+      <p style={{ fontSize: 13, color: textColor, lineHeight: 1.65, margin: '0 0 12px' }}>{body}</p>
+      <a href="/partners" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: titleColor, textDecoration: 'none' }}>Apply to partner →</a>
+    </div>
+  )
+}
+
+function FeatPhone({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ width: 164, height: 326, borderRadius: 28, border: `1.5px solid ${C.border}`, background: C.white, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 9, left: '50%', transform: 'translateX(-50%)', width: 40, height: 5, borderRadius: 3, background: C.border, zIndex: 5 }} />
+      <div style={{ paddingTop: 20, height: '100%', overflow: 'hidden' }}>{children}</div>
+    </div>
+  )
+}
+
+function ExplorePhoneScreen() {
+  const items = [
+    { name: 'Piano · Yamaha, Tampines', detail: 'Age 5–12 · Trial S$25', time: 'Sat 10am', free: false },
+    { name: 'Swimming · Swimwerks, Bedok', detail: 'Age 4–10 · Trial S$18', time: 'Various slots', free: false },
+    { name: 'Coding · Tinkercad, Orchard', detail: 'Age 7–12 · Trial FREE', time: 'Sun 2pm', free: true },
   ]
   return (
-    <section id="features" style={{ background: C.cream, padding: '72px 24px' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <div style={S.eyebrow}>What GoBela does</div>
-          <h2 style={S.h2}>Two things Singapore parents need most</h2>
-          <p style={S.lead}>Find the right class. Plan the week&apos;s meals. Done.</p>
+    <div style={{ height: '100%', background: C.cream, fontSize: 11 }}>
+      <div style={{ background: C.coral, padding: '9px 10px', color: C.navy }}>
+        <div style={{ fontSize: 10, opacity: 0.75 }}>BelaExplore</div>
+        <div style={{ fontSize: 12, fontWeight: 700 }}>200+ classes near you</div>
+      </div>
+      <div style={{ display: 'flex', gap: 4, padding: '6px 8px', borderBottom: `1px solid ${C.border}` }}>
+        {(['All', 'Sports', 'Music', 'Arts'] as const).map((label, i) => (
+          <div key={label} style={{ flexShrink: 0, borderRadius: 999, padding: '2px 7px', fontSize: 10, background: i === 0 ? C.coral : C.bg2, color: i === 0 ? C.navy : C.muted, border: i === 0 ? 'none' : `1px solid ${C.border}`, fontWeight: i === 0 ? 600 : 400 }}>{label}</div>
+        ))}
+      </div>
+      <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+        {items.map(({ name, detail, time, free }) => (
+          <div key={name} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: '6px 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 4 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.navy, lineHeight: 1.3 }}>{name}</div>
+                <div style={{ fontSize: 10, color: C.muted }}>{detail}</div>
+                <div style={{ fontSize: 10, color: C.muted }}>{time}</div>
+              </div>
+              {free && <div style={{ fontSize: 9, background: '#EAF3DE', color: '#27500A', borderRadius: 4, padding: '1px 4px', fontWeight: 600, flexShrink: 0 }}>FREE</div>}
+            </div>
+            <div style={{ marginTop: 5, background: C.coral, color: C.navy, borderRadius: 5, padding: '3px 7px', fontSize: 10, fontWeight: 600, display: 'inline-block' }}>Book trial</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MealPhoneScreen() {
+  const days = [
+    { d: 'MON', m: 'Chicken Rice', s: 'Home · 25 min' },
+    { d: 'TUE', m: 'Maxwell Hawker', s: 'Nearby · til 10pm' },
+    { d: 'WED', m: 'Aglio Olio', s: '15 min · NTUC items' },
+    { d: 'THU', m: 'Nasi Lemak 🥚', s: '45 min · Kids fave' },
+    { d: 'FRI', m: 'Pizza Night 🍕', s: '20 min · Easy' },
+  ]
+  return (
+    <div style={{ height: '100%', background: C.cream, fontSize: 11, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: C.navy, padding: '9px 10px', color: '#fff', flexShrink: 0 }}>
+        <div style={{ fontSize: 10, opacity: 0.65 }}>This week&apos;s meals</div>
+        <div style={{ fontSize: 12, fontWeight: 700 }}>May 2026 · 5 planned</div>
+      </div>
+      <div style={{ padding: '4px 8px', flex: 1 }}>
+        {days.map(({ d, m, s }, i) => (
+          <div key={d} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0', borderBottom: i < days.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: C.coral, width: 26, flexShrink: 0 }}>{d}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: C.navy, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m}</div>
+              <div style={{ fontSize: 10, color: C.muted }}>{s}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '5px 8px', flexShrink: 0 }}>
+        <div style={{ background: '#E1F5EE', border: '1px solid #9FE1CB', borderRadius: 8, padding: '6px 8px' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#085041' }}>🛒 NTUC shopping list</div>
+          <div style={{ fontSize: 10, color: '#0F6E56' }}>14 items · Auto-generated</div>
+        </div>
+      </div>
+      <div style={{ padding: '5px 8px 8px', flexShrink: 0 }}>
+        <div style={{ background: C.coral, color: C.navy, borderRadius: 8, padding: '6px', textAlign: 'center', fontSize: 10, fontWeight: 700 }}>✨ Regenerate plan</div>
+      </div>
+    </div>
+  )
+}
+
+function FeaturesSection() {
+  const [active, setActive] = useState(0)
+  const tabStyle = (i: number): React.CSSProperties => ({
+    flex: 1, padding: '10px 16px', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 500,
+    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+    background: i === active ? C.white : 'transparent',
+    color: i === active ? C.navy : C.muted,
+    boxShadow: i === active ? `0 0 0 1px ${C.border}` : 'none',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+  })
+  return (
+    <section id="features" style={{ ...S.section, background: C.white }}>
+      <div style={S.container}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={S.eyebrow}>Our two strongest features</div>
+          <h2 style={S.h2}>The reasons families (and partners) choose GoBela</h2>
+          <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
+            These aren&apos;t just features — they&apos;re the two biggest problems Singapore parents face every week.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 4, background: C.bg2, padding: 4, borderRadius: 14, maxWidth: 560, margin: '0 auto 40px' }}>
+          <button style={tabStyle(0)} onClick={() => setActive(0)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+            BelaExplore
+          </button>
+          <button style={tabStyle(1)} onClick={() => setActive(1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Family meal planning
+          </button>
         </div>
 
-        {/* ClassPass for kids */}
-        <div style={{ display: 'flex', gap: 48, alignItems: 'center', flexWrap: 'wrap', marginBottom: 72 }}>
-          <div style={{ flex: '1 1 300px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: C.coralLight, border: `1px solid ${C.coralBdr}`, color: C.coral, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 18 }}>
-              🎟️ Trial Classes
-            </div>
-            <h3 style={{ fontSize: 'clamp(22px,3.5vw,32px)', fontWeight: 700, color: C.navy, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 14 }}>
-              Try any class.<br />No package needed.
-            </h3>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.75, marginBottom: 20 }}>
-              GoBela is Singapore&apos;s ClassPass for children. Book a single trial session at enrichment centres, sports schools, and arts studios — pay per class, skip the 10-lesson commitment.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-              {[
-                '✅ 80+ partner studios across Singapore',
-                '✅ Ages 2–14 · All skill levels welcome',
-                '✅ One-tap booking · Instant confirmation',
-                '✅ Loved it? Continue at member rates',
-              ].map(t => <div key={t} style={{ fontSize: 14, color: C.navy }}>{t}</div>)}
-            </div>
-            <a href="/#waitlist" style={{ ...S.btnPrimary, textDecoration: 'none', display: 'inline-flex' }}>
-              Browse trial classes
-            </a>
-          </div>
-          <div style={{ flex: '1 1 300px' }}>
-            <div style={{ ...S.card, padding: 24, boxShadow: '0 8px 40px rgba(0,0,0,0.07)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>Trial classes near you</div>
-                <div style={{ fontSize: 12, color: C.coral, fontWeight: 600 }}>Tampines · this week</div>
+        {active === 0 && (
+          <div id="belaexplore" style={{ display: 'flex', gap: 48, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 340px', minWidth: 0 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FAEEDA', border: '1px solid #FAC775', color: '#854F0B', borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 600, marginBottom: 16 }}>
+                ⚡ BelaExplore · Strongest hook for activity partners
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-                {classes.map(({ icon, label, sub }) => (
-                  <div key={label} style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 8px', textAlign: 'center', cursor: 'pointer' }}>
-                    <div style={{ fontSize: 24, marginBottom: 5 }}>{icon}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: C.navy }}>{label}</div>
-                    <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{sub}</div>
-                  </div>
-                ))}
+              <h3 style={{ fontSize: 'clamp(22px,3vw,32px)', fontWeight: 700, color: C.navy, letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12 }}>
+                Try any class.<br />Cancel anytime.
+              </h3>
+              <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, marginBottom: 24 }}>
+                One subscription unlocks trial sessions at 200+ enrichment centres, sports academies, arts studios, and coding schools across Singapore — with zero full-term commitment required.
+              </p>
+              <FeatCheckItem color="#1D9E75" title="1-session trials before committing to a term" desc="No more guessing if your child will enjoy piano, football, or coding — try it first" />
+              <FeatCheckItem color="#1D9E75" title="Filtered by age, area, and category" desc="Enrichment, sports, music, arts, dance, coding — all near your MRT station" />
+              <FeatCheckItem color="#1D9E75" title="One-tap booking via Klook, Peatix, Fever, or direct" desc="No phone calls, no deposits — instant slot confirmation in the app" />
+              <FeatCheckItem color="#1D9E75" title="Bela recommends classes personalised to each child" desc="Age, past trials, interests, and schedule all factor into what Bela suggests" />
+              <FeatMetrics metrics={[{ value: '200+', label: 'Classes listed' }, { value: '12', label: 'Categories' }, { value: 'S$0', label: 'To get listed' }]} />
+              <FeatPartnerCallout bg="#FAEEDA" bdr="#FAC775" textColor="#633806" titleColor="#412402" title="For activity providers" body="Get in front of trial-ready Singapore families before they commit to a competitor. Zero commission on first-session bookings. Free listing tier, 3–5 day onboarding, dedicated partner portal launching 2026." />
+            </div>
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ background: C.bg2, borderRadius: 20, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                <FeatPhone><ExplorePhoneScreen /></FeatPhone>
+                <div style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>BelaExplore in the app</div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Meal Planning */}
-        <div style={{ display: 'flex', gap: 48, alignItems: 'center', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
-          <div style={{ flex: '1 1 300px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: C.coralLight, border: `1px solid ${C.coralBdr}`, color: C.coral, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 18 }}>
-              🍳 Meal Planning
-            </div>
-            <h3 style={{ fontSize: 'clamp(22px,3.5vw,32px)', fontWeight: 700, color: C.navy, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 14 }}>
-              Never ask &ldquo;what&apos;s for dinner?&rdquo; again.
-            </h3>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.75, marginBottom: 20 }}>
-              Tell Bela what&apos;s in your fridge and your kids&apos; favourites. She generates a full week of meals from NTUC basics — Singaporean dishes your family actually eats, with a shopping list included.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-              {[
-                '✅ Weekly meal calendar in one tap',
-                '✅ Hawker spots near you when you need a break',
-                '✅ Fussy eater profiles per child',
-                '✅ Auto shopping list by NTUC aisle',
-              ].map(t => <div key={t} style={{ fontSize: 14, color: C.navy }}>{t}</div>)}
-            </div>
-            <a href="/#waitlist" style={{ ...S.btnPrimary, textDecoration: 'none', display: 'inline-flex' }}>
-              Plan this week&apos;s meals
-            </a>
-          </div>
-          <div style={{ flex: '1 1 300px' }}>
-            <div style={{ ...S.card, padding: 24, boxShadow: '0 8px 40px rgba(0,0,0,0.07)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>This week&apos;s meal plan</div>
-                <div style={{ fontSize: 12, color: C.coral, fontWeight: 600 }}>Bela generated ✨</div>
+        {active === 1 && (
+          <div id="mealplan" style={{ display: 'flex', gap: 48, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 340px', minWidth: 0 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#E1F5EE', border: '1px solid #9FE1CB', color: '#085041', borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 600, marginBottom: 16 }}>
+                ⚡ Strongest hook for food and supply partners
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {meals.map(({ day, name, time, tag }) => (
-                  <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: C.coral, minWidth: 28 }}>{day}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>{name}</div>
-                      <div style={{ fontSize: 11, color: C.muted }}>{time}</div>
-                    </div>
-                    <div style={{ background: C.coralLight, border: `1px solid ${C.coralBdr}`, color: C.coral, borderRadius: 999, padding: '2px 8px', fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap' }}>{tag}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                <div style={{ flex: 1, background: C.coral, color: C.navy, borderRadius: 8, padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 700 }}>✨ Regenerate</div>
-                <div style={{ flex: 1, background: C.bg2, border: `1px solid ${C.border}`, color: C.navy, borderRadius: 8, padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600 }}>🛒 Shopping list</div>
+              <h3 style={{ fontSize: 'clamp(22px,3vw,32px)', fontWeight: 700, color: C.navy, letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12 }}>
+                Your family&apos;s meals,<br />sorted for the week.
+              </h3>
+              <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, marginBottom: 24 }}>
+                AI-powered weekly meal plans built around your kids&apos; tastes, dietary needs, and what&apos;s at NTUC FairPrice, Cold Storage, or the nearest hawker centre.
+              </p>
+              <FeatCheckItem color={C.coral} title="Weekly meal calendar with one-tap regeneration" desc="5 dinners planned in seconds — hawker night, easy home cook, or delivery" />
+              <FeatCheckItem color={C.coral} title="Auto-generates your NTUC or Cold Storage shopping list" desc="Exact quantities, ticked off as you shop — no more over-buying or forgotten items" />
+              <FeatCheckItem color={C.coral} title="Fussy-eater mode and full allergy filters" desc="Plans adapt to each child's preferences — never suggests what they'll refuse" />
+              <FeatCheckItem color={C.coral} title="Hawker + home cook balance you control" desc="Maxwell, Old Airport Rd, Lau Pa Sat mixed with simple 15–30 min recipes" />
+              <FeatMetrics metrics={[{ value: '5', label: 'Meals per week' }, { value: 'Auto', label: 'Shopping list' }, { value: '847+', label: 'Families planning' }]} />
+              <FeatPartnerCallout bg="#E1F5EE" bdr="#9FE1CB" textColor="#085041" titleColor="#04342C" title="For F&B brands, hawkers, and suppliers" body="Get featured directly in weekly meal plans and auto-generated NTUC shopping lists. Placement in 847+ family kitchens from day one — hawker stalls, NTUC products, meal kits, and restaurants." />
+            </div>
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ background: C.bg2, borderRadius: 20, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                <FeatPhone><MealPhoneScreen /></FeatPhone>
+                <div style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>Meal planning in the app</div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   )
