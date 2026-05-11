@@ -1,0 +1,7 @@
+{
+  "css.lint.duplicateProperties": "ignore",
+  "css.validate": false,
+  "stylelint.enable": false,
+  "editor.codeActionsOnSave": {},
+  "eslint.enable": false
+}

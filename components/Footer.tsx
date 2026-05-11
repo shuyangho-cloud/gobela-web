@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-[#1A2C4E] text-white/70 text-sm">
-      <div className="max-w-6xl mx-auto px-5 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
+      <div className="max-w-6xl mx-auto px-5 py-14 grid grid-cols-2 md:grid-cols-3 gap-10">
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <p className="font-extrabold text-xl text-white tracking-tight mb-3">
@@ -22,16 +22,6 @@ export default function Footer() {
             <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
             <li><Link href="/#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
             <li><a href="#download" className="hover:text-white transition-colors">Download</a></li>
-          </ul>
-        </div>
-
-        {/* Partners */}
-        <div>
-          <p className="text-white font-semibold mb-3">Partners</p>
-          <ul className="space-y-2">
-            <li><Link href="/partners" className="hover:text-white transition-colors">Become a Partner</Link></li>
-            <li><Link href="/partners#types" className="hover:text-white transition-colors">Partner Types</Link></li>
-            <li><Link href="/partners#faq" className="hover:text-white transition-colors">FAQ</Link></li>
           </ul>
         </div>
 
