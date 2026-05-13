@@ -22,7 +22,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request) {
   try {
-    const { messages } = await request.json()
+    const { messages, system, max_tokens } = await request.json()
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'messages array required' }, { status: 400 })
@@ -30,8 +30,8 @@ export async function POST(request) {
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 400,
-      system: BELA_SYSTEM,
+      max_tokens: max_tokens || 400,
+      system: system || BELA_SYSTEM,
       messages,
     })
 
