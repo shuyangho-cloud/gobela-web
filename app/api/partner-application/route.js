@@ -15,15 +15,15 @@ export async function POST(request) {
     }
 
     const { error } = await supabase.from('partner_applications').insert({
-      business_name: businessName.trim(),
-      contact_name:  contactName.trim(),
-      email:         email.trim().toLowerCase(),
-      phone:         phone?.trim() || null,
-      partner_type:  partnerType,
-      website:       website?.trim() || null,
-      instagram:     instagram?.trim() || null,
-      description:   description?.trim() || null,
-      status:        'pending',
+      business_name:    businessName.trim(),
+      contact_name:     contactName.trim(),
+      contact_email:    email.trim().toLowerCase(),
+      contact_phone:    phone?.trim() || null,
+      application_type: partnerType,
+      website:          website?.trim() || null,
+      instagram:        instagram?.trim() || null,
+      description:      description?.trim() || null,
+      status:           'pending',
     })
 
     if (error) {

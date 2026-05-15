@@ -64,7 +64,7 @@ function HeroSection({ onJoin, onTryBela }: { onJoin: () => void; onTryBela: () 
           <button style={{ ...S.btnSecondary, fontSize: 15, padding: '13px 28px' }} onClick={onTryBela}>💬 Try Bela now</button>
         </div>
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', fontSize: 13, color: C.muted }}>
-          {['🇸🇬 Built for Singapore', '🔒 No spam, ever', '⭐ Free to join', '📱 iOS & Android coming'].map(t => <span key={t}>{t}</span>)}
+          {['🇸🇬 Built for Singapore', '🔒 No spam, ever', '⭐ Free to join', '📱 iOS & Android ready'].map(t => <span key={t}>{t}</span>)}
         </div>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginTop: 52 }}>
           {scenarios.map(({ icon, title, desc }) => (
@@ -344,7 +344,7 @@ function BelaChatSection() {
         </div>
         <div style={{ ...S.card, padding: 0, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
           <div style={{ background: C.navy, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src="/mascot/Happy.png" alt="Bela" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'contain', background: '#fff', flexShrink: 0 }} />
+            <img src="/mascot/transparent/Happy.png" alt="Bela" style={{ width: 40, height: 40, objectFit: 'contain', flexShrink: 0 }} />
             <div><div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>Bela</div><div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>Your AI parenting co-pilot</div></div>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ADE80' }} /> Online
@@ -353,7 +353,7 @@ function BelaChatSection() {
           <div ref={chatRef} style={{ height: 320, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end' }}>
-                {msg.role === 'assistant' && <img src="/mascot/Happy.png" alt="Bela" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'contain', background: '#fff', flexShrink: 0 }} />}
+                {msg.role === 'assistant' && <img src="/mascot/transparent/Happy.png" alt="Bela" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />}
                 <div style={{ padding: '10px 14px', fontSize: 14, lineHeight: 1.6, maxWidth: '78%', borderRadius: 14, borderBottomLeftRadius: msg.role === 'assistant' ? 3 : 14, borderBottomRightRadius: msg.role === 'user' ? 3 : 14, background: msg.role === 'user' ? C.coral : C.bg2, color: msg.role === 'user' ? '#fff' : C.navy, border: msg.role === 'assistant' ? `1px solid ${C.border}` : 'none' }}>
                   {msg.content}
                 </div>
@@ -361,7 +361,7 @@ function BelaChatSection() {
             ))}
             {loading && (
               <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                <img src="/mascot/Happy.png" alt="Bela" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'contain', background: '#fff', flexShrink: 0 }} />
+                <img src="/mascot/transparent/Happy.png" alt="Bela" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />
                 <div style={{ padding: '12px 16px', borderRadius: '14px 14px 14px 3px', background: C.bg2, border: `1px solid ${C.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
                   {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: C.coral, animation: `gb-typing 1s ${i*0.2}s infinite` }} />)}
                 </div>
@@ -554,7 +554,7 @@ function WaitlistSection() {
           <div style={{ background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:16, padding:24, display:'flex', flexDirection:'column', gap:12 }}>
             <input style={darkInput} placeholder="Your name" value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
             <input style={darkInput} placeholder="Email address" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email:e.target.value }))} />
-            <select style={darkInput} value={form.age} onChange={e => setForm(f => ({ ...f, age:e.target.value }))}>
+            <select aria-label="Child's age range" style={darkInput} value={form.age} onChange={e => setForm(f => ({ ...f, age:e.target.value }))}>
               <option value="">Child&apos;s age range</option>
               <option>0–2 years (Infant / Toddler)</option>
               <option>3–5 years (Preschool)</option>
@@ -609,6 +609,85 @@ function Footer() {
   )
 }
 
+function PartnerSpotlightSection() {
+  const partners = [
+    {
+      name: 'Penguin Swim School',
+      category: '🏊 Swimming',
+      tagline: 'Singapore\'s highest-rated home swim school',
+      description: 'Coach comes to your condo pool. 40+ certified coaches island-wide. Gentle water confidence for babies through competitive squad.',
+      ageRange: '6 months – 14 yrs',
+      trial: 'Trial from S$45',
+      rating: '4.9',
+      reviews: '318',
+      tags: ['Islandwide', 'Flexible schedule', 'Parent-in-pool option'],
+    },
+    {
+      name: 'Fencing Masters',
+      category: '🤺 Fencing',
+      tagline: 'Olympic-standard fencing for kids & teens',
+      description: 'Led by IOC-certified coaches with 50+ years experience. Free trial class — equipment provided. 177 Ubi Ave 4 · SSC Sport Enrichment programme.',
+      ageRange: '7–18 yrs',
+      trial: 'FREE trial class',
+      rating: '4.8',
+      reviews: '42',
+      tags: ['Free trial', 'Equipment provided', 'IOC certified coaches'],
+    },
+  ]
+  return (
+    <section id="partners" style={{ ...S.section, background: C.bg2 }}>
+      <div style={S.container}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={S.eyebrow}>GoBela Verified Partners</div>
+          <h2 style={S.h2}>Real classes. Real coaches. Real results.</h2>
+          <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
+            Every GoBela Verified partner is personally onboarded and vetted — not scraped from a directory.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {partners.map((p) => (
+            <div key={p.name} style={{ ...S.card, padding: 28, flex: '1 1 320px', maxWidth: 440 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 4 }}>{p.category}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: C.navy, letterSpacing: '-0.02em' }}>{p.name}</div>
+                  <div style={{ fontSize: 13, color: C.muted, marginTop: 3 }}>{p.tagline}</div>
+                </div>
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4, background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 700, color: '#166534', whiteSpace: 'nowrap' }}>
+                  ✓ GoBela Verified
+                </div>
+              </div>
+              <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, marginBottom: 16 }}>{p.description}</p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                {p.tags.map(tag => (
+                  <div key={tag} style={{ background: C.coralLight, border: `1px solid ${C.coralBdr}`, borderRadius: 999, padding: '3px 10px', fontSize: 12, color: '#854F0B', fontWeight: 500 }}>{tag}</div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 12, borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: C.muted }}>Ages</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>{p.ageRange}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: C.muted }}>Trial</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#166534' }}>{p.trial}</div>
+                </div>
+                <div style={{ flex: 1, textAlign: 'right' }}>
+                  <div style={{ fontSize: 11, color: C.muted }}>Rating</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>⭐ {p.rating} <span style={{ color: C.muted, fontWeight: 400 }}>({p.reviews})</span></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <a href="/partners" style={{ ...S.btnSecondary, fontSize: 14, padding: '11px 24px', display: 'inline-flex' }}>Are you an activity provider? Apply to partner →</a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const waitlistRef = useRef<HTMLDivElement>(null)
   const belaRef     = useRef<HTMLDivElement>(null)
@@ -618,6 +697,7 @@ export default function HomePage() {
       <Navbar />
       <HeroSection onJoin={() => scrollTo(waitlistRef)} onTryBela={() => scrollTo(belaRef)} />
       <FeaturesSection />
+      <PartnerSpotlightSection />
       <div ref={belaRef}><BelaChatSection /></div>
       <ScreenshotsSection />
       <div ref={waitlistRef}><WaitlistSection /></div>

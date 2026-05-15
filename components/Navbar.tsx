@@ -17,7 +17,7 @@ export default function Navbar() {
     }}>
       <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', alignItems: 'center', height: 60, gap: 24 }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginRight: 'auto' }}>
-          <img src="/mascot/Happy.png" alt="Bela mascot" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+          <img src="/mascot/transparent/Happy.png" alt="Bela mascot" style={{ width: 32, height: 32, objectFit: 'contain' }} />
           <span style={{ fontSize: 20, fontWeight: 700, color: C.navy }}>Go<span style={{ color: C.coral }}>Bela</span></span>
         </a>
         {([
