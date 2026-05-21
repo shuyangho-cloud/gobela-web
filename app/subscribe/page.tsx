@@ -6,7 +6,7 @@ import { Suspense } from 'react'
 const PLANS = {
   plus: {
     name: 'GoBela Plus',
-    price: 'S$6.99 / month',
+    price: 'S$19.98 / month',
     features: [
       'Unlimited Bela AI chat',
       'Priority class bookings',
@@ -19,7 +19,7 @@ const PLANS = {
   },
   family: {
     name: 'GoBela Family',
-    price: 'S$12.99 / month',
+    price: 'S$49.98 / month',
     features: [
       'Everything in Plus',
       'Up to 4 child profiles',
