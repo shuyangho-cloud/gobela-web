@@ -40,7 +40,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/10 max-w-6xl mx-auto px-5 py-5 flex flex-col md:flex-row justify-between gap-2 text-xs text-white/40">
-        <p>© 2026 GoBela Pte Ltd. All rights reserved.</p>
+        <p>© 2026 GOBELA PTE. LTD. · UEN 202620732H · All rights reserved.</p>
         <p>Made with ❤️ for Singapore families</p>
       </div>
     </footer>

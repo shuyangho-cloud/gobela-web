@@ -121,6 +121,59 @@ function PartnerHero() {
   )
 }
 
+const CURRENT_PARTNERS = [
+  {
+    emoji: '🐧',
+    name: 'Penguin Swim School',
+    category: 'Swimming · Ages 3–12',
+    description: 'Professional swimming lessons for children at multiple pools across Singapore. Free trial class available.',
+    color: '#0EA5E9',
+  },
+  {
+    emoji: '⚽',
+    name: 'MiniSport',
+    category: 'Multi-sport · Ages 18m–8y',
+    description: 'Award-winning multi-sport programme building motor skills, confidence, and a love of movement in young children.',
+    color: '#16A34A',
+  },
+]
+
+function PartnerShowcase() {
+  return (
+    <section style={{ ...S.section, background: C.white }}>
+      <div style={S.container}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <div style={S.eyebrow}>Featured partners</div>
+          <h2 style={S.h2}>Trusted by Singapore families</h2>
+          <p style={{ ...S.lead, maxWidth: 480, margin: '0 auto' }}>
+            Every GoBela partner is individually reviewed before going live in the app.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {CURRENT_PARTNERS.map(({ emoji, name, category, description, color }) => (
+            <div key={name} style={{ ...S.card, padding: 28, flex: '1 1 280px', maxWidth: 380 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
+                  {emoji}
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: C.navy }}>{name}</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{category}</div>
+                </div>
+              </div>
+              <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.65, margin: 0 }}>{description}</p>
+              <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: C.green, fontSize: 11, fontWeight: 700 }}>✓</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.green }}>GoBela Verified Partner</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 const PARTNER_TYPES = [
   {
     emoji:    '🎡',
@@ -503,7 +556,7 @@ function Footer() {
           ))}
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>© 2026 GoBela Pte Ltd. All rights reserved.</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>© 2026 GOBELA PTE. LTD. · UEN 202620732H · All rights reserved.</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Made with ❤️ for Singapore families 🇸🇬</div>
         </div>
       </div>
@@ -516,6 +569,7 @@ export default function PartnersPage() {
     <main style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100vh', background: C.cream, color: C.navy }}>
       <Nav />
       <PartnerHero />
+      <PartnerShowcase />
       <PartnerTypes />
       <PartnerForm />
       <FAQ />
