@@ -568,7 +568,7 @@ type Msg = { role: 'user' | 'assistant'; content: string }
 function BelaChatSection() {
   const [messages, setMessages] = useState<Msg[]>([{
     role: 'assistant',
-    content: "Hi! I'm Bela 👋 Tell me about your family's day and I'll help plan something great. Try a suggestion below or type your own!",
+    content: "Hi! I'm Bela 🐾 — your GoBela AI companion.\n\nGoBela helps Singapore families plan better weekends — enrichment classes for your kids, family dining spots, meal ideas, and weekend plans.\n\nTry a question below, or ask me anything about planning your family's weekend!",
   }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
