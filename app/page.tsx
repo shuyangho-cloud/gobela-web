@@ -332,13 +332,22 @@ function MealPhoneScreen() {
 function FeaturesSection() {
   const [active, setActive] = useState(0)
   const tabStyle = (i: number): React.CSSProperties => ({
-    flex: 1, padding: '10px 16px', border: 'none', borderRadius: 10, fontSize: 14,
-    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+    flex: 1,
+    padding: '10px 16px',
+    border: 'none',
+    borderRadius: 10,
+    fontSize: 14,
+    fontWeight: i === active ? 600 : 400,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    transition: 'all 0.2s',
     background: i === active ? C.white : 'transparent',
     color: i === active ? C.navy : C.muted,
     boxShadow: i === active ? `0 0 0 1px ${C.border}, 0 2px 8px rgba(0,0,0,0.05)` : 'none',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-    fontWeight: i === active ? 600 : 400,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   })
   return (
     <section id="features" style={{ ...S.section, background: C.white }} aria-label="Features">
