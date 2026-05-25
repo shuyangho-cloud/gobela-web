@@ -3,5 +3,8 @@
   "css.validate": false,
   "stylelint.enable": false,
   "editor.codeActionsOnSave": {},
-  "eslint.enable": false
+  "eslint.enable": false,
+  "vscode-edge-devtools.webhint": false,
+  "edgeDevTools.webhint": false,
+  "microsoftEdgeTools.webhint": "off"
 }
