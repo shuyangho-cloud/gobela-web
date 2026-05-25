@@ -1,144 +1,213 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Link from "next/link";
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 
-const values = [
-  { icon: "🧠", title: "Bela-first thinking", desc: "Every feature is designed around one question: does Bela make family life simpler? If not, we don't ship it." },
-  { icon: "🌱", title: "Local roots", desc: "We are built in Singapore, for Singapore. Hawker culture, school terms, monsoon seasons — Bela gets all of it." },
-  { icon: "🤝", title: "Community over algorithm", desc: "Real parent reviews beat AI recommendations every time. We build tools that amplify the community, not replace it." },
-  { icon: "🔒", title: "Privacy by design", desc: "Your family data is yours. We never sell it. We never share it. We use it only to make Bela better for you." },
-];
-
-const team = [
-  { name: "Shuyang", role: "Founder & CEO", emoji: "👨‍💻" },
-  { name: "Endria", role: "Chief Inspiration Officer", emoji: "👧" },
-];
+export const metadata = {
+  title: 'About — GoBela',
+  description: 'GoBela was built by a Singapore dad who got tired of spending Sunday mornings deciding instead of enjoying them.',
+}
 
 export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-16 flex flex-col">
+      <main style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", background: '#FFFBF5', color: '#0D2137' }}>
 
-        {/* Hero */}
-        <section className="bg-[#F8F9FA] py-20">
-          <div className="max-w-3xl mx-auto px-5 text-center">
-            <p className="text-[#2FB7A8] font-semibold text-sm uppercase tracking-widest mb-4">Our Story</p>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#1A2C4E] mb-6 leading-tight">
-              Built by a parent,<br />for parents
+        {/* ── HERO ─────────────────────────────────────────────────────── */}
+        <section style={{ padding: 'clamp(60px,8vw,96px) 24px 0', background: '#FFFBF5' }}>
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
+
+            {/* Eyebrow */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFB020', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>
+              The story
+            </div>
+
+            {/* Headline */}
+            <h1 style={{ fontSize: 'clamp(32px,5vw,56px)', fontWeight: 700, lineHeight: 1.08, letterSpacing: '-0.03em', color: '#0D2137', marginBottom: 0, maxWidth: 680 }}>
+              I didn&apos;t plan to build GoBela.
+              <br />
+              <span style={{ color: '#FFB020' }}>She made me.</span>
             </h1>
-            <p className="text-gray-500 text-lg leading-relaxed">
-              GoBela started with a simple frustration: every Sunday evening, the same question —
-              &ldquo;What are we doing this weekend?&rdquo; — followed by 45 minutes of scrolling group chats,
-              Google, and Instagram, and still ending up at the same mall.
+
+            {/* Two-column layout: story + photo */}
+            <div style={{ display: 'flex', gap: 'clamp(32px,6vw,72px)', alignItems: 'flex-start', marginTop: 48, flexWrap: 'wrap' }}>
+
+              {/* Left: story */}
+              <div style={{ flex: '1 1 380px', minWidth: 0 }}>
+                <p style={{ fontSize: 18, lineHeight: 1.8, color: '#64748B', marginBottom: 24 }}>
+                  Every Sunday, same routine. Wake up, make breakfast, then start the negotiation.
+                </p>
+                <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', marginBottom: 24 }}>
+                  <em>&ldquo;What are we doing today?&rdquo;</em>
+                </p>
+                <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', marginBottom: 24 }}>
+                  Five apps open. Three Facebook groups checked. Two WhatsApp messages sent to other parents. Forty minutes later, we&apos;re at the same mall we always end up at.
+                </p>
+                <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', marginBottom: 24 }}>
+                  I&apos;m a software engineer. I build things for a living. And I kept thinking: why hasn&apos;t someone built the thing that solves this?
+                </p>
+                <p style={{ fontSize: 16, lineHeight: 1.8, color: '#0D2137', fontWeight: 600, marginBottom: 0 }}>
+                  So I stopped waiting.
+                </p>
+              </div>
+
+              {/* Right: photo */}
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                <div style={{ borderRadius: 24, overflow: 'hidden', border: '3px solid #EDE5DB', boxShadow: '0 12px 48px rgba(13,33,55,0.12)', maxWidth: 320, width: '100%' }}>
+                  <img
+                    src="/about/founder.jpg"
+                    alt="Shuyang and his daughter — the reason GoBela exists"
+                    style={{ width: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center 30%', aspectRatio: '3/4' }}
+                  />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0D2137' }}>Shuyang Ho</div>
+                  <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>Founder · GoBela</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── DAUGHTER SECTION ─────────────────────────────────────────── */}
+        <section style={{ padding: '80px 24px', background: '#F8F4F0' }}>
+          <div style={{ maxWidth: 680, margin: '0 auto' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFB020', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>
+              Chief experience officer
+            </div>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.15, color: '#0D2137', marginBottom: 24 }}>
+              She doesn&apos;t know she&apos;s the product manager.
+            </h2>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', marginBottom: 20 }}>
+              My daughter has no idea she&apos;s the Chief Experience Officer of GoBela. She&apos;s 5. She has strong opinions about everything — which is exactly what good product feedback sounds like.
             </p>
-          </div>
-        </section>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', marginBottom: 20 }}>
+              Every feature in this app exists because of a real moment with her. The swimming trial she hated but stuck with. The fencing class that turned her into a fierce competitor. The Saturday mornings we finally stopped wasting on indecision.
+            </p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B' }}>
+              Without her, I would never have built this. I would have kept downloading the same apps, checking the same Facebook groups, and having the same Sunday morning argument.
+            </p>
 
-        {/* Mission */}
-        <section className="py-20 bg-white">
-          <div className="max-w-4xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-extrabold text-[#1A2C4E] mb-5">Our mission</h2>
-              <p className="text-gray-500 leading-relaxed mb-4">
-                We believe the mental load of parenting is underestimated. Deciding what to cook,
-                where to bring your kids, which class to enrol them in — it adds up. GoBela exists
-                to take that load off.
+            {/* Quote pull */}
+            <div style={{ background: '#0D2137', borderRadius: 16, padding: '28px 32px', marginTop: 36 }}>
+              <p style={{ fontSize: 18, fontWeight: 600, color: '#FFB020', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
+                &ldquo;Not because of her, I would not build this app.&rdquo;
               </p>
-              <p className="text-gray-500 leading-relaxed mb-4">
-                We are building the operating system for modern parenting — a single AI-powered app
-                that knows your family, learns what works, and proactively plans so you don&apos;t have to.
-              </p>
-              <p className="text-gray-500 leading-relaxed">
-                We started in Singapore because we are Singaporean parents. But the problem is
-                universal — and so is our ambition.
-              </p>
-            </div>
-            <div className="bg-[#1A2C4E] rounded-3xl p-8 text-white">
-              <p className="text-[#FFB703] font-semibold text-sm uppercase tracking-widest mb-3">The GoBela promise</p>
-              <ul className="space-y-4">
-                {[
-                  "One app instead of ten",
-                  "Recommendations that actually know your kids",
-                  "Zero decision fatigue on the weekend",
-                  "More time connecting, less time planning",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="text-[#FFB703] font-bold text-lg leading-none mt-0.5">✓</span>
-                    <span className="text-white/80">{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 12, marginBottom: 0 }}>— Shuyang, Founder</p>
             </div>
           </div>
         </section>
 
-        {/* Values */}
-        <section className="py-20 bg-[#F8F9FA]">
-          <div className="max-w-6xl mx-auto px-5">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl font-extrabold text-[#1A2C4E] mb-3">What we believe in</h2>
+        {/* ── WHAT WE'VE BUILT ─────────────────────────────────────────── */}
+        <section style={{ padding: '80px 24px', background: '#FFFBF5' }}>
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 52 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#FFB020', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
+                What we&apos;ve built
+              </div>
+              <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.15, color: '#0D2137', marginBottom: 16 }}>
+                A live product. Real partners. Honest model.
+              </h2>
+              <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.75, maxWidth: 520, margin: '0 auto' }}>
+                GoBela isn&apos;t a concept or a waitlist. It&apos;s a working app that Singapore families are using today.
+              </p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {values.map((v) => (
-                <div key={v.title} className="bg-white rounded-2xl p-6 shadow-sm">
-                  <div className="text-3xl mb-4">{v.icon}</div>
-                  <h3 className="font-bold text-[#1A2C4E] mb-2">{v.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              {[
+                { icon: '📱', title: 'Live on iOS & Android', desc: 'App Store and Google Play — download today, no waitlist.' },
+                { icon: '🤝', title: '8 verified partners', desc: 'Personally onboarded studios — swim, fencing, dance, sports, yoga, and more.' },
+                { icon: '💸', title: 'S$5 flat platform fee', desc: 'Parents pay no subscription. We earn a small fee per booking. That\'s it.' },
+                { icon: '🤖', title: 'AI at the core', desc: 'Bela plans meals, recommends classes, and suggests weekends — personalised to your kids.' },
+              ].map(({ icon, title, desc }) => (
+                <div key={title} style={{ background: '#fff', border: '1px solid #EDE5DB', borderRadius: 16, padding: '24px 20px' }}>
+                  <div style={{ fontSize: 28, marginBottom: 12 }}>{icon}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0D2137', marginBottom: 6 }}>{title}</div>
+                  <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>{desc}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Team */}
-        <section className="py-20 bg-white">
-          <div className="max-w-3xl mx-auto px-5 text-center">
-            <h2 className="text-3xl font-extrabold text-[#1A2C4E] mb-10">The team</h2>
-            <div className="flex flex-wrap justify-center gap-8">
-              {team.map((member) => (
-                <div key={member.name} className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-[#F8F9FA] rounded-full flex items-center justify-center text-4xl mb-3 border-2 border-[#FFB703]">
-                    {member.emoji}
-                  </div>
-                  <p className="font-bold text-[#1A2C4E]">{member.name}</p>
-                  <p className="text-gray-500 text-sm">{member.role}</p>
+        {/* ── VISION ───────────────────────────────────────────────────── */}
+        <section style={{ padding: '80px 24px', background: '#0D2137' }}>
+          <div style={{ maxWidth: 680, margin: '0 auto' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFB020', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>
+              Where this goes
+            </div>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.15, color: '#fff', marginBottom: 28 }}>
+              Singapore is the proof.<br />Southeast Asia is the opportunity.
+            </h2>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: 'rgba(255,255,255,0.65)', marginBottom: 20 }}>
+              Every parent in Malaysia, Indonesia, Thailand, and Vietnam faces the same Sunday morning problem. Different hawkers. Different enrichment centres. Same decision fatigue. Same mental load.
+            </p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: 'rgba(255,255,255,0.65)', marginBottom: 20 }}>
+              We&apos;re building GoBela correctly in Singapore first — with real partners, real bookings, and real families — before expanding to a region of 60 million families who face the same problem.
+            </p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#FFB020', fontWeight: 600 }}>
+              GoBela starts here. It doesn&apos;t end here.
+            </p>
+
+            {/* Regional flags */}
+            <div style={{ display: 'flex', gap: 16, marginTop: 36, flexWrap: 'wrap' }}>
+              {[
+                { flag: '🇸🇬', country: 'Singapore', status: 'Live now' },
+                { flag: '🇲🇾', country: 'Malaysia', status: 'Coming next' },
+                { flag: '🇮🇩', country: 'Indonesia', status: 'On the roadmap' },
+                { flag: '🇹🇭', country: 'Thailand', status: 'On the roadmap' },
+              ].map(({ flag, country, status }) => (
+                <div key={country} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 16px', textAlign: 'center', flex: '1 1 120px' }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{flag}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{country}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{status}</div>
                 </div>
               ))}
             </div>
-            <p className="mt-10 text-gray-400 text-sm">
-              We are a small team with a big vision. If you want to help build the future of
-              family tech in Southeast Asia, we&apos;d love to hear from you.
-            </p>
-            <a
-              href="mailto:hello@gobela.sg"
-              className="inline-block mt-4 text-[#2FB7A8] font-semibold hover:underline"
-            >
-              hello@gobela.sg
-            </a>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="bg-[#FFB703] py-16">
-          <div className="max-w-xl mx-auto px-5 text-center">
-            <h2 className="text-3xl font-extrabold text-[#1A2C4E] mb-4">Join the GoBela family</h2>
-            <p className="text-[#1A2C4E]/70 mb-8">
-              Download the app and experience family life — simplified.
+        {/* ── CONTACT ──────────────────────────────────────────────────── */}
+        <section style={{ padding: '80px 24px', background: '#F8F4F0' }}>
+          <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#FFB020', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
+              Get in touch
+            </div>
+            <h2 style={{ fontSize: 'clamp(24px,3.5vw,36px)', fontWeight: 700, letterSpacing: '-0.025em', color: '#0D2137', marginBottom: 16 }}>
+              Want to partner, invest, or just say hi?
+            </h2>
+            <p style={{ fontSize: 15, color: '#64748B', lineHeight: 1.75, marginBottom: 32 }}>
+              We&apos;re always looking for enrichment and activity partners, and we&apos;re happy to talk to investors who believe in the family tech opportunity in Southeast Asia.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="https://apps.apple.com"
-                className="bg-[#1A2C4E] text-white font-bold px-8 py-3 rounded-full hover:bg-[#243d6b] transition-colors"
-              >
-                Download GoBela
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
+              <a href="mailto:hello@gobela.sg" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#0D2137', color: '#fff', borderRadius: 12, padding: '13px 24px', textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+                ✉️ hello@gobela.sg
               </a>
-              <Link
-                href="/partners"
-                className="border border-[#1A2C4E] text-[#1A2C4E] font-semibold px-8 py-3 rounded-full hover:bg-[#1A2C4E]/5 transition-colors"
-              >
-                Partner with us
-              </Link>
+              <a href="/partners" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'transparent', color: '#64748B', border: '1.5px solid #EDE5DB', borderRadius: 12, padding: '13px 24px', textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+                Become a partner →
+              </a>
+            </div>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>GoBela Pte. Ltd. · UEN 202620732H · Singapore</p>
+          </div>
+        </section>
+
+        {/* ── DOWNLOAD CTA ─────────────────────────────────────────────── */}
+        <section style={{ padding: '72px 24px', background: '#FFB020' }}>
+          <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 'clamp(24px,3.5vw,36px)', fontWeight: 700, letterSpacing: '-0.025em', color: '#0D2137', marginBottom: 12 }}>
+              Try GoBela for free
+            </h2>
+            <p style={{ fontSize: 15, color: 'rgba(13,33,55,0.65)', lineHeight: 1.7, marginBottom: 28 }}>
+              Available now on iOS and Android. No subscription. No credit card. Just better weekends.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a href="https://apps.apple.com/sg/app/gobela/id6767062415" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#0D2137', color: '#fff', borderRadius: 12, padding: '13px 24px', textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                App Store
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=com.gobela.app" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(13,33,55,0.12)', color: '#0D2137', border: '1.5px solid rgba(13,33,55,0.2)', borderRadius: 12, padding: '13px 24px', textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.18 23.76c.37.21.8.22 1.2.04l12.44-6.87-2.84-2.84-10.8 9.67zm-.96-20.7C2.07 3.36 2 3.67 2 4v16c0 .33.07.64.22.93l.08.08 8.97-8.97v-.21L2.3 3.06l-.08.1zM19.37 9.76l-2.55-1.41-3.18 3.18 3.18 3.18 2.58-1.42c.73-.41.73-1.11-.03-1.53zM4.38.24C3.98.06 3.55.07 3.18.28l10.8 9.71 2.84-2.84L4.38.24z"/></svg>
+                Google Play
+              </a>
             </div>
           </div>
         </section>
@@ -146,5 +215,5 @@ export default function AboutPage() {
       </main>
       <Footer />
     </>
-  );
+  )
 }

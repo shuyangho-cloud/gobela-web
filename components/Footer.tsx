@@ -10,7 +10,7 @@ export default function Footer() {
             <span>Go</span><span style={{ color: "#FFB703" }}>Bela</span>
           </p>
           <p className="leading-relaxed text-white/60 text-xs">
-            The Operating System for Modern Parenting.<br />
+            The easiest way for Singapore families to book trial classes, plan meals &amp; enjoy their weekends.<br />
             Singapore · 2026
           </p>
         </div>
