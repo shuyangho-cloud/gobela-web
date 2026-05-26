@@ -5,12 +5,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gobela.sg"),
-  title: "GoBela — The Operating System for Modern Parenting",
+  title: "GoBela — Book trial classes, plan meals & enjoy your weekends",
   description:
-    "GoBela helps Singapore families decide what to cook, where to dine, what activities to book and how to grow their children — all in one AI-powered app.",
+    "The easiest way for Singapore families to book trial classes, plan meals & enjoy their weekends. AI-powered, free to download.",
   openGraph: {
-    title: "GoBela — The OS for Modern Parenting",
-    description: "Cook smarter. Dine better. Play more. Powered by parents.",
+    title: "GoBela — For Singapore Families",
+    description: "Book trial classes, plan meals & enjoy your weekends. Free on iOS & Android.",
     url: "https://gobela.sg",
     siteName: "GoBela",
     images: [{ url: "/og.png", width: 1200, height: 630 }],
