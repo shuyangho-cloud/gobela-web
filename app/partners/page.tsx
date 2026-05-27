@@ -447,7 +447,11 @@ function PartnerForm() {
               {loading ? 'Submitting…' : 'Submit application →'}
             </button>
             <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, marginTop: 12 }}>
-              By submitting, you agree to be contacted by the GoBela team. We do not spam.
+              By submitting, you agree to our{' '}
+              <a href="/partner-terms" style={{ color: C.navy, fontWeight: 600, textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">
+                Partner Terms & Conditions
+              </a>{' '}
+              and to be contacted by the GoBela team.
             </p>
           </div>
         )}
