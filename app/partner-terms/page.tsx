@@ -57,28 +57,28 @@ export default function PartnerTermsPage() {
             },
             {
               n: '2',
-              title: 'Bookings',
-              body: 'Parents may request a trial class booking through the GoBela app. You will receive an email notification for each booking request with the child\'s details and requested date/time.',
+              title: 'Trial Vouchers',
+              body: 'Parents purchase a trial voucher through the GoBela app for a class listed on your profile. Upon purchase, the parent receives a unique voucher code and your contact details. The parent will contact you directly to arrange a suitable trial date and time. You are not required to manage availability through GoBela.',
             },
             {
               n: '3',
-              title: 'Confirmation',
-              body: 'You must confirm or decline each booking request within 48 hours. Requests not responded to within 48 hours will automatically expire and the parent will be notified.',
+              title: 'Voucher Redemption',
+              body: 'You agree to accommodate voucher holders by offering a suitable trial slot within a reasonable timeframe. Trial vouchers are valid for 90 days from the date of purchase. If you are unable to accommodate a parent within the validity period, please notify GoBela at hello@gobela.sg so that a refund or extension can be arranged.',
             },
             {
               n: '4',
-              title: 'Platform Fee',
-              body: 'GoBela charges a flat S$5 platform fee per confirmed booking. This is deducted from the payment collected from the parent. The remaining amount is paid to you.',
+              title: 'Payment & Platform Fee — Trial Vouchers',
+              body: 'GoBela collects the full trial voucher price from the parent as stated in your listing. A flat S$5 platform fee is deducted from that amount, and the remaining balance is transferred to you within 2–3 business days of the trial class taking place.',
             },
             {
               n: '5',
-              title: 'Payment',
-              body: 'GoBela collects payment from the parent at the time of booking. Partner payouts are processed within 2–3 business days of the confirmed trial class taking place.',
+              title: 'Payment & Platform Fee — Packages & Term Enrolments',
+              body: 'Where a parent proceeds to sign up for a full package or term enrolment through GoBela, GoBela will collect the full package price from the parent on your behalf. A platform fee of 8% of the total package price is deducted, and the remaining balance is transferred to you within 2–3 business days of the enrolment being confirmed.',
             },
             {
               n: '6',
-              title: 'Cancellations',
-              body: 'If you need to cancel a confirmed booking, notify GoBela at hello@gobela.sg as soon as possible. Repeated cancellations may result in your listing being suspended.',
+              title: 'Cancellations & Refunds',
+              body: 'If you are unable to honour a voucher redemption request, notify GoBela at hello@gobela.sg as soon as possible. GoBela reserves the right to issue a refund to the parent in such cases. Repeated failures to accommodate voucher holders may result in your listing being suspended.',
             },
             {
               n: '7',
@@ -93,7 +93,7 @@ export default function PartnerTermsPage() {
             {
               n: '9',
               title: 'Termination',
-              body: 'Either party may end the partnership at any time with written notice to hello@gobela.sg. Pending confirmed bookings must still be honoured.',
+              body: 'Either party may end the partnership at any time with written notice to hello@gobela.sg. Any outstanding unredeemed vouchers sold prior to termination must still be honoured or refunded to the parent.',
             },
             {
               n: '10',
