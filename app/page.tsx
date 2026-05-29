@@ -230,9 +230,15 @@ function HeroSection({ onTryBela }: { onTryBela: () => void }) {
 
 // ─── STATS BAR ────────────────────────────────────────────────────────────────
 function StatsBar() {
+  const [bookings, setBookings] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/stats').then(r => r.json()).then(d => setBookings(d.bookings)).catch(() => {})
+  }, [])
+
   const stats = [
-    { value: '50+',     label: 'Trial classes listed',    icon: '🎓' },
-    { value: '8',       label: 'Verified partner studios', icon: '✅' },
+    { value: bookings === null ? '…' : bookings === 0 ? '—' : `${bookings}`, label: 'Trial bookings made', icon: '🎓' },
+    { value: '12',      label: 'Partner studios',         icon: '✅' },
     { value: 'S$5',     label: 'Flat platform fee',        icon: '💸' },
     { value: '🇸🇬',    label: 'Singapore-built & owned',  icon: '' },
   ]
@@ -251,6 +257,57 @@ function StatsBar() {
         </div>
       </div>
     </div>
+  )
+}
+
+// ─── TESTIMONIALS ─────────────────────────────────────────────────────────────
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      quote: "Booked a trial swim class for my 3-year-old in literally 2 minutes. The coach came to our condo pool — my daughter loved it and we signed up for the full term the same week.",
+      name: "Sarah L.",
+      detail: "Mum of 1 · Tampines",
+      emoji: "🏊",
+    },
+    {
+      quote: "I was spending every Sunday googling 'enrichment classes near me' and calling schools that never pick up. GoBela just solved that. Booked a fencing trial for my 8-year-old and he's obsessed now.",
+      name: "David T.",
+      detail: "Dad of 2 · Bishan",
+      emoji: "🤺",
+    },
+    {
+      quote: "The meal planning alone is worth it. I tell Bela what's in my fridge and she plans the whole week. My kids actually eat what she suggests.",
+      name: "Michelle K.",
+      detail: "Mum of 3 · Jurong West",
+      emoji: "🍳",
+    },
+  ]
+  return (
+    <section style={{ ...S.section, background: C.bg2 }} aria-label="Parent testimonials">
+      <div style={S.container}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <div style={S.eyebrow}>What parents say</div>
+          <h2 style={S.h2}>Built for real Singapore families.</h2>
+          <p style={{ ...S.lead, maxWidth: 480, margin: '0 auto' }}>
+            From Tampines to Jurong, Singapore parents are reclaiming their weekends with GoBela.
+          </p>
+        </div>
+        <div className="test-grid">
+          {testimonials.map(({ quote, name, detail, emoji }) => (
+            <div key={name} style={{ ...S.card, padding: 28 }}>
+              <div style={{ fontSize: 28, marginBottom: 16 }}>{emoji}</div>
+              <p style={{ fontSize: 14, color: C.navy, lineHeight: 1.75, margin: '0 0 20px', fontStyle: 'italic' }}>
+                &ldquo;{quote}&rdquo;
+              </p>
+              <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{name}</div>
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -970,6 +1027,7 @@ export default function HomePage() {
       <StatsBar />
       <FeaturesSection />
       <FounderSection />
+      <TestimonialsSection />
       <PartnerSpotlightSection />
       <div ref={belaRef}><BelaChatSection /></div>
       <ScreenshotsSection />
