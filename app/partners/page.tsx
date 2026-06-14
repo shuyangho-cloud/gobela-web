@@ -238,66 +238,67 @@ interface FormState {
   contactName:  string
   email:        string
   phone:        string
+  whatsapp:     string
   partnerType:  string
   website:      string
   instagram:    string
+  address:      string
   description:  string
 }
 
+interface ClassEntry {
+  name:        string
+  age_range:   string
+  description: string
+  trial_price: string
+  term_price:  string
+  duration:    string
+  schedule:    string
+}
+
 const EMPTY_FORM: FormState = {
-  businessName: '',
-  contactName:  '',
-  email:        '',
-  phone:        '',
-  partnerType:  '',
-  website:      '',
-  instagram:    '',
-  description:  '',
+  businessName: '', contactName: '', email: '', phone: '',
+  whatsapp: '', partnerType: '', website: '', instagram: '',
+  address: '', description: '',
+}
+
+const EMPTY_CLASS: ClassEntry = {
+  name: '', age_range: '', description: '',
+  trial_price: '', term_price: '', duration: '60', schedule: '',
+}
+
+function StepDots({ step, total }: { step: number; total: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
+      {Array.from({ length: total }, (_, i) => (
+        <div key={i} style={{
+          height: 6, borderRadius: 3,
+          width: i + 1 === step ? 24 : 8,
+          background: i + 1 <= step ? C.coral : C.border,
+          transition: 'all 0.2s',
+        }} />
+      ))}
+    </div>
+  )
 }
 
 function PartnerForm() {
-  const [form, setForm]           = useState<FormState>(EMPTY_FORM)
+  const [step, setStep]         = useState(1)
+  const [form, setForm]         = useState<FormState>(EMPTY_FORM)
+  const [classes, setClasses]   = useState<ClassEntry[]>([{ ...EMPTY_CLASS }])
+  const [logoUrl, setLogoUrl]   = useState<string | null>(null)
+  const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const [submitted, setSubmitted] = useState(false)
-  const [loading, setLoading]     = useState(false)
-  const [errors, setErrors]       = useState<Record<string, string>>({})
+  const [loading, setLoading]   = useState(false)
+  const [uploading, setUploading] = useState<string | null>(null)
+  const [errors, setErrors]     = useState<Record<string, string>>({})
 
-  const update = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    setForm(f => ({ ...f, [field]: e.target.value }))
-
-  const validate = () => {
-    const e: Record<string, string> = {}
-    if (!form.businessName.trim()) e.businessName = 'Business name is required'
-    if (!form.contactName.trim())  e.contactName  = 'Contact name is required'
-    if (!form.email.trim())        e.email        = 'Email is required'
-    if (!form.partnerType)         e.partnerType  = 'Please select a partner type'
-    if (!form.website.trim() && !form.instagram.trim()) {
-      e.online = 'Please provide either a website or Instagram handle (or both)'
-    }
-    return e
-  }
-
-  const handleSubmit = async () => {
-    const e = validate()
-    if (Object.keys(e).length > 0) { setErrors(e); return }
-    setErrors({})
-    setLoading(true)
-    try {
-      await fetch('/api/partner-application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      setSubmitted(true)
-    } catch {
-      setSubmitted(true)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const update = (field: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setForm(f => ({ ...f, [field]: e.target.value }))
 
   const fieldStyle = (field: string): React.CSSProperties => ({
-    ...S.input,
-    borderColor: errors[field] ? '#EF4444' : C.border,
+    ...S.input, borderColor: errors[field] ? '#EF4444' : C.border,
   })
 
   const Label = ({ children, optional }: { children: React.ReactNode; optional?: boolean }) => (
@@ -310,151 +311,303 @@ function PartnerForm() {
   const FieldError = ({ field }: { field: string }) =>
     errors[field] ? <p style={{ fontSize: 12, color: '#EF4444', margin: '5px 0 0' }}>{errors[field]}</p> : null
 
+  const isActivity = form.partnerType === 'activity'
+  const totalSteps = isActivity ? 3 : 2
+
+  const validateStep1 = () => {
+    const e: Record<string, string> = {}
+    if (!form.businessName.trim()) e.businessName = 'Required'
+    if (!form.contactName.trim())  e.contactName  = 'Required'
+    if (!form.email.trim())        e.email        = 'Required'
+    if (!form.partnerType)         e.partnerType  = 'Please select a type'
+    if (!form.website.trim() && !form.instagram.trim()) e.online = 'Provide a website or Instagram'
+    return e
+  }
+
+  const uploadFile = async (file: File, label: string) => {
+    setUploading(label)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('label', label)
+      const res  = await fetch('/api/upload-partner-file', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (label === 'logo') setLogoUrl(data.url)
+      else setPhotoUrls(p => [...p, data.url])
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const handleNext = () => {
+    if (step === 1) {
+      const e = validateStep1()
+      if (Object.keys(e).length > 0) { setErrors(e); return }
+      setErrors({})
+    }
+    setStep(s => s + 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleSubmit = async () => {
+    setLoading(true)
+    try {
+      await fetch('/api/partner-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          class_details: isActivity ? classes : [],
+          logo_url:   logoUrl,
+          photo_urls: photoUrls,
+        }),
+      })
+      setSubmitted(true)
+    } catch {
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateClass = (i: number, field: keyof ClassEntry) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setClasses(cs => cs.map((c, j) => j === i ? { ...c, [field]: e.target.value } : c))
+
+  if (submitted) {
+    return (
+      <section id="apply" style={{ ...S.section, background: C.white }}>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <div style={{ ...S.card, padding: 48, textAlign: 'center' }}>
+            <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: C.navy, marginBottom: 10 }}>Application received!</h3>
+            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, maxWidth: 380, margin: '0 auto 24px' }}>
+              Thanks, <strong>{form.contactName || 'there'}</strong>. We&apos;ll review and get back within 3 business days.
+            </p>
+            <a href="mailto:partnerships@gobela.sg" style={{ ...S.btnSecondary, margin: '0 auto' }}>partnerships@gobela.sg</a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section id="apply" style={{ ...S.section, background: C.white }}>
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={S.eyebrow}>Apply to become a partner</div>
           <h2 style={S.h2}>Let&apos;s work together</h2>
           <p style={{ ...S.lead, maxWidth: 480, margin: '0 auto' }}>
-            Fill in the form and our team will reach out within 3 business days.
+            {step === 1 && 'Tell us about your business.'}
+            {step === 2 && isActivity && 'Add your programmes and pricing.'}
+            {(step === 2 && !isActivity) || step === 3 ? 'Upload your logo and a few photos.' : ''}
           </p>
         </div>
 
-        {submitted ? (
-          <div style={{ ...S.card, padding: 48, textAlign: 'center' }}>
-            <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: C.navy, marginBottom: 10 }}>
-              Application received!
-            </h3>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, maxWidth: 380, margin: '0 auto 24px' }}>
-              Thanks for applying, <strong>{form.contactName || 'there'}</strong>. Our team will review your application and get back to you within 3 business days.
-            </p>
-            <a href="mailto:partnerships@gobela.sg" style={{ ...S.btnSecondary, margin: '0 auto' }}>
-              partnerships@gobela.sg
-            </a>
-          </div>
-        ) : (
-          <div style={{ ...S.card, padding: 36 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 20 }}>
+        <StepDots step={step} total={totalSteps} />
 
-              <div>
-                <Label>Business name</Label>
-                <input style={fieldStyle('businessName')} placeholder="Little Stars Enrichment Centre" value={form.businessName} onChange={update('businessName')} />
-                <FieldError field="businessName" />
+        <div style={{ ...S.card, padding: 36 }}>
+
+          {/* ── STEP 1: Business info ── */}
+          {step === 1 && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 20 }}>
+                <div>
+                  <Label>Business name</Label>
+                  <input style={fieldStyle('businessName')} placeholder="Little Stars Enrichment" value={form.businessName} onChange={update('businessName')} />
+                  <FieldError field="businessName" />
+                </div>
+                <div>
+                  <Label>Contact name</Label>
+                  <input style={fieldStyle('contactName')} placeholder="Sarah Tan" value={form.contactName} onChange={update('contactName')} />
+                  <FieldError field="contactName" />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <input style={fieldStyle('email')} type="email" placeholder="hello@yourbusiness.com" value={form.email} onChange={update('email')} />
+                  <FieldError field="email" />
+                </div>
+                <div>
+                  <Label optional>Phone</Label>
+                  <input style={S.input} type="tel" placeholder="+65 9123 4567" value={form.phone} onChange={update('phone')} />
+                </div>
+                <div>
+                  <Label optional>WhatsApp number</Label>
+                  <input style={S.input} type="tel" placeholder="+65 9123 4567" value={form.whatsapp} onChange={update('whatsapp')} />
+                </div>
+                <div>
+                  <Label>Partner type</Label>
+                  <select style={fieldStyle('partnerType')} value={form.partnerType} onChange={update('partnerType')}>
+                    <option value="">Select a category</option>
+                    <option value="activity">Activity / enrichment class</option>
+                    <option value="fnb">Restaurant / F&amp;B</option>
+                    <option value="supplier">Supplier / brand / product</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <FieldError field="partnerType" />
+                </div>
               </div>
 
-              <div>
-                <Label>Contact name</Label>
-                <input style={fieldStyle('contactName')} placeholder="Sarah Tan" value={form.contactName} onChange={update('contactName')} />
-                <FieldError field="contactName" />
-              </div>
-
-              <div>
-                <Label>Email</Label>
-                <input style={fieldStyle('email')} type="email" placeholder="hello@yourbusiness.com" value={form.email} onChange={update('email')} />
-                <FieldError field="email" />
-              </div>
-
-              <div>
-                <Label optional>Phone</Label>
-                <input style={S.input} type="tel" placeholder="+65 9123 4567" value={form.phone} onChange={update('phone')} />
-              </div>
-
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-              <Label>Partner type</Label>
-              <select style={fieldStyle('partnerType')} value={form.partnerType} onChange={update('partnerType')}>
-                <option value="">Select a category</option>
-                <option value="activity">Activity provider (classes, events, enrichment)</option>
-                <option value="fnb">Restaurant / F&amp;B</option>
-                <option value="supplier">Supplier / brand / product</option>
-                <option value="other">Other</option>
-              </select>
-              <FieldError field="partnerType" />
-            </div>
-
-            <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 20 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: C.navy, marginBottom: 4 }}>
-                Online presence
-              </p>
-              <p style={{ fontSize: 12, color: C.muted, marginBottom: 16 }}>
-                Share either or both — whatever applies to your business.
-                {errors.online && <span style={{ color: '#EF4444', marginLeft: 8 }}>{errors.online}</span>}
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
-
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 20 }}>
                 <div>
                   <Label optional>Website</Label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{
-                      position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                      fontSize: 13, color: C.muted, pointerEvents: 'none', userSelect: 'none',
-                    }}>
-                      https://
-                    </span>
-                    <input
-                      style={{ ...S.input, paddingLeft: 72, borderColor: errors.online ? '#EF4444' : C.border }}
-                      placeholder="yourbusiness.com"
-                      value={form.website}
-                      onChange={update('website')}
-                      type="url"
-                      autoComplete="url"
-                    />
-                  </div>
+                  <input style={{ ...S.input, borderColor: errors.online ? '#EF4444' : C.border }} placeholder="https://yourbusiness.com" value={form.website} onChange={update('website')} type="url" />
                 </div>
-
                 <div>
-                  <Label optional>Instagram handle</Label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{
-                      position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                      fontSize: 14, color: C.muted, pointerEvents: 'none', userSelect: 'none',
-                      fontWeight: 500,
-                    }}>
-                      @
-                    </span>
-                    <input
-                      style={{ ...S.input, paddingLeft: 28, borderColor: errors.online ? '#EF4444' : C.border }}
-                      placeholder="yourbusiness"
-                      value={form.instagram}
-                      onChange={e => setForm(f => ({ ...f, instagram: e.target.value.replace(/^@/, '') }))}
-                      autoComplete="off"
-                    />
+                  <Label optional>Instagram</Label>
+                  <input style={{ ...S.input, borderColor: errors.online ? '#EF4444' : C.border }} placeholder="@yourbusiness" value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value.replace(/^@/, '') }))} />
+                </div>
+              </div>
+              {errors.online && <p style={{ fontSize: 12, color: '#EF4444', margin: '-12px 0 12px' }}>{errors.online}</p>}
+
+              <div style={{ marginBottom: 20 }}>
+                <Label optional>Full address</Label>
+                <input style={S.input} placeholder="22 Havelock Road, #01-689, Singapore 169628" value={form.address} onChange={update('address')} />
+              </div>
+
+              <div style={{ marginBottom: 28 }}>
+                <Label optional>Tell us about your business</Label>
+                <textarea style={{ ...S.input, minHeight: 90, resize: 'vertical', lineHeight: 1.6 }} placeholder="What do you offer, who do you serve, and why would GoBela families love you?" value={form.description} onChange={update('description')} />
+              </div>
+            </>
+          )}
+
+          {/* ── STEP 2: Classes (activity only) ── */}
+          {step === 2 && isActivity && (
+            <>
+              <p style={{ fontSize: 13, color: C.muted, marginBottom: 24 }}>
+                Add each class or programme you offer. You can add up to 6.
+              </p>
+              {classes.map((cls, i) => (
+                <div key={i} style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: C.navy }}>Class {i + 1}</span>
+                    {classes.length > 1 && (
+                      <button onClick={() => setClasses(cs => cs.filter((_, j) => j !== i))}
+                        style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                    <div>
+                      <Label>Class name</Label>
+                      <input style={S.input} placeholder="Scratch Foundations" value={cls.name} onChange={updateClass(i, 'name')} />
+                    </div>
+                    <div>
+                      <Label>Age range</Label>
+                      <input style={S.input} placeholder="9–11 yrs" value={cls.age_range} onChange={updateClass(i, 'age_range')} />
+                    </div>
+                    <div>
+                      <Label>Trial price (S$)</Label>
+                      <input style={S.input} type="number" placeholder="57" value={cls.trial_price} onChange={updateClass(i, 'trial_price')} />
+                    </div>
+                    <div>
+                      <Label>Term / monthly price (S$)</Label>
+                      <input style={S.input} type="number" placeholder="278" value={cls.term_price} onChange={updateClass(i, 'term_price')} />
+                    </div>
+                    <div>
+                      <Label>Duration (minutes)</Label>
+                      <input style={S.input} type="number" placeholder="60" value={cls.duration} onChange={updateClass(i, 'duration')} />
+                    </div>
+                    <div>
+                      <Label>Schedule</Label>
+                      <input style={S.input} placeholder="Sat & Sun 9:30am–12pm" value={cls.schedule} onChange={updateClass(i, 'schedule')} />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 14 }}>
+                    <Label>Short description</Label>
+                    <textarea style={{ ...S.input, minHeight: 72, resize: 'vertical', lineHeight: 1.6 }} placeholder="What happens in this class, who is it for, and what makes it special?" value={cls.description} onChange={updateClass(i, 'description')} />
                   </div>
                 </div>
+              ))}
+              {classes.length < 6 && (
+                <button onClick={() => setClasses(cs => [...cs, { ...EMPTY_CLASS }])}
+                  style={{ ...S.btnSecondary, width: '100%', justifyContent: 'center', marginBottom: 8, fontSize: 14 }}>
+                  + Add another class
+                </button>
+              )}
+            </>
+          )}
 
+          {/* ── STEP 3 (or 2 for non-activity): Logo & photos ── */}
+          {((step === 3 && isActivity) || (step === 2 && !isActivity)) && (
+            <>
+              <p style={{ fontSize: 13, color: C.muted, marginBottom: 24 }}>
+                Upload your logo and up to 4 action photos. These appear in the GoBela app listing.
+              </p>
+
+              {/* Logo */}
+              <div style={{ marginBottom: 28 }}>
+                <Label>Logo</Label>
+                {logoUrl ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <img src={logoUrl} alt="logo" style={{ height: 72, objectFit: 'contain', borderRadius: 10, border: `1px solid ${C.border}`, background: C.bg2, padding: 8 }} />
+                    <button onClick={() => setLogoUrl(null)} style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Remove</button>
+                  </div>
+                ) : (
+                  <label style={{ display: 'block', border: `2px dashed ${C.border}`, borderRadius: 10, padding: '24px', textAlign: 'center', cursor: uploading === 'logo' ? 'wait' : 'pointer', background: C.bg2 }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>🖼️</div>
+                    <div style={{ fontSize: 13, color: C.muted }}>{uploading === 'logo' ? 'Uploading…' : 'Click to upload logo (PNG or JPG)'}</div>
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'logo') }} />
+                  </label>
+                )}
               </div>
-            </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <Label optional>Tell us about your business</Label>
-              <textarea
-                style={{ ...S.input, minHeight: 100, resize: 'vertical', lineHeight: 1.6 }}
-                placeholder="What do you offer, who do you serve, and why would GoBela families love you?"
-                value={form.description}
-                onChange={update('description')}
-              />
-            </div>
+              {/* Photos */}
+              <div style={{ marginBottom: 28 }}>
+                <Label optional>Action photos (up to 4)</Label>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                  {photoUrls.map((url, i) => (
+                    <div key={i} style={{ position: 'relative' }}>
+                      <img src={url} alt="" style={{ width: 100, height: 80, objectFit: 'cover', borderRadius: 8, border: `1px solid ${C.border}` }} />
+                      <button onClick={() => setPhotoUrls(p => p.filter((_, j) => j !== i))}
+                        style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#EF4444', color: '#fff', border: 'none', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {photoUrls.length < 4 && (
+                    <label style={{ width: 100, height: 80, border: `2px dashed ${C.border}`, borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: uploading === 'photo' ? 'wait' : 'pointer', background: C.bg2, gap: 4 }}>
+                      <span style={{ fontSize: 20 }}>📷</span>
+                      <span style={{ fontSize: 10, color: C.muted }}>{uploading === 'photo' ? '…' : 'Add photo'}</span>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f, 'photo') }} />
+                    </label>
+                  )}
+                </div>
+              </div>
 
-            <button
-              style={{ ...S.btnPrimary, width: '100%', justifyContent: 'center', fontSize: 15, padding: '14px', opacity: loading ? 0.7 : 1 }}
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? 'Submitting…' : 'Submit application →'}
-            </button>
-            <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, marginTop: 12 }}>
-              By submitting, you agree to our{' '}
-              <a href="/partner-terms" style={{ color: C.navy, fontWeight: 600, textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">
-                Partner Terms & Conditions
-              </a>{' '}
-              and to be contacted by the GoBela team.
-            </p>
+              {/* Terms + submit */}
+              <button
+                style={{ ...S.btnPrimary, width: '100%', justifyContent: 'center', fontSize: 15, padding: '14px', opacity: loading ? 0.7 : 1 }}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? 'Submitting…' : 'Submit application →'}
+              </button>
+              <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, marginTop: 12 }}>
+                By submitting you agree to our{' '}
+                <a href="/partner-terms" style={{ color: C.navy, fontWeight: 600, textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">Partner Terms</a>.
+              </p>
+            </>
+          )}
+
+          {/* Navigation buttons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: step === 1 ? 0 : 8 }}>
+            {step > 1 && (
+              <button onClick={() => setStep(s => s - 1)} style={{ ...S.btnSecondary, flex: '0 0 auto', fontSize: 14, padding: '12px 20px' }}>
+                ← Back
+              </button>
+            )}
+            {/* Show Next only on steps that aren't the final submit step */}
+            {!((step === 3 && isActivity) || (step === 2 && !isActivity)) && (
+              <button onClick={handleNext} style={{ ...S.btnPrimary, flex: 1, justifyContent: 'center', fontSize: 15, padding: '14px' }}>
+                Next →
+              </button>
+            )}
           </div>
-        )}
+
+        </div>
       </div>
     </section>
   )

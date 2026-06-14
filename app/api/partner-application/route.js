@@ -8,7 +8,7 @@ export async function POST(request) {
   )
   try {
     const body = await request.json()
-    const { businessName, contactName, email, phone, partnerType, website, instagram, description } = body
+    const { businessName, contactName, email, phone, whatsapp, partnerType, website, instagram, address, description, class_details, logo_url, photo_urls } = body
 
     if (!businessName?.trim() || !contactName?.trim() || !email?.trim() || !partnerType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -18,11 +18,16 @@ export async function POST(request) {
       business_name:    businessName.trim(),
       contact_name:     contactName.trim(),
       contact_email:    email.trim().toLowerCase(),
-      contact_phone:    phone?.trim() || null,
+      contact_phone:    phone?.trim()    || null,
+      whatsapp:         whatsapp?.trim() || null,
       application_type: partnerType,
-      website:          website?.trim() || null,
-      instagram:        instagram?.trim() || null,
+      website:          website?.trim()  || null,
+      instagram:        instagram?.trim()|| null,
+      full_address:     address?.trim()  || null,
       description:      description?.trim() || null,
+      class_details:    class_details    || [],
+      logo_url:         logo_url         || null,
+      photo_urls:       photo_urls       || [],
       status:           'pending',
     })
 
