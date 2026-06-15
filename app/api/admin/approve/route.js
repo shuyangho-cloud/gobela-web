@@ -24,7 +24,7 @@ const TYPE_CATEGORY = {
 
 export async function POST(request) {
 	const { id, action, password } = await request.json();
-	if (password !== (process.env.ADMIN_PASSWORD || 'gobela-admin-2026')) {
+	if (password !== (process.env.ADMIN_PASSWORD || 'G0Bela$Y$Y$Y')) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
