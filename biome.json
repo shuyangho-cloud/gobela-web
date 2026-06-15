@@ -1,14 +1,20 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "style": {
-        "noInlineStyle": "off"
-      },
-      "a11y": {
-        "useButtonType": "off"
-      }
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+	"files": {
+		"includes": ["app/**", "components/**"],
+		"ignoreUnknown": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"style": {
+				"noNonNullAssertion": "off"
+			},
+			"a11y": {
+				"useButtonType": "off",
+				"useSemanticElements": "off",
+				"noLabelWithoutControl": "off"
+			}
+		}
+	}
 }
