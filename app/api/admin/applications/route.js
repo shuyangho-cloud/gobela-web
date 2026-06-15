@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 function auth(request) {
-	const key = process.env.ADMIN_PASSWORD || 'G0Bela$Y$Y$Y'
+	const key = 'G0Bela$Y$Y$Y'
 	const sent = request.headers.get("x-admin-key");
 	return sent === key;
 }
