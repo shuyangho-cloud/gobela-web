@@ -76,8 +76,11 @@ export default function AdminPage() {
 			setAuthed(true);
 			const { applications } = await res.json();
 			setApps(applications);
-		} else {
+		} else if (res.status === 401) {
 			setMsg("Wrong password");
+		} else {
+			const err = await res.json().catch(() => ({}));
+			setMsg(`Server error ${res.status}: ${err.error ?? "check Vercel logs"}`);
 		}
 	};
 
