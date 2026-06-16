@@ -56,6 +56,9 @@ export default function AdminPage() {
 	const [pushBody, setPushBody] = useState("");
 	const [pushSending, setPushSending] = useState(false);
 	const [pushResult, setPushResult] = useState("");
+	const [connectProvider, setConnectProvider] = useState("");
+	const [connectLoading, setConnectLoading] = useState(false);
+	const [connectResult, setConnectResult] = useState<{ url?: string; account_id?: string; error?: string } | null>(null);
 
 	useEffect(() => {
 		const saved = sessionStorage.getItem("gobela_admin");
@@ -404,6 +407,62 @@ export default function AdminPage() {
 							{pushSending ? "Sending…" : "Send to all users →"}
 						</button>
 					</div>
+				</div>
+
+				{/* ── Stripe Connect ───────────────────────────────────────────── */}
+				<div
+					style={{
+						background: C.white,
+						border: `1px solid ${C.border}`,
+						borderRadius: 14,
+						padding: "20px 24px",
+						marginBottom: 28,
+					}}
+				>
+					<h2 style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 16px" }}>
+						💳 Generate Stripe Connect Link
+					</h2>
+					<div style={{ display: "flex", gap: 10 }}>
+						<input
+							placeholder="Provider name e.g. Penguin Swim School"
+							value={connectProvider}
+							onChange={(e) => { setConnectProvider(e.target.value); setConnectResult(null); }}
+							style={{ flex: 1, padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 14, fontFamily: "inherit" }}
+						/>
+						<button
+							disabled={connectLoading || !connectProvider.trim()}
+							onClick={async () => {
+								setConnectLoading(true);
+								setConnectResult(null);
+								const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create-connect-account`, {
+									method: "POST",
+									headers: { "Content-Type": "application/json", apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
+									body: JSON.stringify({ provider_name: connectProvider.trim() }),
+								});
+								const data = await res.json();
+								setConnectLoading(false);
+								setConnectResult(data);
+							}}
+							style={{ padding: "10px 20px", background: C.navy, color: "#fff", border: "none", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", opacity: connectLoading || !connectProvider.trim() ? 0.5 : 1 }}
+						>
+							{connectLoading ? "Generating…" : "Get link →"}
+						</button>
+					</div>
+					{connectResult?.error && (
+						<p style={{ marginTop: 10, fontSize: 13, color: C.red }}>{connectResult.error}</p>
+					)}
+					{connectResult?.url && (
+						<div style={{ marginTop: 12, background: C.bg2, borderRadius: 9, padding: "12px 16px" }}>
+							<p style={{ fontSize: 12, color: C.muted, margin: "0 0 6px" }}>Account: <strong>{connectResult.account_id}</strong></p>
+							<p style={{ fontSize: 13, color: C.navy, margin: "0 0 8px", wordBreak: "break-all" }}>{connectResult.url}</p>
+							<button
+								onClick={() => { navigator.clipboard.writeText(connectResult.url!); }}
+								style={{ padding: "6px 14px", background: C.coral, border: "none", borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: "pointer", color: C.navy, fontFamily: "inherit" }}
+							>
+								Copy link
+							</button>
+						</div>
+					)}
 				</div>
 
 				{loading && <p style={{ color: C.muted, fontSize: 14 }}>Loading…</p>}
