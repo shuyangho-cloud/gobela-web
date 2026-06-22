@@ -688,24 +688,24 @@ function TestimonialsSection() {
 	const testimonials = [
 		{
 			quote:
-				"Booked a trial swim class for my 3-year-old in literally 2 minutes. The coach came to our condo pool — my daughter loved it and we signed up for the full term the same week.",
-			name: "Sarah L.",
-			detail: "Mum of 1 · Tampines",
+				"My son takes swimming lessons under coach Remus. He is a great coach, mentor and friend — shows unwavering commitment and builds confidence in my son.",
+			name: "Anil Choudhary",
+			detail: "Parent · Penguin Swim School",
 			emoji: "🏊",
 		},
 		{
 			quote:
-				"I was spending every Sunday googling 'enrichment classes near me' and calling schools that never pick up. GoBela just solved that. Booked a fencing trial for my 8-year-old and he's obsessed now.",
-			name: "David T.",
-			detail: "Dad of 2 · Bishan",
-			emoji: "🤺",
+				"Our son has been attending Minisport since he was 18 months and immediately loved his sessions with the fantastic coaches.",
+			name: "Abby Cadman",
+			detail: "Parent · MiniSport Singapore",
+			emoji: "⚽",
 		},
 		{
 			quote:
-				"The meal planning alone is worth it. I tell Bela what's in my fridge and she plans the whole week. My kids actually eat what she suggests.",
-			name: "Michelle K.",
-			detail: "Mum of 3 · Jurong West",
-			emoji: "🍳",
+				"Both kids absolutely love it. Bubbles Gym staff just love children and are excellent with kids.",
+			name: "Alex Commissaris",
+			detail: "Parent · Bubbles Gym",
+			emoji: "🤸",
 		},
 	];
 	return (
@@ -716,10 +716,9 @@ function TestimonialsSection() {
 			<div style={S.container}>
 				<div style={{ textAlign: "center", marginBottom: 44 }}>
 					<div style={S.eyebrow}>What parents say</div>
-					<h2 style={S.h2}>Built for real Singapore families.</h2>
+					<h2 style={S.h2}>Trusted by Singapore families.</h2>
 					<p style={{ ...S.lead, maxWidth: 480, margin: "0 auto" }}>
-						From Tampines to Jurong, Singapore parents are reclaiming their
-						weekends with GoBela.
+						Real reviews from parents about the classes listed on GoBela.
 					</p>
 				</div>
 				<div className="test-grid">
