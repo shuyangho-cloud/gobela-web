@@ -13,7 +13,8 @@ const PROVIDER_MAP = {
 };
 
 export default async function PartnerConnectPage({ searchParams }) {
-	const slug = searchParams?.p;
+	const params = await searchParams;
+	const slug = params?.p;
 	const providerName = PROVIDER_MAP[slug];
 
 	if (!providerName) {
