@@ -57,12 +57,19 @@ export async function POST(request) {
 			);
 		}
 
-		const response = await anthropic.messages.create({
-			model: "claude-sonnet-4-6",
-			max_tokens: max_tokens || 400,
-			system: system || BELA_SYSTEM,
-			messages,
-		});
+		const startTs = Date.now();
+		let response;
+		try {
+			response = await anthropic.messages.create({
+				model: "claude-sonnet-4-6",
+				max_tokens: max_tokens || 400,
+				system: system || BELA_SYSTEM,
+				messages,
+			});
+		} finally {
+			const took = Date.now() - startTs;
+			console.log(`[Bela API] Anthropic call took ${took}ms; messages=${(messages || []).length}; max_tokens=${max_tokens || 400}`);
+		}
 
 		const reply = response.content
 			.filter((block) => block.type === "text")
