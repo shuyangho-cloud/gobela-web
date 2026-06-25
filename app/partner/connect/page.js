@@ -10,6 +10,7 @@ const PROVIDER_MAP = {
 	"fencing-masters": "Fencing Masters",
 	"code-ninja": "Code Ninja",
 	"bubbles-gym": "Bubbles Gym (Eastwood)",
+	"seashell-academy": "Seashell Academy",
 };
 
 export default async function PartnerConnectPage({ searchParams }) {
