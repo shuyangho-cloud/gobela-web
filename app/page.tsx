@@ -688,22 +688,22 @@ function TestimonialsSection() {
 	const testimonials = [
 		{
 			quote:
-				"My son takes swimming lessons under coach Remus. He is a great coach, mentor and friend — shows unwavering commitment and builds confidence in my son.",
-			name: "Anil Choudhary",
+				"Highly recommend Coach Remus for his dedication and patience throughout the swimming lessons. His clear instructions, encouragement, and calm guidance helped my son feel more confident in the water.",
+			name: "Hien Nguyen",
 			detail: "Parent · Penguin Swim School",
 			emoji: "🏊",
 		},
 		{
 			quote:
-				"Our son has been attending Minisport since he was 18 months and immediately loved his sessions with the fantastic coaches.",
-			name: "Abby Cadman",
-			detail: "Parent · MiniSport Singapore",
-			emoji: "⚽",
+				"Initially the plan was just a holiday programme but now it's become my kids' weekly lesson. Code Ninja has a team of committed and patient instructors.",
+			name: "Jeannie Tan",
+			detail: "Parent · Code Ninja",
+			emoji: "💻",
 		},
 		{
 			quote:
-				"Both kids absolutely love it. Bubbles Gym staff just love children and are excellent with kids.",
-			name: "Alex Commissaris",
+				"My son looks forward to every lesson each week! The coaches are always very patient, professional, kind and put extra effort to ensure my son improves week by week!",
+			name: "Alina Tan",
 			detail: "Parent · Bubbles Gym",
 			emoji: "🤸",
 		},
