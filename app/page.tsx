@@ -707,6 +707,48 @@ function TestimonialsSection() {
 			detail: "Parent · Bubbles Gym",
 			emoji: "🤸",
 		},
+		{
+			quote:
+				"My son is enrolled in the robotics course and we've been very happy. The instructors are warm, patient, and knowledgeable, and the environment is fun and engaging for young learners.",
+			name: "Kencheng Chuang",
+			detail: "Parent · STEM Genius",
+			emoji: "🤖",
+		},
+		{
+			quote:
+				"Ms Langley is a dedicated, approachable and experienced dance teacher who nurtures her students. I have been under her guidance for over a decade.",
+			name: "Jing Yi Foo",
+			detail: "Student · Elevate Dance Academie",
+			emoji: "💃",
+		},
+		{
+			quote:
+				"The coaches are truly professional and passionate about fencing. Their expertise and dedication to the sport are evident in every session.",
+			name: "Amanda Ong",
+			detail: "Student · Fencing Masters",
+			emoji: "🤺",
+		},
+		{
+			quote:
+				"She now actually looks forward to her lessons — which is such a joy to see! The centre made her feel so welcome and comfortable right from the start.",
+			name: "Siti Aishah Ali Akbar",
+			detail: "Parent · Seashell Academy",
+			emoji: "📚",
+		},
+		{
+			quote:
+				"The teachers are patient, knowledgeable, and genuinely passionate about helping students improve. Lessons are well-structured, interactive, and tailored to each student's level.",
+			name: "Ricky Valencia",
+			detail: "Student · Elite Linguistic Network",
+			emoji: "🗣️",
+		},
+		{
+			quote:
+				"Such a fantastic time at the kids' magic show! The magician had amazing energy and a natural way of engaging the kids, keeping them laughing, amazed, and fully involved.",
+			name: "Azhar Abas",
+			detail: "Parent · M for Magic",
+			emoji: "🎩",
+		},
 	];
 	return (
 		<section
