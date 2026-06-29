@@ -47,6 +47,19 @@ function OnboardingContent() {
 	}
 
 	if (status === "refresh") {
+		const provider = params.get("provider");
+		if (provider) {
+			// Auto-refresh: redirect back to generate a new Stripe link
+			if (typeof window !== "undefined") {
+				window.location.href = `/api/stripe-onboard?provider=${encodeURIComponent(provider)}`;
+			}
+			return (
+				<div style={{ textAlign: "center", padding: "80px 24px" }}>
+					<div style={{ fontSize: 48, marginBottom: 16 }}>🔄</div>
+					<p style={{ fontSize: 16, color: "#64748B" }}>Refreshing your link…</p>
+				</div>
+			);
+		}
 		return (
 			<div style={{ textAlign: "center", padding: "80px 24px" }}>
 				<div style={{ fontSize: 48, marginBottom: 16 }}>⏱️</div>
