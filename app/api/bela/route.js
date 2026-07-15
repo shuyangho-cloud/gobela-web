@@ -43,27 +43,61 @@ Singapore context to reference:
 
 TONE: Warm, practical, Singapore-specific, concise (2–4 sentences max). Always end with a helpful next step or follow-up question.`;
 
-const anthropic = new Anthropic({
-	apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-// Fallback provider — only used when the primary Anthropic call fails.
-// null (not undefined) when unconfigured, so callers can check truthiness
-// without an env-var read on every request.
+const anthropic = process.env.ANTHROPIC_API_KEY
+	? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+	: null;
 const openai = process.env.OPENAI_API_KEY
 	? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 	: null;
-const OPENAI_FALLBACK_MODEL = "gpt-4o-mini";
-
-// Second fallback tier — plain fetch rather than an SDK, since this is a
-// single endpoint and adding a third provider SDK for one call isn't worth
-// the dependency.
 const geminiApiKey = process.env.GEMINI_API_KEY || null;
-const GEMINI_FALLBACK_MODEL = "gemini-flash-latest";
 
-async function callGemini(messages, system, max_tokens) {
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const PROVIDER_PRIORITY = (process.env.BELA_PROVIDER_PRIORITY || "anthropic,openai,gemini")
+	.split(",")
+	.map((value) => value.trim().toLowerCase())
+	.filter(Boolean);
+
+function sanitizeMaxTokens(value) {
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return 400;
+	return Math.max(64, Math.min(1200, Math.floor(parsed)));
+}
+
+function normalizeMessages(messages) {
+	if (!Array.isArray(messages) || messages.length === 0) return null;
+	const allowedRoles = new Set(["user", "assistant"]);
+	const normalized = [];
+	for (const message of messages) {
+		if (!message || typeof message !== "object") return null;
+		const role = typeof message.role === "string" ? message.role.trim().toLowerCase() : "";
+		const content = typeof message.content === "string" ? message.content.trim() : "";
+		if (!allowedRoles.has(role) || !content) return null;
+		normalized.push({ role, content });
+	}
+	return normalized.length ? normalized : null;
+}
+
+function getAvailableProviders() {
+	const configured = {
+		anthropic: Boolean(anthropic),
+		openai: Boolean(openai),
+		gemini: Boolean(geminiApiKey),
+	};
+	const ordered = [];
+	for (const provider of PROVIDER_PRIORITY) {
+		if (configured[provider] && !ordered.includes(provider)) ordered.push(provider);
+	}
+	for (const provider of ["anthropic", "openai", "gemini"]) {
+		if (configured[provider] && !ordered.includes(provider)) ordered.push(provider);
+	}
+	return ordered;
+}
+
+async function callGemini(messages, system, maxTokens) {
 	const res = await fetch(
-		`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_FALLBACK_MODEL}:generateContent`,
+		`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
 		{
 			method: "POST",
 			headers: {
@@ -77,7 +111,7 @@ async function callGemini(messages, system, max_tokens) {
 					role: m.role === "assistant" ? "model" : "user",
 					parts: [{ text: m.content }],
 				})),
-				generationConfig: { maxOutputTokens: max_tokens || 400 },
+				generationConfig: { maxOutputTokens: maxTokens },
 			}),
 		},
 	);
@@ -89,6 +123,58 @@ async function callGemini(messages, system, max_tokens) {
 	return (data.candidates?.[0]?.content?.parts ?? [])
 		.map((p) => p.text ?? "")
 		.join("");
+}
+
+async function callAnthropic(messages, system, maxTokens) {
+	const response = await anthropic.messages.create({
+		model: ANTHROPIC_MODEL,
+		max_tokens: maxTokens,
+		system: system || BELA_SYSTEM,
+		messages,
+	});
+	return response.content
+		.filter((block) => block.type === "text")
+		.map((block) => block.text)
+		.join("");
+}
+
+async function callOpenAI(messages, system, maxTokens) {
+	const completion = await openai.chat.completions.create({
+		model: OPENAI_MODEL,
+		max_tokens: maxTokens,
+		messages: [
+			{ role: "system", content: system || BELA_SYSTEM },
+			...messages,
+		],
+	});
+	return completion.choices[0]?.message?.content ?? "";
+}
+
+function classifyGenericProviderError(error) {
+	const status = Number(error?.status) || Number(error?.code) || 0;
+	const message = String(error?.message || "");
+	if (status === 401 || status === 403 || /api key|auth|unauthorized|forbidden/i.test(message)) {
+		return { status: 502, code: "upstream_auth", message: "Bela is misconfigured (provider authentication failed). This is a server issue, not yours." };
+	}
+	if (status === 429 || /rate limit|quota|capacity/i.test(message)) {
+		return { status: 429, code: "upstream_rate_limited", message: "Bela is getting a lot of requests right now — try again in a moment." };
+	}
+	if (status >= 500 || /timeout|timed out|network|fetch failed|connection/i.test(message)) {
+		return { status: 503, code: "upstream_unavailable", message: "Bela is temporarily unavailable — try again in a moment." };
+	}
+	return { status: 502, code: "upstream_unknown", message: "Bela couldn't respond right now — try again in a moment." };
+}
+
+function classifyProviderError(provider, error) {
+	if (provider === "anthropic") return classifyAnthropicError(error);
+	return classifyGenericProviderError(error);
+}
+
+async function callProvider(provider, messages, system, maxTokens) {
+	if (provider === "anthropic") return callAnthropic(messages, system, maxTokens);
+	if (provider === "openai") return callOpenAI(messages, system, maxTokens);
+	if (provider === "gemini") return callGemini(messages, system, maxTokens);
+	throw new Error(`Unsupported provider: ${provider}`);
 }
 
 // Maps an Anthropic SDK error to (a) the HTTP status we return to our own
@@ -126,90 +212,62 @@ function classifyAnthropicError(error) {
 }
 
 export async function POST(request) {
-	let messages, system, max_tokens;
+	let body;
 	try {
-		({ messages, system, max_tokens } = await request.json());
+		body = await request.json();
 	} catch (error) {
 		console.error("[Bela API] Invalid JSON body:", error.message);
 		return NextResponse.json({ error: "Invalid JSON body", code: "bad_request" }, { status: 400 });
 	}
 
-	if (!messages || !Array.isArray(messages)) {
+	const messages = normalizeMessages(body?.messages);
+	const system = typeof body?.system === "string" && body.system.trim()
+		? body.system.trim()
+		: BELA_SYSTEM;
+	const maxTokens = sanitizeMaxTokens(body?.max_tokens);
+
+	if (!messages) {
 		return NextResponse.json(
-			{ error: "messages array required", code: "bad_request" },
+			{ error: "messages must be a non-empty array of { role, content } objects", code: "bad_request" },
 			{ status: 400 },
 		);
 	}
 
-	const startTs = Date.now();
-	let response;
-	try {
-		response = await anthropic.messages.create({
-			model: "claude-sonnet-4-6",
-			max_tokens: max_tokens || 400,
-			system: system || BELA_SYSTEM,
-			messages,
-		});
-	} catch (error) {
-		const took = Date.now() - startTs;
-		const { status, code, message } = classifyAnthropicError(error);
-		// Structured, single-line log: status/code/request_id/duration up front
-		// so `vercel logs` (or any log search) surfaces the category without
-		// needing to expand the full error object, unlike the previous
-		// console.error(error) which required pulling raw JSON logs to find
-		// the actual cause (this was a real incident — see route history).
-		console.error(
-			`[Bela API] upstream_error code=${code} status=${status} anthropic_status=${error.status ?? "n/a"} request_id=${error.requestID ?? "n/a"} took=${took}ms messages=${messages.length} max_tokens=${max_tokens || 400} detail=${error.message}`,
+	const providers = getAvailableProviders();
+	if (providers.length === 0) {
+		console.error("[Bela API] No AI providers configured for Bela route");
+		return NextResponse.json(
+			{ error: "Bela is not configured on the server right now.", code: "server_unconfigured" },
+			{ status: 503 },
 		);
-
-		if (openai) {
-			const fallbackStart = Date.now();
-			try {
-				const completion = await openai.chat.completions.create({
-					model: OPENAI_FALLBACK_MODEL,
-					max_tokens: max_tokens || 400,
-					messages: [
-						{ role: "system", content: system || BELA_SYSTEM },
-						...messages,
-					],
-				});
-				const reply = completion.choices[0]?.message?.content ?? "";
-				console.log(
-					`[Bela API] fallback_success provider=openai model=${OPENAI_FALLBACK_MODEL} took=${Date.now() - fallbackStart}ms after_anthropic_code=${code}`,
-				);
-				return NextResponse.json({ reply, fallback: "openai" });
-			} catch (fallbackError) {
-				console.error(
-					`[Bela API] fallback_failed provider=openai took=${Date.now() - fallbackStart}ms after_anthropic_code=${code} detail=${fallbackError.message}`,
-				);
-				// fall through to the next fallback tier
-			}
-		}
-
-		if (geminiApiKey) {
-			const fallbackStart = Date.now();
-			try {
-				const reply = await callGemini(messages, system, max_tokens);
-				console.log(
-					`[Bela API] fallback_success provider=gemini model=${GEMINI_FALLBACK_MODEL} took=${Date.now() - fallbackStart}ms after_anthropic_code=${code}`,
-				);
-				return NextResponse.json({ reply, fallback: "gemini" });
-			} catch (fallbackError) {
-				console.error(
-					`[Bela API] fallback_failed provider=gemini took=${Date.now() - fallbackStart}ms after_anthropic_code=${code} detail=${fallbackError.message}`,
-				);
-				// fall through — return the original Anthropic error below
-			}
-		}
-
-		return NextResponse.json({ error: message, code }, { status });
 	}
-	console.log(`[Bela API] Anthropic call took ${Date.now() - startTs}ms; messages=${messages.length}; max_tokens=${max_tokens || 400}`);
 
-	const reply = response.content
-		.filter((block) => block.type === "text")
-		.map((block) => block.text)
-		.join("");
+	const startTs = Date.now();
+	let firstFailure = null;
+	for (let index = 0; index < providers.length; index += 1) {
+		const provider = providers[index];
+		const providerStart = Date.now();
+		try {
+			const reply = await callProvider(provider, messages, system, maxTokens);
+			console.log(
+				`[Bela API] success provider=${provider} model=${provider === "anthropic" ? ANTHROPIC_MODEL : provider === "openai" ? OPENAI_MODEL : GEMINI_MODEL} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${maxTokens} fallback_count=${index}`,
+			);
+			return NextResponse.json(
+				index === 0
+					? { reply }
+					: { reply, provider_used: provider, fallback_count: index },
+			);
+		} catch (error) {
+			const classified = classifyProviderError(provider, error);
+			if (!firstFailure) firstFailure = classified;
+			console.error(
+				`[Bela API] provider_failed provider=${provider} code=${classified.code} status=${classified.status} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${maxTokens} detail=${error.message}`,
+			);
+		}
+	}
 
-	return NextResponse.json({ reply });
+	return NextResponse.json(
+		{ error: firstFailure?.message || "Failed to get a response from Bela", code: firstFailure?.code || "upstream_unknown" },
+		{ status: firstFailure?.status || 502 },
+	);
 }
