@@ -46,42 +46,84 @@ const anthropic = new Anthropic({
 	apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Maps an Anthropic SDK error to (a) the HTTP status we return to our own
+// client and (b) a safe, actionable message — never the raw API error text,
+// which can echo back request content or account-identifying detail.
+function classifyAnthropicError(error) {
+	if (error instanceof Anthropic.AuthenticationError) {
+		return { status: 502, code: "upstream_auth", message: "Bela is misconfigured (invalid API key). This is a server issue, not yours." };
+	}
+	if (error instanceof Anthropic.PermissionDeniedError) {
+		return { status: 502, code: "upstream_permission", message: "Bela's API key lacks permission for this request. This is a server issue, not yours." };
+	}
+	if (error instanceof Anthropic.RateLimitError) {
+		return { status: 429, code: "upstream_rate_limited", message: "Bela is getting a lot of requests right now — try again in a moment." };
+	}
+	if (error instanceof Anthropic.BadRequestError) {
+		// Anthropic reports account-level usage/spend caps as a 400
+		// invalid_request_error, indistinguishable from a real malformed
+		// request except by message text — this was the actual root cause
+		// of the 2026-07 outage, and it looked identical to a generic 500
+		// until the raw error was pulled from Vercel logs.
+		const upstreamMessage = error.message || "";
+		if (/usage limit|spend limit|billing/i.test(upstreamMessage)) {
+			return { status: 503, code: "upstream_usage_limit", message: "Bela is temporarily unavailable (API usage limit reached). Please try again later." };
+		}
+		return { status: 502, code: "upstream_bad_request", message: "Bela couldn't process that request. Please try rephrasing." };
+	}
+	if (error instanceof Anthropic.APIConnectionError) {
+		return { status: 502, code: "upstream_connection", message: "Bela couldn't be reached — try again in a moment." };
+	}
+	if (error instanceof Anthropic.APIStatusError && error.status >= 500) {
+		return { status: 503, code: "upstream_unavailable", message: "Bela is temporarily unavailable — try again in a moment." };
+	}
+	return { status: 502, code: "upstream_unknown", message: "Bela couldn't respond right now — try again in a moment." };
+}
+
 export async function POST(request) {
+	let messages, system, max_tokens;
 	try {
-		const { messages, system, max_tokens } = await request.json();
-
-		if (!messages || !Array.isArray(messages)) {
-			return NextResponse.json(
-				{ error: "messages array required" },
-				{ status: 400 },
-			);
-		}
-
-		const startTs = Date.now();
-		let response;
-		try {
-			response = await anthropic.messages.create({
-				model: "claude-sonnet-4-6",
-				max_tokens: max_tokens || 400,
-				system: system || BELA_SYSTEM,
-				messages,
-			});
-		} finally {
-			const took = Date.now() - startTs;
-			console.log(`[Bela API] Anthropic call took ${took}ms; messages=${(messages || []).length}; max_tokens=${max_tokens || 400}`);
-		}
-
-		const reply = response.content
-			.filter((block) => block.type === "text")
-			.map((block) => block.text)
-			.join("");
-
-		return NextResponse.json({ reply });
+		({ messages, system, max_tokens } = await request.json());
 	} catch (error) {
-		console.error("[Bela API] Error:", error);
+		console.error("[Bela API] Invalid JSON body:", error.message);
+		return NextResponse.json({ error: "Invalid JSON body", code: "bad_request" }, { status: 400 });
+	}
+
+	if (!messages || !Array.isArray(messages)) {
 		return NextResponse.json(
-			{ error: "Failed to get a response from Bela" },
-			{ status: 500 },
+			{ error: "messages array required", code: "bad_request" },
+			{ status: 400 },
 		);
 	}
+
+	const startTs = Date.now();
+	let response;
+	try {
+		response = await anthropic.messages.create({
+			model: "claude-sonnet-4-6",
+			max_tokens: max_tokens || 400,
+			system: system || BELA_SYSTEM,
+			messages,
+		});
+	} catch (error) {
+		const took = Date.now() - startTs;
+		const { status, code, message } = classifyAnthropicError(error);
+		// Structured, single-line log: status/code/request_id/duration up front
+		// so `vercel logs` (or any log search) surfaces the category without
+		// needing to expand the full error object, unlike the previous
+		// console.error(error) which required pulling raw JSON logs to find
+		// the actual cause (this was a real incident — see route history).
+		console.error(
+			`[Bela API] upstream_error code=${code} status=${status} anthropic_status=${error.status ?? "n/a"} request_id=${error.requestID ?? "n/a"} took=${took}ms messages=${messages.length} max_tokens=${max_tokens || 400} detail=${error.message}`,
+		);
+		return NextResponse.json({ error: message, code }, { status });
+	}
+	console.log(`[Bela API] Anthropic call took ${Date.now() - startTs}ms; messages=${messages.length}; max_tokens=${max_tokens || 400}`);
+
+	const reply = response.content
+		.filter((block) => block.type === "text")
+		.map((block) => block.text)
+		.join("");
+
+	return NextResponse.json({ reply });
 }
