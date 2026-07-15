@@ -2,6 +2,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
+// Worst case is 3 sequential provider attempts at PROVIDER_TIMEOUT_MS each
+// (36s) plus request overhead -- give the function room for that instead
+// of relying on the platform default, which can be lower.
+export const maxDuration = 45;
+
 const BELA_SYSTEM = `You are Bela — GoBela's warm, helpful AI companion for Singapore families. You live on the GoBela website and inside the GoBela app.
 
 ABOUT GOBELA:
@@ -51,9 +56,19 @@ const openai = process.env.OPENAI_API_KEY
 	: null;
 const geminiApiKey = process.env.GEMINI_API_KEY || null;
 
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+// claude-sonnet-4-20250514 (a dated snapshot) carries an active Anthropic
+// deprecation warning with an end-of-life of 2026-06-15 -- already past as
+// of this fix -- so it was silently one bad-model-ID away from failing
+// even after the account-level usage cap lifts. claude-sonnet-4-6 is the
+// current, non-deprecated rolling alias and was the confirmed-working
+// value before this file's model IDs were last touched.
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+// gemini-2.5-flash returns a live 404 ("no longer available to new users")
+// -- confirmed by forcing it to the front of the provider chain and
+// reading the raw Gemini error from Vercel logs, not assumed. gemini-flash-latest
+// is the alias Google keeps pointed at a served model.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
 const PROVIDER_PRIORITY = (process.env.BELA_PROVIDER_PRIORITY || "anthropic,openai,gemini")
 	.split(",")
 	.map((value) => value.trim().toLowerCase())
@@ -95,6 +110,11 @@ function getAvailableProviders() {
 	return ordered;
 }
 
+// Bounds each provider attempt so a hung/slow provider can't burn the
+// whole Vercel function's execution budget before the loop ever reaches a
+// working fallback tier -- previously unbounded (SDK defaults are ~10 min).
+const PROVIDER_TIMEOUT_MS = 12000;
+
 async function callGemini(messages, system, maxTokens) {
 	const res = await fetch(
 		`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
@@ -113,11 +133,20 @@ async function callGemini(messages, system, maxTokens) {
 				})),
 				generationConfig: { maxOutputTokens: maxTokens },
 			}),
+			signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
 		},
 	);
 	if (!res.ok) {
 		const body = await res.text();
-		throw new Error(`${res.status} ${body}`);
+		// classifyGenericProviderError() reads error.status first, falling
+		// back to text matching only when it's absent -- a plain `new Error`
+		// here left every Gemini failure (auth, quota, invalid model, ...)
+		// misclassified as upstream_unknown regardless of the real HTTP
+		// status, since res.status was never attached to anything Node
+		// treats as .status.
+		const err = new Error(`${res.status} ${body}`);
+		err.status = res.status;
+		throw err;
 	}
 	const data = await res.json();
 	return (data.candidates?.[0]?.content?.parts ?? [])
@@ -126,12 +155,15 @@ async function callGemini(messages, system, maxTokens) {
 }
 
 async function callAnthropic(messages, system, maxTokens) {
-	const response = await anthropic.messages.create({
-		model: ANTHROPIC_MODEL,
-		max_tokens: maxTokens,
-		system: system || BELA_SYSTEM,
-		messages,
-	});
+	const response = await anthropic.messages.create(
+		{
+			model: ANTHROPIC_MODEL,
+			max_tokens: maxTokens,
+			system: system || BELA_SYSTEM,
+			messages,
+		},
+		{ timeout: PROVIDER_TIMEOUT_MS },
+	);
 	return response.content
 		.filter((block) => block.type === "text")
 		.map((block) => block.text)
@@ -139,14 +171,17 @@ async function callAnthropic(messages, system, maxTokens) {
 }
 
 async function callOpenAI(messages, system, maxTokens) {
-	const completion = await openai.chat.completions.create({
-		model: OPENAI_MODEL,
-		max_tokens: maxTokens,
-		messages: [
-			{ role: "system", content: system || BELA_SYSTEM },
-			...messages,
-		],
-	});
+	const completion = await openai.chat.completions.create(
+		{
+			model: OPENAI_MODEL,
+			max_tokens: maxTokens,
+			messages: [
+				{ role: "system", content: system || BELA_SYSTEM },
+				...messages,
+			],
+		},
+		{ timeout: PROVIDER_TIMEOUT_MS },
+	);
 	return completion.choices[0]?.message?.content ?? "";
 }
 
