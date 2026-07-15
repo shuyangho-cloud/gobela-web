@@ -55,6 +55,42 @@ const openai = process.env.OPENAI_API_KEY
 	: null;
 const OPENAI_FALLBACK_MODEL = "gpt-4o-mini";
 
+// Second fallback tier — plain fetch rather than an SDK, since this is a
+// single endpoint and adding a third provider SDK for one call isn't worth
+// the dependency.
+const geminiApiKey = process.env.GEMINI_API_KEY || null;
+const GEMINI_FALLBACK_MODEL = "gemini-flash-latest";
+
+async function callGemini(messages, system, max_tokens) {
+	const res = await fetch(
+		`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_FALLBACK_MODEL}:generateContent`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-goog-api-key": geminiApiKey,
+			},
+			body: JSON.stringify({
+				systemInstruction: { parts: [{ text: system || BELA_SYSTEM }] },
+				// Gemini uses "model" where Anthropic/OpenAI use "assistant".
+				contents: messages.map((m) => ({
+					role: m.role === "assistant" ? "model" : "user",
+					parts: [{ text: m.content }],
+				})),
+				generationConfig: { maxOutputTokens: max_tokens || 400 },
+			}),
+		},
+	);
+	if (!res.ok) {
+		const body = await res.text();
+		throw new Error(`${res.status} ${body}`);
+	}
+	const data = await res.json();
+	return (data.candidates?.[0]?.content?.parts ?? [])
+		.map((p) => p.text ?? "")
+		.join("");
+}
+
 // Maps an Anthropic SDK error to (a) the HTTP status we return to our own
 // client and (b) a safe, actionable message — never the raw API error text,
 // which can echo back request content or account-identifying detail.
@@ -145,6 +181,22 @@ export async function POST(request) {
 			} catch (fallbackError) {
 				console.error(
 					`[Bela API] fallback_failed provider=openai took=${Date.now() - fallbackStart}ms after_anthropic_code=${code} detail=${fallbackError.message}`,
+				);
+				// fall through to the next fallback tier
+			}
+		}
+
+		if (geminiApiKey) {
+			const fallbackStart = Date.now();
+			try {
+				const reply = await callGemini(messages, system, max_tokens);
+				console.log(
+					`[Bela API] fallback_success provider=gemini model=${GEMINI_FALLBACK_MODEL} took=${Date.now() - fallbackStart}ms after_anthropic_code=${code}`,
+				);
+				return NextResponse.json({ reply, fallback: "gemini" });
+			} catch (fallbackError) {
+				console.error(
+					`[Bela API] fallback_failed provider=gemini took=${Date.now() - fallbackStart}ms after_anthropic_code=${code} detail=${fallbackError.message}`,
 				);
 				// fall through — return the original Anthropic error below
 			}
