@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 const BELA_SYSTEM = `You are Bela — GoBela's warm, helpful AI companion for Singapore families. You live on the GoBela website and inside the GoBela app.
@@ -45,6 +46,14 @@ TONE: Warm, practical, Singapore-specific, concise (2–4 sentences max). Always
 const anthropic = new Anthropic({
 	apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+// Fallback provider — only used when the primary Anthropic call fails.
+// null (not undefined) when unconfigured, so callers can check truthiness
+// without an env-var read on every request.
+const openai = process.env.OPENAI_API_KEY
+	? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+	: null;
+const OPENAI_FALLBACK_MODEL = "gpt-4o-mini";
 
 // Maps an Anthropic SDK error to (a) the HTTP status we return to our own
 // client and (b) a safe, actionable message — never the raw API error text,
@@ -116,6 +125,31 @@ export async function POST(request) {
 		console.error(
 			`[Bela API] upstream_error code=${code} status=${status} anthropic_status=${error.status ?? "n/a"} request_id=${error.requestID ?? "n/a"} took=${took}ms messages=${messages.length} max_tokens=${max_tokens || 400} detail=${error.message}`,
 		);
+
+		if (openai) {
+			const fallbackStart = Date.now();
+			try {
+				const completion = await openai.chat.completions.create({
+					model: OPENAI_FALLBACK_MODEL,
+					max_tokens: max_tokens || 400,
+					messages: [
+						{ role: "system", content: system || BELA_SYSTEM },
+						...messages,
+					],
+				});
+				const reply = completion.choices[0]?.message?.content ?? "";
+				console.log(
+					`[Bela API] fallback_success provider=openai model=${OPENAI_FALLBACK_MODEL} took=${Date.now() - fallbackStart}ms after_anthropic_code=${code}`,
+				);
+				return NextResponse.json({ reply, fallback: "openai" });
+			} catch (fallbackError) {
+				console.error(
+					`[Bela API] fallback_failed provider=openai took=${Date.now() - fallbackStart}ms after_anthropic_code=${code} detail=${fallbackError.message}`,
+				);
+				// fall through — return the original Anthropic error below
+			}
+		}
+
 		return NextResponse.json({ error: message, code }, { status });
 	}
 	console.log(`[Bela API] Anthropic call took ${Date.now() - startTs}ms; messages=${messages.length}; max_tokens=${max_tokens || 400}`);
