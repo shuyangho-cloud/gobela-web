@@ -8,19 +8,31 @@ function slugify(str) {
 		.replace(/^-|-$/g, "");
 }
 
-// Map partner type → enrichment category (best guess; admin can edit in Supabase after)
-const TYPE_CATEGORY = {
-	swimming: "swimming",
-	gymnastics: "gymnastics",
-	coding: "coding",
-	music: "music",
-	dance: "dance",
-	sports: "sports",
-	art: "art",
-	brain: "brain",
-	tuition: "tuition",
-	activity: "sports",
-};
+// Public submission form only collects a coarse partnerType (activity/fnb/
+// supplier/other), never a specific enrichment category — class_details
+// objects have no `category` field. Infer the real category from the
+// business name + description instead of defaulting every "activity"
+// application to "sports" (the bug that mis-filed Nuggets Academy under
+// Sports, fixed at the data level 2026-07-14 but never fixed here).
+const CATEGORY_KEYWORDS = [
+	["swimming", /\bswim/i],
+	["gymnastics", /gymnastic/i],
+	["coding", /\bcod(e|ing)\b|robotic|programming|\bstem\b/i],
+	["music", /music|piano|violin|guitar|drum|instrument|choir|vocal/i],
+	["dance", /\bdance|ballet|folk dance/i],
+	["art", /\bart\b|paint|drawing|sketch|craft|pottery/i],
+	["brain", /\bbrain\b|chess|abacus|mental math/i],
+	["tuition", /tuition|academic|exam prep|\bmath(s)?\b|\benglish\b|\bscience\b/i],
+	["sports", /sport|football|soccer|basketball|badminton|tennis|martial art|taekwondo|fencing|golf/i],
+];
+
+function inferCategory(businessName, description) {
+	const text = `${businessName ?? ""} ${description ?? ""}`;
+	for (const [category, re] of CATEGORY_KEYWORDS) {
+		if (re.test(text)) return category;
+	}
+	return "sports"; // last-resort fallback, same as the old default
+}
 
 export async function POST(request) {
 	const { id, action, password } = await request.json();
@@ -54,6 +66,7 @@ export async function POST(request) {
 	const classes = Array.isArray(app.class_details) ? app.class_details : [];
 	const baseSlug = slugify(app.business_name);
 	const photoUrls = Array.isArray(app.photo_urls) ? app.photo_urls : [];
+	const category = inferCategory(app.business_name, app.description);
 
 	let classesCreated = 0;
 	if (classes.length > 0) {
@@ -61,7 +74,7 @@ export async function POST(request) {
 			id: `${baseSlug}-${i + 1}`,
 			name: cls.name,
 			provider: app.business_name,
-			category: TYPE_CATEGORY[cls.category] ?? "sports",
+			category,
 			location: app.location_district ?? "Singapore",
 			address: app.full_address ?? null,
 			trial_price: parseFloat(cls.trial_price) || 0,

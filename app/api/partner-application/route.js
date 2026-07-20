@@ -61,6 +61,15 @@ export async function POST(request) {
 			);
 		}
 
+		// A submitted application means this lead has converted — stop the cold
+		// outreach pipeline from still following up with them (outreach_due_contacts
+		// only looks at outreach_sends history, so without this it keeps nudging
+		// people who already signed up).
+		await supabase
+			.from("outreach_contacts")
+			.update({ do_not_contact: true })
+			.ilike("email", email.trim());
+
 		// Notify Shuyang via email
 		await _notifyNewApplication({
 			businessName,
