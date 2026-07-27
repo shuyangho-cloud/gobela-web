@@ -89,6 +89,7 @@ export async function POST(request) {
 			is_active: true,
 			duration_minutes: parseInt(cls.duration, 10) || 60,
 			whatsapp: app.whatsapp ?? null,
+			partner_email: app.contact_email ?? app.email ?? null,
 			website_url: app.website ?? null,
 			logo_url: app.logo_url ?? null,
 			image_url: photoUrls[i] ?? photoUrls[0] ?? null,
