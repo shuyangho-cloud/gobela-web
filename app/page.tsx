@@ -401,7 +401,7 @@ function LaunchBanner() {
 				lineHeight: 1.5,
 			}}
 		>
-			🎉 GoBela is now live on the App Store!&nbsp;
+			🎉 GoBela is now live on iOS &amp; Android!&nbsp;
 			<a
 				href="https://apps.apple.com/sg/app/gobela/id6767062415"
 				target="_blank"
@@ -412,7 +412,20 @@ function LaunchBanner() {
 					textUnderlineOffset: 3,
 				}}
 			>
-				Download free →
+				App Store
+			</a>
+			{" · "}
+			<a
+				href="https://play.google.com/store/apps/details?id=com.gobela.app"
+				target="_blank"
+				rel="noopener noreferrer"
+				style={{
+					color: "#fff",
+					textDecoration: "underline",
+					textUnderlineOffset: 3,
+				}}
+			>
+				Google Play →
 			</a>
 			<button
 				onClick={() => setVisible(false)}

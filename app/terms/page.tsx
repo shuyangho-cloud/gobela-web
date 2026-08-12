@@ -31,11 +31,11 @@ export default function TermsPage() {
 						},
 						{
 							title: "5. Subscriptions",
-							body: "GoBela may offer auto-renewable subscription plans that provide access to premium features. Subscriptions are billed on a recurring basis (monthly or annually) at the price shown at the time of purchase. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current billing period. You can manage and cancel your subscription in your device's App Store account settings.",
+							body: "GoBela may offer auto-renewable subscription plans that provide access to premium features. Subscriptions are billed on a recurring basis (monthly or annually) at the price shown at the time of purchase. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current billing period. You can manage and cancel your subscription in your device's App Store (iOS) or Google Play (Android) account settings.",
 						},
 						{
 							title: "6. Cancellation and Refunds",
-							body: "You may cancel your subscription at any time through your App Store account settings. Cancellation takes effect at the end of the current billing period. Refunds for subscriptions are subject to the App Store's refund policy.",
+							body: "You may cancel your subscription at any time through your App Store (iOS) or Google Play (Android) account settings. Cancellation takes effect at the end of the current billing period. Refunds for subscriptions are subject to the App Store's or Google Play's refund policy, as applicable to your device.",
 						},
 						{
 							title: "7. User Conduct",

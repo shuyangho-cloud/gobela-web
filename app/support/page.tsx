@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 const faqs = [
 	{
 		q: "How do I get started with GoBela?",
-		a: "Download GoBela from the App Store, create an account, and tell Bela about your family — your children's ages, dietary preferences, and interests. Bela will start personalising recommendations right away.",
+		a: "Download GoBela from the App Store or Google Play, create an account, and tell Bela about your family — your children's ages, dietary preferences, and interests. Bela will start personalising recommendations right away.",
 	},
 	{
 		q: "What is Bela?",
@@ -29,7 +29,7 @@ const faqs = [
 	},
 	{
 		q: "Is GoBela available on Android?",
-		a: "GoBela is currently available on iOS (iPhone and iPad). Android is on our roadmap and coming soon.",
+		a: "Yes — GoBela is available on both iOS and Android. Download it from the App Store or Google Play.",
 	},
 	{
 		q: "How do I delete my account?",
@@ -37,7 +37,7 @@ const faqs = [
 	},
 	{
 		q: "My app is crashing or not loading. What should I do?",
-		a: "Try these steps: (1) Close and reopen the app. (2) Check your internet connection. (3) Update GoBela to the latest version from the App Store. (4) Restart your phone. If the issue persists, email us at hello@gobela.sg with your device model and iOS version.",
+		a: "Try these steps: (1) Close and reopen the app. (2) Check your internet connection. (3) Update GoBela to the latest version from the App Store or Google Play. (4) Restart your phone. If the issue persists, email us at hello@gobela.sg with your device model and OS version.",
 	},
 	{
 		q: "How do I update my family profile?",
