@@ -110,5 +110,25 @@ export async function POST(request) {
 		.update({ status: "approved", reviewed_at: new Date().toISOString() })
 		.eq("id", id);
 
-	return NextResponse.json({ ok: true, classes_created: classesCreated });
+	// Invite the partner to a real account so they can reach the in-app
+	// Partner Portal. Must run after the enrichment_classes insert above —
+	// handle_new_user() links role='partner' at signup by matching the new
+	// user's email against enrichment_classes.partner_email, so that row has
+	// to exist first for the auto-link to fire. Best-effort: an invite
+	// failure (e.g. address already has an account) shouldn't fail approval.
+	const partnerEmail = app.contact_email ?? app.email ?? null;
+	let inviteSent = false;
+	if (partnerEmail) {
+		const { error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(
+			partnerEmail,
+			{ redirectTo: "https://gobela.sg/reset-password" },
+		);
+		if (inviteErr) {
+			console.error(`Partner invite failed for ${partnerEmail}:`, inviteErr.message);
+		} else {
+			inviteSent = true;
+		}
+	}
+
+	return NextResponse.json({ ok: true, classes_created: classesCreated, invite_sent: inviteSent });
 }
