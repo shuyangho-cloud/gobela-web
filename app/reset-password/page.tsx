@@ -49,12 +49,24 @@ export default function ResetPasswordPage() {
 	>("idle");
 	const [message, setMessage] = useState("");
 	const [hasToken, setHasToken] = useState(false);
+	const [email, setEmail] = useState<string | null>(null);
 
 	useEffect(() => {
 		// Supabase puts the recovery token in the URL hash
 		const hash = window.location.hash;
 		if (hash.includes("type=recovery") || hash.includes("access_token")) {
 			setHasToken(true);
+			// supabase-js's browser client auto-detects the session from this
+			// hash on creation, but the page never showed *which* account that
+			// session belongs to — partners had no way to visually confirm the
+			// link was really theirs before typing a new password.
+			const supabase = createClient(
+				process.env.NEXT_PUBLIC_SUPABASE_URL!,
+				process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+			);
+			supabase.auth.getUser().then(({ data }) => {
+				if (data.user?.email) setEmail(data.user.email);
+			});
 		} else {
 			setStatus("invalid");
 		}
@@ -235,6 +247,13 @@ export default function ResetPasswordPage() {
 								}}
 							>
 								Choose a strong password — at least 8 characters.
+								{email && (
+									<>
+										<br />
+										Setting a new password for{" "}
+										<strong style={{ color: C.navy }}>{email}</strong>.
+									</>
+								)}
 							</p>
 
 							<div
