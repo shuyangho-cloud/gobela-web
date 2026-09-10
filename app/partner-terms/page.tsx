@@ -112,37 +112,37 @@ export default function PartnerTermsPage() {
 						{
 							n: "1",
 							title: "Listing",
-							body: "GoBela will create and maintain your class listing on the GoBela app at no cost. You may request updates to your listing details at any time by contacting hello@gobela.sg.",
+							body: "GoBela will create and maintain your class listing on the GoBela app at no cost. Once listed, you can self-edit your programme name, description, age range, trial and regular pricing, schedule, and photos/logo directly in the in-app Partner Portal. For changes to your venue, address, category, or contact details, email hello@gobela.sg — these will be reflected within 1–2 working days.",
 						},
 						{
 							n: "2",
-							title: "Trial Vouchers",
-							body: "Parents purchase a trial voucher through the GoBela app for a class listed on your profile. Upon purchase, the parent receives a unique voucher code and your contact details. The parent will contact you directly to arrange a suitable trial date and time. You are not required to manage availability through GoBela.",
+							title: "Standard Trial Bookings",
+							body: "For most listings, a parent selects a preferred date and time in the GoBela app and pays the trial fee upfront via Stripe. This creates a pending booking, which you must Confirm or decline (\"Can't Accept\") in the Partner Portal — for example if the requested slot or age range doesn't actually fit your availability. If you don't respond within 28 hours, the booking automatically expires and the parent is refunded.",
 						},
 						{
 							n: "3",
+							title: "Trial Vouchers",
+							body: "Some listings instead use trial vouchers: the parent purchases a voucher through the GoBela app and receives a unique voucher code and your contact details, then contacts you directly to arrange a suitable trial date and time. You are not required to manage availability through GoBela for voucher-based listings.",
+						},
+						{
+							n: "4",
 							title: "Voucher Redemption",
 							body: "You agree to accommodate voucher holders by offering a suitable trial slot within a reasonable timeframe. Trial vouchers are valid for 90 days from the date of purchase. If you are unable to accommodate a parent within the validity period, please notify GoBela at hello@gobela.sg so that a refund or extension can be arranged.",
 						},
 						{
-							n: "4",
-							title: "Payment & Platform Fee — Trial Vouchers",
-							body: "GoBela collects the full trial voucher price from the parent as stated in your listing. A flat S$5 platform fee is deducted from that amount, and the remaining balance is transferred to you within 2–3 business days of the trial class taking place.",
-						},
-						{
 							n: "5",
-							title: "Payment & Platform Fee — Packages & Term Enrolments",
-							body: "Where a parent proceeds to sign up for a full package or term enrolment through GoBela, GoBela will collect the full package price from the parent on your behalf. A platform fee of 8% of the total package price is deducted, and the remaining balance is transferred to you within 2–3 business days of the enrolment being confirmed.",
+							title: "Payment & Platform Fee",
+							body: "GoBela charges a flat S$5 platform fee per confirmed trial that takes place, whether booked as a standard trial or redeemed voucher — no cost for listing, no charge for declined, cancelled, or expired bookings. Once you complete Stripe Connect onboarding (a one-time setup, link provided after you're listed), payment splits automatically at the moment a parent books: GoBela's S$5 fee is retained, and your share transfers directly to your own Stripe account on Stripe's standard payout schedule. Until Connect is set up, GoBela holds the full amount and transfers your share manually after each confirmed trial.",
 						},
 						{
 							n: "6",
 							title: "Cancellations & Refunds",
-							body: "If you are unable to honour a voucher redemption request, notify GoBela at hello@gobela.sg as soon as possible. GoBela reserves the right to issue a refund to the parent in such cases. Repeated failures to accommodate voucher holders may result in your listing being suspended.",
+							body: "Standard trial bookings: if you decline a booking in the Partner Portal, or don't respond within 28 hours, the parent is refunded automatically — no fee is charged to either party. If a parent cancels at least 48 hours before the trial, they receive a full refund; cancellations or no-shows inside 48 hours are non-refundable, and you keep the fee (less GoBela's S$5 platform fee) as compensation for reserving the slot. Trial vouchers: if you are unable to honour a voucher redemption request within its validity period, notify GoBela at hello@gobela.sg so a refund or extension can be arranged. Repeated failures to accommodate bookings or voucher holders may result in your listing being suspended.",
 						},
 						{
 							n: "7",
 							title: "Accuracy",
-							body: "You are responsible for ensuring your listing information (pricing, schedule, location, age groups) is accurate and up to date. To update your listing, notify GoBela by emailing hello@gobela.sg or by resubmitting your details via gobela.sg/partners. Changes will be reflected within 1–2 working days.",
+							body: "You are responsible for ensuring your listing information (pricing, schedule, location, age groups) is accurate and up to date, whether edited by you in the Partner Portal or by GoBela on your behalf.",
 						},
 						{
 							n: "8",
@@ -152,7 +152,7 @@ export default function PartnerTermsPage() {
 						{
 							n: "9",
 							title: "Termination",
-							body: "Either party may end the partnership at any time with written notice to hello@gobela.sg. Any outstanding unredeemed vouchers sold prior to termination must still be honoured or refunded to the parent.",
+							body: "Either party may end the partnership at any time with written notice to hello@gobela.sg. Any outstanding pending bookings or unredeemed vouchers sold prior to termination must still be honoured or refunded to the parent.",
 						},
 						{
 							n: "10",

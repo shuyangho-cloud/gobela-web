@@ -27,7 +27,7 @@ export default function TermsPage() {
 						},
 						{
 							title: "4. Bookings and Payments",
-							body: "Trial class bookings are subject to availability and partner confirmation. GoBela charges a S$5 platform fee per booking. Payments are processed securely via Stripe. Full refunds are available for cancellations made at least 24 hours before the scheduled class.",
+							body: "Trial class bookings are subject to availability and partner confirmation. GoBela charges a S$5 platform fee per booking. Payments are processed securely via Stripe. Full refunds are available for cancellations made at least 48 hours before the scheduled class. If the partner is unable to accommodate your requested slot, you will be refunded automatically.",
 						},
 						{
 							title: "5. Subscriptions",
