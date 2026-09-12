@@ -132,7 +132,7 @@ export default function PartnerTermsPage() {
 						{
 							n: "5",
 							title: "Payment & Platform Fee",
-							body: "GoBela charges a flat S$5 platform fee per confirmed trial that takes place, whether booked as a standard trial or redeemed voucher — no cost for listing, no charge for declined, cancelled, or expired bookings. Once you complete Stripe Connect onboarding (a one-time setup, link provided after you're listed), payment splits automatically at the moment a parent books: GoBela's S$5 fee is retained, and your share transfers directly to your own Stripe account on Stripe's standard payout schedule. Until Connect is set up, GoBela holds the full amount and transfers your share manually after each confirmed trial.",
+							body: "GoBela charges a flat S$5 platform fee per confirmed trial that takes place, whether booked as a standard trial or redeemed voucher — no cost for listing, no charge for declined, cancelled, or expired bookings. For a paid trial, this happens automatically: once you complete Stripe Connect onboarding (a one-time setup, link provided after you're listed), payment splits at the moment a parent books, GoBela's S$5 fee is retained, and your share transfers directly to your own Stripe account on Stripe's standard payout schedule (until Connect is set up, GoBela holds the full amount and transfers your share manually after each confirmed trial). For a free trial, there is no payment to split — instead, GoBela emails you a S$5 PayNow request after you confirm the booking, which you settle directly with us.",
 						},
 						{
 							n: "6",
