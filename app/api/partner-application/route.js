@@ -1,5 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { isValidEmail } from "@/lib/validation";
+import { checkRateLimit, clientIdentifier } from "@/lib/rateLimit";
+import { upsertBrevoContact, PROVIDER_LIST_ID } from "@/lib/brevo";
 
 export async function POST(request) {
 	const supabase = createClient(
@@ -22,7 +25,12 @@ export async function POST(request) {
 			class_details,
 			logo_url,
 			photo_urls,
+			company, // honeypot — real applicants never fill this
 		} = body;
+
+		if (company) {
+			return NextResponse.json({ ok: true });
+		}
 
 		if (
 			!businessName?.trim() ||
@@ -33,6 +41,26 @@ export async function POST(request) {
 			return NextResponse.json(
 				{ error: "Missing required fields" },
 				{ status: 400 },
+			);
+		}
+
+		if (!isValidEmail(email)) {
+			return NextResponse.json(
+				{ error: "Please enter a valid email address" },
+				{ status: 400 },
+			);
+		}
+
+		const allowed = await checkRateLimit(supabase, {
+			route: "partner-application",
+			identifier: clientIdentifier(request),
+			max: 5,
+			windowSeconds: 600,
+		});
+		if (!allowed) {
+			return NextResponse.json(
+				{ error: "Too many requests, please try again later" },
+				{ status: 429 },
 			);
 		}
 
@@ -69,6 +97,22 @@ export async function POST(request) {
 			.from("outreach_contacts")
 			.update({ do_not_contact: true })
 			.ilike("email", email.trim());
+
+		// Sync to Brevo's enrichment-provider contact list — fire-and-forget,
+		// same non-critical-side-effect treatment as the notification email
+		// below: a Brevo failure should never fail this request.
+		try {
+			const result = await upsertBrevoContact({
+				email: email.trim().toLowerCase(),
+				listId: PROVIDER_LIST_ID,
+				attributes: { PROVIDER_STATUS: "pending" },
+			});
+			if (!result.ok) {
+				console.error("Brevo contact sync failed:", result.error);
+			}
+		} catch (brevoErr) {
+			console.error("Brevo contact sync failed:", brevoErr);
+		}
 
 		// Notify Shuyang via email
 		await _notifyNewApplication({

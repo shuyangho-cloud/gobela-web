@@ -1,0 +1,5 @@
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function isValidEmail(email: unknown): boolean {
+  return typeof email === "string" && EMAIL_RE.test(email.trim());
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import FeaturedProgrammes from "@/components/FeaturedProgrammes";
 
 const C = {
 	coral: "#FFB020",
@@ -98,78 +100,6 @@ const S = {
 	} as React.CSSProperties,
 };
 
-function Nav() {
-	return (
-		<nav
-			style={{
-				position: "sticky",
-				top: 0,
-				zIndex: 100,
-				background: "rgba(255,251,245,0.95)",
-				backdropFilter: "blur(12px)",
-				borderBottom: `1px solid ${C.border}`,
-				padding: "0 24px",
-			}}
-		>
-			<div
-				style={{
-					maxWidth: 960,
-					margin: "0 auto",
-					display: "flex",
-					alignItems: "center",
-					height: 60,
-					gap: 24,
-				}}
-			>
-				<a
-					href="/"
-					style={{
-						fontSize: 20,
-						fontWeight: 700,
-						color: C.navy,
-						textDecoration: "none",
-						marginRight: "auto",
-					}}
-				>
-					Go<span style={{ color: C.coral }}>Bela</span>
-				</a>
-				{(
-					[
-						["Features", "/#features"],
-						["How it works", "/#how-it-works"],
-						["About", "/about"],
-					] as [string, string][]
-				).map(([l, h]) => (
-					<a
-						key={l}
-						href={h}
-						style={{ fontSize: 13, color: C.muted, textDecoration: "none" }}
-					>
-						{l}
-					</a>
-				))}
-				<a
-					href="/partners"
-					style={{
-						fontSize: 13,
-						color: C.coral,
-						fontWeight: 600,
-						textDecoration: "none",
-					}}
-				>
-					Partners
-				</a>
-				<a
-					href="/#waitlist"
-					style={{ ...S.btnPrimary, padding: "9px 18px", fontSize: 13 }}
-				>
-					Get early access
-				</a>
-			</div>
-		</nav>
-	);
-}
-
 function PartnerHero() {
 	return (
 		<section style={{ background: C.navy, padding: "80px 24px 64px" }}>
@@ -201,8 +131,8 @@ function PartnerHero() {
 						marginBottom: 18,
 					}}
 				>
-					Reach Singapore families{" "}
-					<span style={{ color: C.coral }}>at the moment of decision</span>
+					Bring meaningful experiences{" "}
+					<span style={{ color: C.coral }}>to Singapore families</span>
 				</h1>
 				<p
 					style={{
@@ -213,9 +143,9 @@ function PartnerHero() {
 						margin: "0 auto 36px",
 					}}
 				>
-					GoBela puts your venue, class, or product in front of parents exactly
-					when they&apos;re deciding where to go, what to eat, and how to spend
-					their weekend.
+					Help families discover your programme, meet your team and take the
+					first step. We welcome educators, coaches and businesses that enrich
+					family life.
 				</p>
 				<div
 					style={{
@@ -256,9 +186,9 @@ function PartnerHero() {
 					}}
 				>
 					{[
-						{ value: "847+", label: "Families on waitlist" },
+						{ value: "Live", label: "On iOS & Android" },
 						{ value: "S$0", label: "To get listed" },
-						{ value: "3–5", label: "Days to onboard" },
+						{ value: "Personal", label: "Onboarding support" },
 					].map(({ value, label }, i, arr) => (
 						<div
 							key={label}
@@ -292,137 +222,15 @@ function PartnerHero() {
 	);
 }
 
-const CURRENT_PARTNERS = [
-	{
-		emoji: "🐧",
-		name: "Penguin Swim School",
-		category: "Swimming · Ages 3–12",
-		description:
-			"Professional swimming lessons for children at multiple pools across Singapore. Free trial class available.",
-		color: "#0EA5E9",
-	},
-	{
-		emoji: "⚽",
-		name: "MiniSport",
-		category: "Multi-sport · Ages 18m–8y",
-		description:
-			"Award-winning multi-sport programme building motor skills, confidence, and a love of movement in young children.",
-		color: "#16A34A",
-	},
-];
-
-function PartnerShowcase() {
-	return (
-		<section style={{ ...S.section, background: C.white }}>
-			<div style={S.container}>
-				<div style={{ textAlign: "center", marginBottom: 44 }}>
-					<div style={S.eyebrow}>Featured partners</div>
-					<h2 style={S.h2}>Trusted by Singapore families</h2>
-					<p style={{ ...S.lead, maxWidth: 480, margin: "0 auto" }}>
-						Every GoBela partner is individually reviewed before going live in
-						the app.
-					</p>
-				</div>
-				<div
-					style={{
-						display: "flex",
-						gap: 20,
-						flexWrap: "wrap",
-						justifyContent: "center",
-					}}
-				>
-					{CURRENT_PARTNERS.map(
-						({ emoji, name, category, description, color }) => (
-							<div
-								key={name}
-								style={{
-									...S.card,
-									padding: 28,
-									flex: "1 1 280px",
-									maxWidth: 380,
-								}}
-							>
-								<div
-									style={{
-										display: "flex",
-										alignItems: "center",
-										gap: 14,
-										marginBottom: 16,
-									}}
-								>
-									<div
-										style={{
-											width: 52,
-											height: 52,
-											borderRadius: 14,
-											background: `${color}18`,
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											fontSize: 26,
-											flexShrink: 0,
-										}}
-									>
-										{emoji}
-									</div>
-									<div>
-										<div
-											style={{ fontSize: 16, fontWeight: 700, color: C.navy }}
-										>
-											{name}
-										</div>
-										<div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
-											{category}
-										</div>
-									</div>
-								</div>
-								<p
-									style={{
-										fontSize: 13,
-										color: C.muted,
-										lineHeight: 1.65,
-										margin: 0,
-									}}
-								>
-									{description}
-								</p>
-								<div
-									style={{
-										marginTop: 14,
-										display: "flex",
-										alignItems: "center",
-										gap: 6,
-									}}
-								>
-									<span
-										style={{ color: C.green, fontSize: 11, fontWeight: 700 }}
-									>
-										✓
-									</span>
-									<span
-										style={{ fontSize: 11, fontWeight: 600, color: C.green }}
-									>
-										GoBela Verified Partner
-									</span>
-								</div>
-							</div>
-						),
-					)}
-				</div>
-			</div>
-		</section>
-	);
-}
-
 const PARTNER_TYPES = [
 	{
 		emoji: "🎡",
-		type: "Activity providers",
+		type: "Educators & activity providers",
 		subtitle:
 			"Enrichment centres, indoor playgrounds, sports academies, arts studios, and more.",
 		benefits: [
-			"Instant booking integration",
-			"Real-time slot management",
+			"Programme discovery and trial bookings",
+			"Personal onboarding support",
 			"Targeted reach by child age",
 		],
 		color: C.coral,
@@ -563,6 +371,9 @@ interface FormState {
 	instagram: string;
 	address: string;
 	description: string;
+	// Honeypot — left blank by real applicants, filled in by bots that
+	// autofill every input they find. Never shown to real users.
+	company: string;
 }
 
 interface ClassEntry {
@@ -586,6 +397,7 @@ const EMPTY_FORM: FormState = {
 	instagram: "",
 	address: "",
 	description: "",
+	company: "",
 };
 
 const EMPTY_CLASS: ClassEntry = {
@@ -807,6 +619,24 @@ function PartnerForm() {
 					{/* ── STEP 1: Business info ── */}
 					{step === 1 && (
 						<>
+							{/* Honeypot: real users never see or fill this. Bots that
+							    autofill forms do, and the server rejects silently. */}
+							<input
+								type="text"
+								name="company"
+								value={form.company}
+								onChange={update("company")}
+								tabIndex={-1}
+								autoComplete="off"
+								aria-hidden="true"
+								style={{
+									position: "absolute",
+									width: 1,
+									height: 1,
+									opacity: 0,
+									pointerEvents: "none",
+								}}
+							/>
 							<div
 								style={{
 									display: "grid",
@@ -947,7 +777,9 @@ function PartnerForm() {
 							</div>
 
 							<div style={{ marginBottom: 28 }}>
-								<Label optional>Tell us about your business</Label>
+								<Label optional>
+									Tell us about your business or teaching approach
+								</Label>
 								<textarea
 									style={{
 										...S.input,
@@ -955,7 +787,8 @@ function PartnerForm() {
 										resize: "vertical",
 										lineHeight: 1.6,
 									}}
-									placeholder="What do you offer, who do you serve, and why would GoBela families love you?"
+									aria-label="Business or teaching approach"
+									placeholder="Tell us what you offer, the families you serve, your teaching approach and your team’s experience."
 									value={form.description}
 									onChange={update("description")}
 								/>
@@ -1086,7 +919,8 @@ function PartnerForm() {
 												resize: "vertical",
 												lineHeight: 1.6,
 											}}
-											placeholder="What happens in this class, who is it for, and what makes it special?"
+											aria-label="Class description"
+											placeholder="What will children explore? Tell parents how the session is led, whether they participate and what to bring."
 											value={cls.description}
 											onChange={updateClass(i, "description")}
 										/>
@@ -1355,15 +1189,15 @@ const FAQS = [
 	},
 	{
 		q: "How quickly can I get listed?",
-		a: "Once you submit the form, our team reviews and onboards within 3–5 business days. Premium partners get a dedicated onboarding session.",
+		a: "Our team reviews your application and contacts you to confirm programme details and next steps before publishing. Timing depends on the information and arrangements needed.",
 	},
 	{
 		q: "Can I manage my own listings?",
-		a: "Yes. The GoBela Partner Portal (coming soon) lets you update listings, manage booking slots, view analytics, and respond to enquiries in real time.",
+		a: "Contact our team to update your programme information and availability. A self-service partner portal is planned; it is not currently available.",
 	},
 	{
-		q: "What booking platforms does GoBela support?",
-		a: "We currently integrate with Klook, Peatix, and Fever, as well as direct booking links. Our zero-commission direct partner integration is in beta.",
+		q: "How do programme bookings work?",
+		a: "During onboarding, we agree how your trial sessions, availability and booking arrangements will be presented. Contact hello@gobela.sg to discuss the setup for your programme.",
 	},
 	{
 		q: "Is GoBela only for Singapore?",
@@ -1443,7 +1277,7 @@ function Footer() {
 			links: [
 				["Features", "/#features"],
 				["How it works", "/#how-it-works"],
-				["Early access", "/#waitlist"],
+				["Download", "/#download"],
 			],
 		},
 		{
@@ -1503,7 +1337,7 @@ function Footer() {
 								marginTop: 10,
 							}}
 						>
-							The operating system for modern parenting. Singapore · 2026.
+							Learning, play and everyday family life. Singapore · 2026.
 						</p>
 					</div>
 					{cols.map(({ heading, links }) => (
@@ -1571,9 +1405,26 @@ export default function PartnersPage() {
 				color: C.navy,
 			}}
 		>
-			<Nav />
+			<Navbar />
 			<PartnerHero />
-			<PartnerShowcase />
+			<section className="gb-section" aria-labelledby="educator-invite">
+				<div className="gb-wrap gb-callout">
+					<div>
+						<p className="gb-eyebrow">Early learning &amp; play</p>
+						<h2 id="educator-invite">
+							Educators and coaches, tell your story.
+						</h2>
+						<p>
+							Show families what children will explore, how you teach and what
+							makes a first session welcoming.
+						</p>
+					</div>
+					<a className="gb-button" href="/educators">
+						Explore education partnerships →
+					</a>
+				</div>
+			</section>
+			<FeaturedProgrammes />
 			<PartnerTypes />
 			<PartnerForm />
 			<FAQ />
