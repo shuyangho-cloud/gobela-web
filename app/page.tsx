@@ -1213,8 +1213,8 @@ function FeaturesSection() {
 							/>
 							<CheckItem
 								color="#1D9E75"
-								title="Instant booking — no phone calls"
-								desc="Confirm your slot in the app. Booking reference sent instantly by email."
+								title="Request a trial in the app"
+								desc="Send your preferred date. The provider will contact you within 24 hours to confirm your slot."
 							/>
 							<CheckItem
 								color="#1D9E75"
