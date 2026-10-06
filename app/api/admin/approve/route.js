@@ -100,7 +100,9 @@ export async function POST(request) {
 			location: app.location_district ?? "Singapore",
 			address: app.full_address ?? null,
 			trial_price: parseFloat(cls.trial_price) || 0,
-			monthly_price: parseFloat(cls.term_price) || 0,
+			monthly_price: cls.price_period === "term"
+				? Math.round(((parseFloat(cls.term_price) || 0) / 3) * 100) / 100
+				: parseFloat(cls.term_price) || 0,
 			age_range: cls.age_range,
 			description: cls.description,
 			rating: 0,

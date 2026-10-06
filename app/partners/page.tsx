@@ -574,6 +574,7 @@ interface ClassEntry {
 	description: string;
 	trial_price: string;
 	term_price: string;
+	price_period: "monthly" | "term";
 	duration: string;
 	schedule: string;
 }
@@ -598,6 +599,7 @@ const EMPTY_CLASS: ClassEntry = {
 	description: "",
 	trial_price: "",
 	term_price: "",
+	price_period: "monthly",
 	duration: "60",
 	schedule: "",
 };
@@ -745,7 +747,7 @@ function PartnerForm() {
 
 	const updateClass =
 		(i: number, field: keyof ClassEntry) =>
-		(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+		(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
 			setClasses((cs) =>
 				cs.map((c, j) => (j === i ? { ...c, [field]: e.target.value } : c)),
 			);
@@ -1070,7 +1072,7 @@ function PartnerForm() {
 											/>
 										</div>
 										<div>
-											<Label>Term / monthly price (S$)</Label>
+											<Label>Price (S$)</Label>
 											<input
 												style={S.input}
 												type="number"
@@ -1078,6 +1080,17 @@ function PartnerForm() {
 												value={cls.term_price}
 												onChange={updateClass(i, "term_price")}
 											/>
+										</div>
+										<div>
+											<Label>This price is</Label>
+											<select
+												style={S.input}
+												value={cls.price_period}
+												onChange={updateClass(i, "price_period")}
+											>
+												<option value="monthly">Per month</option>
+												<option value="term">Per term (about 3 months)</option>
+											</select>
 										</div>
 										<div>
 											<Label>Duration (minutes)</Label>
