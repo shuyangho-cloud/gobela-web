@@ -1,5 +1,7 @@
 "use client";
 
+import { events, track } from "@/lib/analytics";
+
 import { useState } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -21,12 +23,15 @@ export default function ContactPage() {
 				headers: { Accept: "application/json" },
 			});
 			if (res.ok) {
+				track(events.contactSubmitted, { location: "contact_page" });
 				setStatus("sent");
 				form.reset();
 			} else {
+ track(events.contactFailed, { location: "contact_page", error_type: "http" });
 				setStatus("error");
 			}
 		} catch {
+ track(events.contactFailed, { location: "contact_page", error_type: "network" });
 			setStatus("error");
 		}
 	}
@@ -67,7 +72,7 @@ export default function ContactPage() {
 					) : (
 						<form
 							onSubmit={handleSubmit}
-							className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6"
+							className="ph-no-capture bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6"
 						>
 							<div>
 								<label className="block text-sm font-semibold text-[#1A2C4E] mb-2">
