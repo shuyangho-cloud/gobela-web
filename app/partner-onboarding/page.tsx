@@ -18,7 +18,7 @@ function OnboardingContent() {
 						marginBottom: 12,
 					}}
 				>
-					You&apos;re all set!
+					Check your Stripe status
 				</h1>
 				<p
 					style={{
@@ -29,9 +29,9 @@ function OnboardingContent() {
 						lineHeight: 1.6,
 					}}
 				>
-					Your Stripe account is connected. GoBela can now send you payouts after
-					each confirmed booking. You&apos;ll receive an email from Stripe once
-					your account is verified.
+					You have returned from Stripe. Open the GoBela Partner Portal and refresh
+					your status to check whether Stripe needs more information and whether
+					payouts are enabled.
 				</p>
 				<p style={{ fontSize: 14, color: "#64748B" }}>
 					Questions? WhatsApp us at{" "}
@@ -46,9 +46,9 @@ function OnboardingContent() {
 		);
 	}
 
-	if (status === "refresh") {
+	if (status === "refresh" || status === "expired") {
 		const provider = params.get("provider");
-		if (provider) {
+		if (status === "refresh" && provider) {
 			// Auto-refresh: redirect back to generate a new Stripe link
 			if (typeof window !== "undefined") {
 				window.location.href = `/api/stripe-onboard?provider=${encodeURIComponent(provider)}`;
@@ -82,8 +82,8 @@ function OnboardingContent() {
 						lineHeight: 1.6,
 					}}
 				>
-					Your onboarding link has expired. Please contact GoBela and we&apos;ll
-					send you a fresh link.
+					Your onboarding link has expired. Open the GoBela Partner Portal and tap
+					Continue Stripe onboarding to get a fresh link. Contact GoBela if you need help.
 				</p>
 				<p style={{ fontSize: 14, color: "#64748B" }}>
 					WhatsApp us at{" "}
