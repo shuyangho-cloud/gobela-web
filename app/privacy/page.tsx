@@ -10,7 +10,7 @@ export default function PrivacyPage() {
 					<h1 className="text-3xl font-extrabold text-[#1A2C4E] mb-2">
 						Privacy Policy
 					</h1>
-					<p className="text-gray-400 text-sm mb-10">Last updated: May 2026</p>
+					<p className="text-gray-400 text-sm mb-10">Last updated: 16 October 2026</p>
 
 					{[
 						{
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 						},
 						{
 							title: "3. Data Sharing",
-							body: "We do not sell, trade, or rent your personal information to third parties. We may share anonymised, aggregated data with partners for analytics purposes.",
+							body: "We do not sell, trade, or rent your personal information. We may share anonymised, aggregated data with partners for analytics. Where available, optional app measurement is off by default. If you enable it in GoBela App Settings, selected app activity (app activations, listing views, trial taps and checkout starts), app/device identifiers, and device/network information and SDK diagnostics are shared with Meta to measure advertising. GoBela does not attach child profiles, names, contact details, searches, booking identifiers or payment details to these events. On iOS, system tracking permission is also required. You may turn this off at any time in App Settings to stop future GoBela event logging; doing so does not delete data already received by Meta. Meta processes received information under its own privacy policy.",
 						},
 						{
 							title: "4. Data Security",
