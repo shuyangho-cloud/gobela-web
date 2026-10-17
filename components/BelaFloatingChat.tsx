@@ -1,5 +1,7 @@
 "use client";
 
+import { events, track } from "@/lib/analytics";
+
 import { useEffect, useRef, useState } from "react";
 
 const C = {
@@ -59,18 +61,24 @@ export default function BelaFloatingChat() {
 		const userMsg: Msg = { role: "user", content };
 		histRef.current = [...histRef.current, userMsg];
 		setMessages((p) => [...p, userMsg]);
+		let errorType: "network" | "http" | "invalid_response" = "network";
 		try {
 			const res = await fetch("/api/bela", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ messages: histRef.current }),
 			});
-			const data = await res.json();
+   if (!res.ok) { errorType = "http"; throw new Error("Request failed"); }
+   errorType = "invalid_response";
+   const data = await res.json();
+   if (typeof data.reply !== "string" || !data.reply.trim()) throw new Error("Missing reply");
+   track(events.chatSubmitted, { location: "floating_chat" });
 			const reply = data.reply ?? "Hmm, tell me a bit more?";
 			const aMsg: Msg = { role: "assistant", content: reply };
 			histRef.current = [...histRef.current, aMsg];
 			setMessages((p) => [...p, aMsg]);
 		} catch {
+ track(events.chatFailed, { location: "floating_chat", error_type: errorType });
 			setMessages((p) => [
 				...p,
 				{ role: "assistant", content: "Oops! Try again in a moment 🙏" },
@@ -81,7 +89,7 @@ export default function BelaFloatingChat() {
 	};
 
 	return (
-		<>
+		<div className="ph-no-capture">
 			<style>{`
         @keyframes bela-typing{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
         @keyframes bela-slide-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -378,6 +386,6 @@ export default function BelaFloatingChat() {
 					</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { events, track } from "@/lib/analytics";
+
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 
@@ -470,7 +472,7 @@ function HeroSection({ onTryBela }: { onTryBela: () => void }) {
 		},
 	];
 	return (
-		<section
+		<section data-analytics-location="hero"
 			style={{ background: C.cream, padding: "clamp(56px,8vw,88px) 24px 60px" }}
 			aria-label="Hero"
 		>
@@ -1725,18 +1727,24 @@ function BelaChatSection() {
 		const userMsg: Msg = { role: "user", content };
 		histRef.current = [...histRef.current, userMsg];
 		setMessages((p) => [...p, userMsg]);
+		let errorType: "network" | "http" | "invalid_response" = "network";
 		try {
 			const res = await fetch("/api/bela", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ messages: histRef.current }),
 			});
-			const data = await res.json();
+   if (!res.ok) { errorType = "http"; throw new Error("Request failed"); }
+   errorType = "invalid_response";
+   const data = await res.json();
+   if (typeof data.reply !== "string" || !data.reply.trim()) throw new Error("Missing reply");
+   track(events.chatSubmitted, { location: "homepage" });
 			const reply = data.reply || "Hmm, can you tell me a bit more?";
 			const aMsg: Msg = { role: "assistant", content: reply };
 			histRef.current = [...histRef.current, aMsg];
 			setMessages((p) => [...p, aMsg]);
 		} catch {
+ track(events.chatFailed, { location: "homepage", error_type: errorType });
 			setMessages((p) => [
 				...p,
 				{
@@ -1752,6 +1760,7 @@ function BelaChatSection() {
 	return (
 		<section
 			id="bela-chat"
+ className="ph-no-capture"
 			style={{ ...S.section, background: C.bg2 }}
 			aria-label="Try Bela"
 		>

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { events, track } from "@/lib/analytics";
+
+import { useEffect, useRef, useState } from "react";
 
 const C = {
 	coral: "#FFB020",
@@ -631,6 +633,20 @@ function StepDots({ step, total }: { step: number; total: number }) {
 }
 
 function PartnerForm() {
+ const formSection = useRef<HTMLElement>(null);
+ useEffect(() => {
+  const section = formSection.current;
+  if (!section) return;
+  const observer = new IntersectionObserver(([entry]) => {
+   if (entry.isIntersecting) {
+    track(events.partnerFormViewed, { location: "partners_page" });
+    observer.disconnect();
+   }
+  });
+  observer.observe(section);
+  return () => observer.disconnect();
+ }, []);
+ const [submitError, setSubmitError] = useState(false);
 	const [step, setStep] = useState(1);
 	const [form, setForm] = useState<FormState>(EMPTY_FORM);
 	const [classes, setClasses] = useState<ClassEntry[]>([{ ...EMPTY_CLASS }]);
@@ -725,9 +741,10 @@ function PartnerForm() {
 	};
 
 	const handleSubmit = async () => {
+		setSubmitError(false);
 		setLoading(true);
 		try {
-			await fetch("/api/partner-application", {
+			const res = await fetch("/api/partner-application", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -737,9 +754,16 @@ function PartnerForm() {
 					photo_urls: photoUrls,
 				}),
 			});
-			setSubmitted(true);
-		} catch {
-			setSubmitted(true);
+   if (!res.ok) {
+    track(events.partnerFailed, { location: "partners_page", error_type: "http" });
+    setSubmitError(true);
+    return;
+   }
+   track(events.partnerSubmitted, { location: "partners_page" });
+   setSubmitted(true);
+  } catch {
+   track(events.partnerFailed, { location: "partners_page", error_type: "network" });
+   setSubmitError(true);
 		} finally {
 			setLoading(false);
 		}
@@ -793,7 +817,8 @@ function PartnerForm() {
 	}
 
 	return (
-		<section id="apply" style={{ ...S.section, background: C.white }}>
+		<section ref={formSection} id="apply" className="ph-no-capture" style={{ ...S.section, background: C.white }}>
+   {submitError && <p role="alert" style={{ color: "#EF4444", textAlign: "center" }}>We couldn’t submit your application. Please try again.</p>}
 			<div style={{ maxWidth: 680, margin: "0 auto" }}>
 				<div style={{ textAlign: "center", marginBottom: 36 }}>
 					<div style={S.eyebrow}>Apply to become a partner</div>
@@ -1086,7 +1111,10 @@ function PartnerForm() {
 											<select
 												style={S.input}
 												value={cls.price_period}
-												onChange={updateClass(i, "price_period")}
+												onChange={(e) => {
+ updateClass(i, "price_period")(e);
+ track(events.partnerPriceSelected, { location: "partners_page", price_period: e.target.value === "term" ? "term" : "monthly" });
+}}
 											>
 												<option value="monthly">Per month</option>
 												<option value="term">Per term (about 3 months)</option>
