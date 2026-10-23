@@ -1,0 +1,5 @@
+-- Reviewed, explicit parent-authorized link only. Values must come from the
+-- completed existing booking flow, never inferred from dates or device IDs.
+-- UPDATE public.trial_bookings SET superbrain_enquiry_id = :enquiry_id
+-- WHERE id = :booking_id AND profile_id = :authenticated_parent_id;
+-- Composite FK rejects links to another family's enquiry.

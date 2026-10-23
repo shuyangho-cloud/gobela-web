@@ -1,0 +1,11 @@
+# Deployment sequence — held for explicit instruction
+
+1. Review both isolated branches and patches. Website baseline commit contains existing working changes separately from integration. Preserve the shared dirty checkouts.
+2. Validate migrations against an actual GoBela development schema, not only the reduced local legacy fixtures. Run Supabase security/performance advisors and resolve scoped release issues. Do not replay the entire local migration directory against production: deployed history differs from local filenames.
+3. Complete signed-in Auth/Storage multi-account journey. The local test is opt-in (`SUPERBRAIN_LOCAL_E2E=true npm test -- tests/superbrain/live.local.test.ts`) and refuses nonlocal endpoints. The current local Auth service times out connecting to its database; this is not a pass.
+4. Curate catalogue eligibility and sources; confirm booking linking and existing Circle workflows. Circle preview stays off until consolidation. Confirm consent, deletion, backup retention and actual data region before health enablement. Clinical charts and delivered reminders are not in this release.
+5. Refresh/verify Meta Page credentials and required permissions via the owner's existing account. No credentials go into Git. Keep SUPERBRAIN_META_ENABLED=false and SUPERBRAIN_EXECUTION_ENABLED=false until account verification and non-sending journey pass. No publishing or ads during validation.
+6. Apply only the six reviewed new migrations in timestamp order, then the guarded bootstrap-founder.sql for the verified founder UUID. This step requires the owner's explicit production deployment instruction.
+7. Deploy web with actions paused, zero budget, AI off, Circle preview off and legacy admin mutations off. Run unsigned and signed-in smoke checks. Preserve existing /api/bela and booking/payment authority.
+8. Enable mobile discovery/family entry only after web acceptance, with SUPERBRAIN_ENABLED=true. Preserve app entry points. Use the mandated Shorebird flow and --allow-asset-diffs for OTA; do not release automatically.
+9. Rollback: disable all new flags and roll web back. Leave additive schema in place to preserve records; never drop family data as an automatic rollback.

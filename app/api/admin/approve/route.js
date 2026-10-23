@@ -1,3 +1,4 @@
+import { adminAccess } from '@/lib/superbrain/admin';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
@@ -57,10 +58,11 @@ function inferCategory(businessName, description) {
 }
 
 export async function POST(request) {
-	const { id, action, password } = await request.json();
-	if (password !== 'G0Bela$Y$Y$Y') {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-	}
+	const denied = await adminAccess(request);
+ if (denied) return denied;
+ const { id, action } = await request.json();
+ if (!['approve','reject'].includes(action) || typeof id !== 'string') return NextResponse.json({error:'Invalid action'},{status:400});
+ if (process.env.SUPERBRAIN_LEGACY_ADMIN_MUTATIONS_ENABLED !== 'true') return NextResponse.json({error:'Partner mutations are paused pending founder enablement'},{status:503});
 
 	const supabase = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL,

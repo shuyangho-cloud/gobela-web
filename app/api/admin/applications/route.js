@@ -1,15 +1,10 @@
+import { adminAccess } from '@/lib/superbrain/admin';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-function auth(request) {
-	const key = 'G0Bela$Y$Y$Y'
-	const sent = request.headers.get("x-admin-key");
-	return sent === key;
-}
-
 export async function GET(request) {
-	if (!auth(request))
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	const denied = await adminAccess(request);
+	if (denied) return denied;
 
 	const supabase = createClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL,

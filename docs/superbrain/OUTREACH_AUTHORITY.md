@@ -1,0 +1,5 @@
+# Outreach authority
+
+The external `Developer/gobela-outreach` directory is a loose operational/archive directory, not a Git checkout. The nested childassist/gobela-outreach contains handoffs and exclusions. Neither is a new send queue. Current operational authority is the existing Supabase outreach contacts, sends, business reviews, control and reservation tables plus actual authorized mailbox history. Existing Edge Functions and shared suppression filters remain the only send boundary. No new scheduler or sender is installed.
+
+The October 6 handoff requires excluding already-listed providers, partner applicants, previous contacts, aliases, related owners, unsubscribes, negative replies, held/rejected identities and bounces. Missing live database or actual mailbox history means zero sends. The superbrain connector must not claim delivery until an account-specific adapter checks those sources, reserves the business, and obtains a provider receipt. The built-in adapter is non-sending and restricted to the exact development-review audience.

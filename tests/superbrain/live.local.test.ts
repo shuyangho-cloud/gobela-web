@@ -1,0 +1,88 @@
+import {readFileSync} from 'node:fs';
+import {createClient} from '@supabase/supabase-js';
+import {it,expect} from 'vitest';
+import {handle} from '../../lib/superbrain/api';
+const enabled=process.env.SUPERBRAIN_LOCAL_E2E==='true';
+it.skipIf(!enabled)('local Supabase campaign, enquiry, consent, health isolation and Storage journey',async()=>{
+ const config=JSON.parse(readFileSync('/tmp/gobela-integration-review/local-supabase.json','utf8'));
+ if(!/^http:\/\/127\.0\.0\.1:56321$/.test(config.API_URL))throw new Error('Isolated local instance required');
+ process.env.NEXT_PUBLIC_SUPABASE_URL=config.API_URL;process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY=config.ANON_KEY;
+ process.env.SUPERBRAIN_EXECUTION_ENABLED='true';process.env.SUPERBRAIN_ADAPTER_MODE='test';process.env.SUPERBRAIN_CIRCLE_PREVIEW_ENABLED='true';
+ const admin=createClient(config.API_URL,config.SERVICE_ROLE_KEY);
+ const users=[];
+ for(const role of ['founder','parent','other']){
+  const email=`${role}-${Date.now()}@gobela.local`;const password='Local-review-only-42!';
+  const created=await admin.auth.admin.createUser({email,password,email_confirm:true});if(created.error)throw created.error;
+  const client=createClient(config.API_URL,config.ANON_KEY);const login=await client.auth.signInWithPassword({email,password});if(login.error)throw login.error;
+  users.push({id:created.data.user!.id,token:login.data.session!.access_token,client});
+ }
+ const [f,p,o]=users;
+ const membership=await admin.from('gb_founders').insert({user_id:f.id});if(membership.error)throw membership.error;
+ async function call(user:typeof f,path:string,method='GET',body?:unknown){
+  const response=await handle(new Request(`http://local/api/superbrain/${path}`,{method,headers:{Authorization:`Bearer ${user.token}`,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined}),path.split('/'));
+  const data=await response.json();if(!response.ok)throw new Error(`${path}: ${response.status} ${data.error}`);return data.data;
+ }
+ expect((await handle(new Request('http://local',{headers:{Authorization:`Bearer ${p.token}`}}),['founder','summary'])).status).toBe(403);
+ const campaign=await call(f,'founder/campaigns','POST',{title:'Review campaign',audience:'gobela-development-review-only',category:'play',objective:'Test enquiry evidence'});
+ await call(f,'founder/controls','POST',{paused:false,execution_enabled:true,daily_budget_cents:0});
+ const action=await call(f,'founder/actions','POST',{payload:{campaign_id:campaign.id,channel:'email',content:'Review only; sends nothing',audience:'gobela-development-review-only'},reserved_cents:0});
+ await call(f,`founder/actions/${action.id}`,'PATCH',{operation:'approve'});
+ await call(f,`founder/actions/${action.id}`,'PATCH',{operation:'execute'});
+ const race=await call(f,'founder/actions','POST',{payload:{campaign_id:campaign.id,channel:'email',content:'Concurrent local fixture',audience:'gobela-development-review-only'},reserved_cents:0});
+ await call(f,`founder/actions/${race.id}`,'PATCH',{operation:'approve'});
+ await call(f,'founder/controls','POST',{paused:true,execution_enabled:true,daily_budget_cents:0});
+ await expect(call(f,`founder/actions/${race.id}`,'PATCH',{operation:'execute'})).rejects.toThrow('Paused');
+ await call(f,'founder/controls','POST',{paused:false,execution_enabled:true,daily_budget_cents:0});
+ const execute=()=>handle(new Request('http://local/api/superbrain/founder/actions/'+race.id,{method:'PATCH',headers:{Authorization:`Bearer ${f.token}`,'Content-Type':'application/json'},body:JSON.stringify({operation:'execute'})}),['founder','actions',race.id]);
+ const outcomes=await Promise.all([execute(),execute()]);expect(outcomes.map(r=>r.status).sort()).toEqual([200,409]);
+ const claims=await admin.from('gb_audit').select('id').eq('entity_id',race.id).eq('event','claim');expect(claims.data).toHaveLength(1);
+ const uncertain=await call(f,'founder/actions','POST',{payload:{campaign_id:campaign.id,channel:'email',content:'Rejected by non-sending adapter',audience:'unapproved-local-audience'},reserved_cents:0});
+ await call(f,`founder/actions/${uncertain.id}`,'PATCH',{operation:'approve'});
+ await expect(call(f,`founder/actions/${uncertain.id}`,'PATCH',{operation:'execute'})).rejects.toThrow('502');
+ const uncertainRow=await admin.from('gb_actions').select('status').eq('id',uncertain.id).single();expect(uncertainRow.data?.status).toBe('uncertain');
+ await expect(call(f,`founder/actions/${uncertain.id}`,'PATCH',{operation:'execute'})).rejects.toThrow('Invalid transition');
+ const legacyId=`fixture-${crypto.randomUUID()}`;
+ const legacy=await admin.from('enrichment_classes').insert({id:legacyId,name:'Local fixture',provider:'Fixture',location:'East',trial_price:0,is_active:true});if(legacy.error)throw legacy.error;
+ const listing=await call(f,'founder/catalogue','POST',{legacy_id:legacyId,title:'Local fixture',provider:'Fixture',category:'play',area:'East',min_age:2,max_age:6,price_cents:0,source_url:'https://example.com',verified_at:new Date().toISOString()});
+ const recommended=await call(p,'parent/recommend','POST',{age:3,budget_cents:0});expect(recommended.listings.map((r:any)=>r.id)).toContain(listing.id);
+ const enquiry=await call(p,'parent/enquiries','POST',{listing_id:listing.id,message:'Local interest',tracking_code:campaign.tracking_code});
+ const bookingId=crypto.randomUUID();
+ const booking=await admin.from('trial_bookings').insert({id:bookingId,profile_id:p.id,event_id:legacyId,status:'completed'});if(booking.error)throw booking.error;
+ await expect(call(o,`parent/bookings/${bookingId}`,'PATCH',{enquiry_id:enquiry.id})).rejects.toThrow();
+ await call(p,`parent/bookings/${bookingId}`,'PATCH',{enquiry_id:enquiry.id});
+ await call(p,`parent/bookings/${bookingId}`,'PATCH',{enquiry_id:enquiry.id}); // idempotent
+ const results=await call(f,'founder/results');expect(results.campaigns.find((r:any)=>r.campaign_id===campaign.id).linked_completed_bookings).toBe(1);
+ const summary=await call(f,'founder/summary');expect(summary.records.enquiries.some((r:any)=>r.campaign_id===campaign.id)).toBe(true);
+ await call(p,'parent/consent','POST',{granted:true});
+ const child=await call(p,'parent/children','POST',{name:'Private fixture',birth_date:'2020-01-01'});
+ await call(p,'parent/health','POST',{child_id:child.id,kind:'height_cm',value:'100',recorded_at:new Date().toISOString()});
+ expect(await call(o,'parent/health')).toEqual([]);expect(await call(f,'parent/health')).toEqual([]);
+ expect((await call(p,'parent/export')).health).toHaveLength(1);
+ const post=await call(p,'circle/posts','POST',{category:'cook',title:'Fixture',body:'Local review'});
+ await call(f,'founder/moderate','POST',{id:post.id,status:'published'});
+ await call(o,`circle/reports/${post.id}`,'POST',{reason:'Local report'});
+ await call(f,'founder/moderate','POST',{id:post.id,status:'published'});
+ await call(o,`circle/votes/${post.id}`,'POST',{});
+ const upload=await call(p,'circle/upload','POST',{extension:'png'});expect(upload.path).toContain(p.id);
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==','base64');
+ const uploaded=await p.client.storage.from('gb-circle').uploadToSignedUrl(upload.path,upload.token,png,{contentType:'image/png'});if(uploaded.error)throw uploaded.error;
+ const photoPost=await call(p,'circle/posts','POST',{category:'play',title:'Private photo fixture',body:'Synthetic local test image',photo_path:upload.path});
+ await expect(call(o,'circle/photo','POST',{path:upload.path})).rejects.toThrow();
+ const ownPhoto=await call(p,'circle/photo','POST',{path:upload.path});expect((await fetch(ownPhoto.signedUrl)).status).toBe(200);
+ await call(f,'founder/moderate','POST',{id:photoPost.id,status:'published'});
+ const sharedPhoto=await call(o,'circle/photo','POST',{path:upload.path});expect((await fetch(sharedPhoto.signedUrl)).status).toBe(200);
+ await call(f,'founder/moderate','POST',{id:photoPost.id,status:'hidden'});
+ await expect(call(o,'circle/photo','POST',{path:upload.path})).rejects.toThrow();
+ const removed=await p.client.storage.from('gb-circle').remove([upload.path]);if(removed.error)throw removed.error;
+
+ await call(p,`parent/children/${child.id}`,'DELETE');expect(await call(p,'parent/health')).toEqual([]);
+ const canonicalReview=`legacy-${crypto.randomUUID()}`;
+ const seeded=await admin.from('gobela_reviews').insert({id:canonicalReview,profile_id:p.id,type:'play',tip:'Legacy canonical fixture',is_hidden:false,posted_at:new Date().toISOString()});if(seeded.error)throw seeded.error;
+ const deniedModeration=await o.client.rpc('gb_moderate_legacy_review',{target_review:canonicalReview,hide:true});expect(deniedModeration.error).not.toBeNull();
+ await call(f,'founder/legacy-moderate','POST',{review_id:canonicalReview,hidden:true});
+ const hidden=await admin.from('gobela_reviews').select('is_hidden').eq('id',canonicalReview).single();expect(hidden.data?.is_hidden).toBe(true);
+ await call(f,'founder/legacy-moderate','POST',{review_id:canonicalReview,hidden:false});
+ const restored=await admin.from('gobela_reviews').select('is_hidden').eq('id',canonicalReview).single();expect(restored.data?.is_hidden).toBe(false);
+ const audit=await call(f,'founder/summary');expect(audit.records.audit.some((r:any)=>r.event==='legacy_circle_moderated' && r.details.review_id===canonicalReview)).toBe(true);
+ await call(f,'founder/controls','POST',{paused:true,execution_enabled:false,daily_budget_cents:0});
+},120000);

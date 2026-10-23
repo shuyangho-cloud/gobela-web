@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { browserClient } from "@/lib/superbrain/browser";
 
 const C = {
 	coral: "#FFB020",
@@ -44,6 +45,8 @@ type ClassEntry = {
 };
 
 export default function AdminPage() {
+	const [email, setEmail] = useState("");
+	const [token, setToken] = useState("");
 	const [password, setPassword] = useState("");
 	const [authed, setAuthed] = useState(false);
 	const [apps, setApps] = useState<Application[]>([]);
@@ -60,27 +63,32 @@ export default function AdminPage() {
 	const [connectLoading, setConnectLoading] = useState(false);
 	const [connectResult, setConnectResult] = useState<{ url?: string; account_id?: string; error?: string } | null>(null);
 
-	useEffect(() => {
-		const saved = sessionStorage.getItem("gobela_admin");
-		if (saved) {
-			setPassword(saved);
-			setAuthed(true);
-		}
-	}, []);
+ useEffect(() => {
+   const { data } = browserClient().auth.onAuthStateChange((_,session) => {
+     setToken(session?.access_token || '');
+     if(!session){setAuthed(false);setApps([]);}
+   });
+   return () => data.subscription.unsubscribe();
+ }, []);
 
 	const login = async () => {
-		setLoading(true);
-		const res = await fetch("/api/admin/applications", {
-			headers: { "x-admin-key": password },
+        setLoading(true);
+        const {data: auth, error} = await browserClient().auth.signInWithPassword({email,password});
+        setPassword('');
+        if(error || !auth.session){setLoading(false);setMsg('Sign-in failed');return;}
+        const accessToken=auth.session.access_token;
+        setToken(accessToken);
+        const res = await fetch("/api/admin/applications", {
+			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		setLoading(false);
 		if (res.ok) {
-			sessionStorage.setItem("gobela_admin", password);
+
 			setAuthed(true);
 			const { applications } = await res.json();
 			setApps(applications);
 		} else if (res.status === 401) {
-			setMsg("Wrong password");
+			setMsg("Founder access required");
 		} else {
 			const err = await res.json().catch(() => ({}));
 			setMsg(`Server error ${res.status}: ${err.error ?? "check Vercel logs"}`);
@@ -90,7 +98,7 @@ export default function AdminPage() {
 	const fetchApps = async (status = filter) => {
 		setLoading(true);
 		const res = await fetch(`/api/admin/applications?status=${status}`, {
-			headers: { "x-admin-key": password },
+			headers: { Authorization: `Bearer ${token}` },
 		});
 		setLoading(false);
 		if (res.ok) {
@@ -103,7 +111,7 @@ export default function AdminPage() {
 		setActing(id + action);
 		const res = await fetch("/api/admin/approve", {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
 			body: JSON.stringify({ id, action, password }),
 		});
 		const data = await res.json();
@@ -153,9 +161,10 @@ export default function AdminPage() {
 					>
 						GoBela Admin
 					</h1>
-					<input
+					<input type="email" placeholder="Founder account email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" />
+                    <input
 						type="password"
-						placeholder="Admin password"
+						placeholder="GoBela account password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						onKeyDown={(e) => e.key === "Enter" && login()}
@@ -368,7 +377,7 @@ export default function AdminPage() {
 								setPushResult("");
 								const res = await fetch("/api/admin/broadcast", {
 									method: "POST",
-									headers: { "Content-Type": "application/json" },
+									headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
 									body: JSON.stringify({
 										password,
 										title: pushTitle,
