@@ -9,3 +9,13 @@ The packet contains 28-second vertical Reel shot prompts, timing, sound design, 
 Private reference media is provisioned separately with `SUPERBRAIN_MARKETING_ASSET_ROOT`, never in `public/`. The allowlisted asset endpoint requires current founder authentication, checks SHA-256 and returns private/no-store media. Client previews use authenticated fetch and temporary object URLs revoked on unmount. The manifest records native sizes and intended use. The square 1080×1080, 10.076-second backpack film is a benchmark only; the new delivery brief requires new 1080×1920 footage. Cast images are identity references, not redistribution assets. Provisioning media in production needs a private deployment storage plan.
 
 The campaign code in a `/bela?campaign=...` destination is carried into an enquiry only when the parent submits it. A visit does not create an enquiry or booking. Existing explicit booking linkage remains authoritative. The production endpoint is founder-only and only supports the completed weekend-discovery packet; other campaign production templates are not presented as finished.
+
+## Verified development result
+
+53 tests pass, including the atomic large-packet regression and parent denial. The final webpack production build passes, including TypeScript. Real local Auth/API verification saved and reopened a packet with three checked activity claims; repeat generation returned the same revision. A fresh founder browser login displayed the persisted packet, captions, storyboard, evidence decisions and tracking destination. Private logo access returned 200 with its expected SHA-256 and private/no-store caching; anonymous access returned 401 and a disposable parent was denied asset and packet access with 403. No external action was requested.
+
+The local fixture contains four public canonical partner records; the production database was read only. Local API/Auth services and Docker networking required recovery. A temporary database hostname mapping was added only inside the isolated Auth container. This is development infrastructure, not a production configuration change. Supabase CLI security advisors were attempted but the host database port timed out; do not mark that advisor gate passed.
+
+## Recover private references
+
+Run `node scripts/superbrain/stage-marketing-assets.mjs /Users/Shuyang/Developer/childassist` from the isolated web checkout, then set `SUPERBRAIN_MARKETING_ASSET_ROOT` to its `.local-marketing-assets` directory. The script checks hashes and refuses to overwrite different staged work. Reference files are excluded from Git and review patches. No reference upload to a generation service is authorised by staging.
