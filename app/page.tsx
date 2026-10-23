@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
+import FeaturedProgrammes from "@/components/FeaturedProgrammes";
+import LearningDiscovery from "@/components/LearningDiscovery";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -454,19 +456,19 @@ function LaunchBanner() {
 function HeroSection({ onTryBela }: { onTryBela: () => void }) {
 	const scenarios = [
 		{
-			icon: "🌧️",
-			title: "Rainy Sunday?",
-			desc: "Bela finds 5 indoor activities near you — filtered by age and budget",
+			icon: "🌱",
+			title: "Where do we start?",
+			desc: "Explore programmes around your child’s age, interests and location.",
 		},
 		{
-			icon: "🍳",
-			title: "Nothing to cook?",
-			desc: "Weekly meal plan from NTUC basics — ready in seconds",
+			icon: "🎨",
+			title: "What will they enjoy?",
+			desc: "Try a first session and discover an activity together.",
 		},
 		{
 			icon: "⚡",
-			title: "Kids need to burn energy?",
-			desc: "East Coast, Bedok Reservoir, Gardens by the Bay — all near MRT",
+			title: "Ready to move & play?",
+			desc: "Discover swimming, dance and multi-sport experiences.",
 		},
 	];
 	return (
@@ -515,10 +517,9 @@ function HeroSection({ onTryBela }: { onTryBela: () => void }) {
 						marginBottom: 20,
 					}}
 				>
-					Stop spending Sundays{" "}
-					<span style={{ color: C.coral }}>deciding.</span>
+					Help your child discover
 					<br />
-					Start enjoying them.
+					<span style={{ color: "#996009" }}>a love of learning.</span>
 				</h1>
 
 				{/* Sub */}
@@ -531,31 +532,19 @@ function HeroSection({ onTryBela }: { onTryBela: () => void }) {
 						margin: "0 auto 28px",
 					}}
 				>
-					GoBela is Singapore&apos;s AI parenting co-pilot — meal plans, hawker
-					discoveries, trial classes, and weekend ideas personalised to your
-					kids.
+					Explore early learning, creative play and sports programmes across
+					Singapore. Find experiences suited to your child’s age and interests,
+					and start with a trial.
 				</p>
 
-				{/* Primary CTA */}
 				<div className="hero-ctas">
-					<a
-						href="https://apps.apple.com/sg/app/gobela/id6767062415"
-						target="_blank"
-						rel="noopener noreferrer"
-						style={{ ...S.btnPrimary, fontSize: 15, padding: "14px 28px" }}
-					>
-						<AppleSVG /> Download on iOS
+					<a href="#early-learning" style={S.btnPrimary}>
+						Explore learning &amp; play →
 					</a>
-					<a
-						href="https://play.google.com/store/apps/details?id=com.gobela.app"
-						target="_blank"
-						rel="noopener noreferrer"
-						style={{ ...S.btnSecondary, fontSize: 15, padding: "14px 28px" }}
-					>
-						<GoogleSVG /> Download on Android
+					<a href="/educators" style={S.btnSecondary}>
+						For educators &amp; programme partners
 					</a>
 				</div>
-
 				{/* Secondary CTA */}
 				<div style={{ marginBottom: 32 }}>
 					<button
@@ -646,7 +635,7 @@ function StatsBar() {
 			label: "Trial bookings made",
 			icon: "🎓",
 		},
-		{ value: "12", label: "Partner studios", icon: "✅" },
+		{ value: "Local", label: "Educators & coaches", icon: "✅" },
 		{ value: "S$5", label: "Flat platform fee", icon: "💸" },
 		{ value: "🇸🇬", label: "Singapore-built & owned", icon: "" },
 	];
@@ -814,20 +803,20 @@ function ExplorePhoneScreen() {
 	const items = [
 		{
 			name: "Fencing Masters · Ubi Ave 4",
-			detail: "Age 7–18 · FREE trial class",
-			time: "Sat & Sun slots",
+			detail: "Fencing · Introductory session",
+			time: "See sessions in app",
 			free: true,
 		},
 		{
 			name: "Penguin Swim School · Islandwide",
-			detail: "Age 6m–14 · Trial S$45",
+			detail: "Swimming · Introductory session",
 			time: "Flexible slots",
 			free: false,
 		},
 		{
 			name: "MiniSport Singapore · Various",
-			detail: "Age 2–8 · Trial S$20",
-			time: "Weekend mornings",
+			detail: "Multi-sport · Introductory session",
+			time: "See sessions in app",
 			free: false,
 		},
 	];
@@ -835,9 +824,7 @@ function ExplorePhoneScreen() {
 		<div style={{ height: "100%", background: C.cream, fontSize: 11 }}>
 			<div style={{ background: C.coral, padding: "9px 10px", color: C.navy }}>
 				<div style={{ fontSize: 10, opacity: 0.75 }}>BelaExplore</div>
-				<div style={{ fontSize: 12, fontWeight: 700 }}>
-					50+ classes near you
-				</div>
+				<div style={{ fontSize: 12, fontWeight: 700 }}>Explore programmes</div>
 			</div>
 			<div
 				style={{
@@ -917,7 +904,7 @@ function ExplorePhoneScreen() {
 										flexShrink: 0,
 									}}
 								>
-									FREE
+									TRIAL
 								</div>
 							)}
 						</div>
@@ -1085,10 +1072,10 @@ function FeaturesSection() {
 			<div style={S.container}>
 				<div style={{ textAlign: "center", marginBottom: 40 }}>
 					<div style={S.eyebrow}>What GoBela does</div>
-					<h2 style={S.h2}>Two problems. Solved every week.</h2>
+					<h2 style={S.h2}>Learning adventures. Everyday support.</h2>
 					<p style={{ ...S.lead, maxWidth: 480, margin: "0 auto" }}>
-						Every Singapore parent faces the same two questions on repeat.
-						GoBela answers both before you even think to ask.
+						Discover a first class with BelaExplore. Plan meals and family time
+						with Bela when you need a little everyday help.
 					</p>
 				</div>
 
@@ -1173,7 +1160,7 @@ function FeaturesSection() {
 									marginBottom: 18,
 								}}
 							>
-								⚡ Biggest reason families book a trial
+								🌱 Start with curiosity
 							</div>
 							<h3
 								style={{
@@ -1185,9 +1172,9 @@ function FeaturesSection() {
 									marginBottom: 14,
 								}}
 							>
-								Try any class.
+								Find their next interest.
 								<br />
-								Cancel anytime.
+								Start with a trial.
 							</h3>
 							<p
 								style={{
@@ -1197,14 +1184,14 @@ function FeaturesSection() {
 									marginBottom: 24,
 								}}
 							>
-								Browse 50+ enrichment centres, sports academies, arts studios,
-								and dance schools across Singapore — book a single trial session
-								before committing to a full term.
+								Explore enrichment centres, sports academies, arts studios and
+								dance schools. Read the programme details and try an
+								introductory session before choosing what comes next.
 							</p>
 							<CheckItem
 								color="#1D9E75"
-								title="1-session trials before any commitment"
-								desc="Try piano, fencing, or coding once — no deposits, no full-term lock-in"
+								title="A first experience before a full term"
+								desc="Explore a new activity together. Check each programme’s trial and cancellation terms before booking."
 							/>
 							<CheckItem
 								color="#1D9E75"
@@ -1223,8 +1210,8 @@ function FeaturesSection() {
 							/>
 							<MetricCards
 								items={[
-									{ value: "50+", label: "Classes" },
-									{ value: "8", label: "Partner studios" },
+									{ value: "Explore", label: "New interests" },
+									{ value: "Try", label: "A first session" },
 									{ value: "S$0", label: "To get listed" },
 								]}
 							/>
@@ -1233,8 +1220,8 @@ function FeaturesSection() {
 								bdr="#FAC775"
 								textColor="#633806"
 								titleColor="#412402"
-								title="For activity providers"
-								body="Get in front of trial-ready Singapore families before they commit to a competitor. Zero commission on first-session bookings. Free listing tier, 3–5 day onboarding."
+								title="For educators & programme providers"
+								body="Help parents understand your programme and take the first step. Share your teaching approach, introduce your team and apply for a free listing."
 							/>
 						</div>
 						<div
@@ -1327,7 +1314,7 @@ function FeaturesSection() {
 							<CheckItem
 								color={C.coral}
 								title="Fussy-eater mode and allergy filters"
-								desc="Bela adapts to each child — never suggests what they&apos;ll refuse"
+								desc="Bela adapts to each child — never suggests what they'll refuse"
 							/>
 							<CheckItem
 								color={C.coral}
@@ -1457,9 +1444,9 @@ function FounderSection() {
 							margin: "0 0 16px",
 						}}
 					>
-						GoBela started with a Sunday morning argument about what to do with
-						a 5-year-old. It grew into a mission to give every Singapore family
-						their weekends back.
+						Inspired by a dad’s search for activities with his daughter, GoBela
+						helps families discover meaningful learning experiences and connect
+						with the educators and coaches behind them.
 					</p>
 					<a
 						href="/about"
@@ -1482,214 +1469,19 @@ function FounderSection() {
 }
 
 // ─── PARTNER SPOTLIGHT ────────────────────────────────────────────────────────
-function PartnerSpotlightSection() {
-	const partners = [
-		{
-			name: "Penguin Swim School",
-			category: "🏊 Swimming",
-			tagline: "Singapore's highest-rated home swim school",
-			description:
-				"Coach comes to your condo pool. 40+ certified coaches island-wide. Gentle water confidence for babies through competitive squad training.",
-			ageRange: "6 months – 14 yrs",
-			trial: "Trial from S$45",
-			tags: ["Islandwide", "Flexible schedule", "Parent-in-pool option"],
-			verified: true,
-		},
-		{
-			name: "Fencing Masters",
-			category: "🤺 Fencing",
-			tagline: "Olympic-standard fencing for kids & teens",
-			description:
-				"Led by IOC-certified coaches with 50+ years of combined experience. Free trial class with equipment provided. SSC Sport Enrichment programme at 177 Ubi Ave 4.",
-			ageRange: "7–18 yrs",
-			trial: "FREE trial class",
-			tags: ["Free trial", "Equipment provided", "IOC certified"],
-			verified: true,
-		},
-		{
-			name: "MiniSport Singapore",
-			category: "🏃 Multi-sports",
-			tagline: "Active play & sport skills for little ones",
-			description:
-				"Structured multi-sport sessions introducing football, basketball, tennis and more across island-wide venues. Designed for young children — high energy, big smiles.",
-			ageRange: "2–8 yrs",
-			trial: "Trial available",
-			tags: ["Island-wide venues", "Ages 2+", "Weekend sessions"],
-			verified: true,
-		},
-		{
-			name: "Elevate Dance Academie",
-			category: "💃 Dance",
-			tagline: "Where passion meets performance",
-			description:
-				"Professional dance training across contemporary, hip hop, jazz, and ballet. Small class sizes ensure every child gets personal attention from qualified instructors.",
-			ageRange: "3 yrs & up",
-			trial: "Trial available",
-			tags: ["Multiple styles", "Small classes", "All levels welcome"],
-			verified: true,
-		},
-	];
-	return (
-		<section
-			id="partners"
-			style={{ ...S.section, background: C.white }}
-			aria-label="Partner studios"
-		>
-			<div style={S.container}>
-				<div style={{ textAlign: "center", marginBottom: 44 }}>
-					<div style={S.eyebrow}>GoBela Verified Partners</div>
-					<h2 style={S.h2}>Real classes. Real coaches. Real results.</h2>
-					<p style={{ ...S.lead, maxWidth: 500, margin: "0 auto" }}>
-						Every GoBela Verified partner is personally onboarded and vetted —
-						not scraped from a directory.
-					</p>
-				</div>
-				<div className="partner-grid">
-					{partners.map((p) => (
-						<div
-							key={p.name}
-							className="partner-card"
-							style={{ ...S.card, padding: 24 }}
-						>
-							<div
-								style={{
-									display: "flex",
-									alignItems: "flex-start",
-									justifyContent: "space-between",
-									gap: 12,
-									marginBottom: 14,
-								}}
-							>
-								<div>
-									<div
-										style={{
-											fontSize: 12,
-											fontWeight: 600,
-											color: C.muted,
-											marginBottom: 4,
-										}}
-									>
-										{p.category}
-									</div>
-									<div
-										style={{
-											fontSize: 17,
-											fontWeight: 700,
-											color: C.navy,
-											letterSpacing: "-0.02em",
-										}}
-									>
-										{p.name}
-									</div>
-									<div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
-										{p.tagline}
-									</div>
-								</div>
-								{p.verified && (
-									<div
-										style={{
-											flexShrink: 0,
-											display: "flex",
-											alignItems: "center",
-											gap: 4,
-											background: "#DCFCE7",
-											border: "1px solid #86EFAC",
-											borderRadius: 999,
-											padding: "3px 10px",
-											fontSize: 11,
-											fontWeight: 700,
-											color: "#166534",
-											whiteSpace: "nowrap",
-										}}
-									>
-										✓ Verified
-									</div>
-								)}
-							</div>
-							<p
-								style={{
-									fontSize: 13,
-									color: C.muted,
-									lineHeight: 1.65,
-									marginBottom: 14,
-								}}
-							>
-								{p.description}
-							</p>
-							<div
-								style={{
-									display: "flex",
-									gap: 6,
-									flexWrap: "wrap",
-									marginBottom: 16,
-								}}
-							>
-								{p.tags.map((tag) => (
-									<span
-										key={tag}
-										style={{
-											background: C.coralLight,
-											border: `1px solid ${C.coralBdr}`,
-											borderRadius: 999,
-											padding: "3px 10px",
-											fontSize: 11,
-											color: "#854F0B",
-											fontWeight: 600,
-										}}
-									>
-										{tag}
-									</span>
-								))}
-							</div>
-							<div
-								style={{
-									display: "flex",
-									gap: 12,
-									borderTop: `1px solid ${C.border}`,
-									paddingTop: 14,
-								}}
-							>
-								<div style={{ flex: 1 }}>
-									<div style={{ fontSize: 11, color: C.muted }}>Ages</div>
-									<div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>
-										{p.ageRange}
-									</div>
-								</div>
-								<div style={{ flex: 1 }}>
-									<div style={{ fontSize: 11, color: C.muted }}>Trial</div>
-									<div
-										style={{ fontSize: 13, fontWeight: 700, color: "#166534" }}
-									>
-										{p.trial}
-									</div>
-								</div>
-							</div>
-						</div>
-					))}
-				</div>
-				<div style={{ textAlign: "center", marginTop: 36 }}>
-					<a href="/partners" style={{ ...S.btnSecondary, fontSize: 14 }}>
-						Are you an activity provider? Apply to list your classes →
-					</a>
-				</div>
-			</div>
-		</section>
-	);
-}
-
 // ─── BELA CHAT ────────────────────────────────────────────────────────────────
 const BELA_PROMPTS = [
 	{
-		label: "🌧️ Raining, kid bored",
-		text: "It's raining and my 5-year-old is bored at home — what can we do?",
+		label: "🌱 A first class",
+		text: "Help me explore a first class for my 3-year-old near Tampines. What should I look for?",
 	},
 	{
-		label: "🍜 Hawker dinner tonight",
-		text: "Family dinner near Tampines tonight, kids aged 4 and 7",
+		label: "🎨 Creative play",
+		text: "My 5-year-old loves music and drawing. What programmes could we explore in Singapore?",
 	},
 	{
-		label: "🛒 Cook from NTUC",
-		text: "What can I cook for dinner using NTUC basics? My kids are fussy eaters",
+		label: "🏊 Try a sport",
+		text: "My child is new to sports. What should I ask a coach before booking a trial?",
 	},
 	{
 		label: "🌳 Free weekend Jurong",
@@ -1704,7 +1496,7 @@ function BelaChatSection() {
 		{
 			role: "assistant",
 			content:
-				"Hi! I'm Bela 🐾 — your GoBela AI companion.\n\nGoBela helps Singapore families plan better weekends — enrichment classes for your kids, family dining spots, meal ideas, and weekend plans.\n\nTry a question below, or ask me anything about planning your family's weekend!",
+				"Hi! I'm Bela 🐾 — your GoBela AI companion.\n\nLet’s explore learning, play and first experiences for your child. Tell me their age, interests and your area.\n\nI can also help with family activities and meal ideas. Check programme details and availability before booking.",
 		},
 	]);
 	const [input, setInput] = useState("");
@@ -1758,10 +1550,10 @@ function BelaChatSection() {
 			<div style={{ maxWidth: 680, margin: "0 auto" }}>
 				<div style={{ textAlign: "center", marginBottom: 36 }}>
 					<div style={S.eyebrow}>Try Bela live</div>
-					<h2 style={S.h2}>Tell Bela about your day ✨</h2>
+					<h2 style={S.h2}>Find a starting point with Bela ✨</h2>
 					<p style={S.lead}>
-						Type any parenting scenario and see Bela plan your next move with
-						real Singapore suggestions.
+						Tell Bela your child’s age, interests and area to explore activity
+						ideas together.
 					</p>
 				</div>
 				<div
@@ -1966,7 +1758,7 @@ function BelaChatSection() {
 							value={input}
 							onChange={(e) => setInput(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && send()}
-							placeholder="Tell Bela about your family's day..."
+							placeholder="Your child’s age, interests and area..."
 							disabled={loading}
 							aria-label="Message to Bela"
 						/>
@@ -2022,7 +1814,9 @@ function HomeScreen() {
 					flexShrink: 0,
 				}}
 			>
-				<div style={{ fontSize: 10, opacity: 0.75 }}>Good morning, Sarah ☀️</div>
+				<div style={{ fontSize: 10, opacity: 0.75 }}>
+					Good morning, Sarah ☀️
+				</div>
 				<div style={{ fontSize: 12, fontWeight: 700 }}>
 					Saturday · Sunny · 31°C
 				</div>
@@ -2565,8 +2359,8 @@ function DownloadSection() {
 						margin: "0 auto 36px",
 					}}
 				>
-					Join Singapore families already using GoBela to plan meals, book trial
-					classes, and discover weekend activities with their kids.
+					Discover programmes, try a first class and explore your child’s
+					interests. Meal planning and family ideas are here too.
 				</p>
 				<div className="dl-btns">
 					<a
@@ -2672,6 +2466,7 @@ function Footer() {
 		{
 			heading: "Partners",
 			links: [
+				["For educators", "/educators"],
 				["Become a partner", "/partners"],
 				["Partner types", "/partners#types"],
 				["FAQ", "/partners#faq"],
@@ -2729,8 +2524,8 @@ function Footer() {
 								marginBottom: 18,
 							}}
 						>
-							The easiest way for Singapore families to book trial classes, plan
-							meals, and enjoy their weekends.
+							Discover learning, play and first experiences for your child.
+							Built for Singapore families.
 						</p>
 						{/* Mini store buttons in footer */}
 						<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -2880,10 +2675,11 @@ export default function HomePage() {
 			<Navbar />
 			<HeroSection onTryBela={() => scrollTo(belaRef)} />
 			<StatsBar />
+			<LearningDiscovery />
+			<FeaturedProgrammes />
 			<FeaturesSection />
 			<FounderSection />
 			<TestimonialsSection />
-			<PartnerSpotlightSection />
 			<div ref={belaRef}>
 				<BelaChatSection />
 			</div>

@@ -11,6 +11,21 @@ export default function AboutPage() {
 	return (
 		<>
 			<Navbar />
+			<section className="gb-section gb-mission">
+				<div className="gb-wrap">
+					<p className="gb-eyebrow">Our purpose</p>
+					<h2>Little discoveries. Meaningful first experiences.</h2>
+					<p>
+						We help families discover meaningful learning experiences—and help
+						the educators behind them reach the children they can inspire. Early
+						learning, creative play and movement are at the heart of that
+						journey.
+					</p>
+					<a className="gb-text-link" href="/educators">
+						Meet our approach to education partnerships →
+					</a>
+				</div>
+			</section>
 			<main
 				style={{
 					fontFamily:
@@ -325,7 +340,7 @@ export default function AboutPage() {
 								},
 								{
 									icon: "🤝",
-									title: "8 verified partners",
+									title: "Local programme partners",
 									desc: "Personally onboarded studios — swim, fencing, dance, sports, yoga, and more.",
 								},
 								{

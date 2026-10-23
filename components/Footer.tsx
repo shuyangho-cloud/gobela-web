@@ -11,8 +11,7 @@ export default function Footer() {
 						<span style={{ color: "#FFB703" }}>Bela</span>
 					</p>
 					<p className="leading-relaxed text-white/60 text-xs">
-						The easiest way for Singapore families to book trial classes, plan
-						meals &amp; enjoy their weekends.
+						Discover learning, play and first experiences for your child.
 						<br />
 						Singapore · 2026
 					</p>
@@ -40,7 +39,7 @@ export default function Footer() {
 						</li>
 						<li>
 							<a
-								href="#download"
+								href="/#download"
 								className="hover:text-white transition-colors"
 							>
 								Download
@@ -71,10 +70,10 @@ export default function Footer() {
 						</li>
 						<li>
 							<a
-								href="mailto:partnerships@gobela.sg"
+								href="/educators"
 								className="hover:text-white transition-colors"
 							>
-								partnerships@gobela.sg
+								For educators
 							</a>
 						</li>
 						<li>

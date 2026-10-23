@@ -15,8 +15,8 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 const PROMPTS = [
 	{
-		label: "🌧️ Rainy day",
-		text: "Rainy Sunday, kids aged 5 and 8 — what should we do?",
+		label: "🌱 First class",
+		text: "Help me find a first class for my 4-year-old. What should I look for?",
 	},
 	{
 		label: "🍽️ Dine out",
@@ -40,7 +40,7 @@ export default function BelaFloatingChat() {
 		{
 			role: "assistant",
 			content:
-				"Hi! I'm Bela 👋 Tell me about your family's day and I'll help plan something great!",
+				"Hi! I'm Bela 👋 Tell me your child’s age, interests and area. Let’s explore learning and play together!",
 		},
 	]);
 	const chatRef = useRef<HTMLDivElement>(null);

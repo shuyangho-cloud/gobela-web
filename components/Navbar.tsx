@@ -29,7 +29,9 @@ export default function Navbar() {
 					margin: "0 auto",
 					display: "flex",
 					alignItems: "center",
-					height: 60,
+					minHeight: 60,
+					flexWrap: "wrap",
+					padding: "12px 0",
 					gap: 24,
 				}}
 			>
@@ -65,7 +67,7 @@ export default function Navbar() {
 
 				{/* Nav links — hidden on small screens via CSS */}
 				<style>{`
-          @media (max-width: 640px) { .nav-links { display: none !important; } }
+          @media (max-width: 640px) { .nav-links { order: 3; width: 100%; justify-content: space-between; gap: 12px !important; padding-bottom: 2px; } }
         `}</style>
 				<div
 					className="nav-links"
@@ -73,8 +75,8 @@ export default function Navbar() {
 				>
 					{(
 						[
-							["Features", "/#features"],
-							["How it works", "/#how-it-works"],
+							["Learning & play", "/#early-learning"],
+							["For educators", "/educators"],
 							["About", "/about"],
 							["Partners", "/partners"],
 						] as [string, string][]

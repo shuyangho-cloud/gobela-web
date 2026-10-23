@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "GoBela — The Operating System for Modern Parenting";
+export const alt = "GoBela — Discover a Love of Learning";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -70,7 +70,7 @@ export default function Image() {
 					maxWidth: 760,
 				}}
 			>
-				The OS for Modern Parenting
+				Discover a love of learning.
 			</div>
 
 			{/* Subtext */}
@@ -83,12 +83,13 @@ export default function Image() {
 					lineHeight: 1.4,
 				}}
 			>
-				Cook smarter. Dine better. Play more. Powered by Singapore parents.
+				Early learning, creative play and sports programmes for Singapore
+				families.
 			</div>
 
 			{/* Pills */}
 			<div style={{ display: "flex", gap: 16 }}>
-				{["🍳 Cook", "🍜 Dine", "🎡 Discover", "👨‍👩‍👧 Community"].map(
+				{["Early learning", "Creative play", "Sports", "Trial classes"].map(
 					(label) => (
 						<div
 							key={label}

@@ -5,13 +5,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
 	metadataBase: new URL("https://gobela.sg"),
-	title: "GoBela — Book trial classes, plan meals & enjoy your weekends",
+	title: "GoBela — Early Learning, Play & Trial Classes in Singapore",
 	description:
-		"The easiest way for Singapore families to book trial classes, plan meals & enjoy their weekends. AI-powered, free to download.",
+		"Discover early learning, creative play and sports programmes in Singapore. Explore your child’s interests and start with a trial. Free on iOS and Android.",
 	openGraph: {
-		title: "GoBela — For Singapore Families",
+		title: "GoBela — Discover a Love of Learning",
 		description:
-			"Book trial classes, plan meals & enjoy your weekends. Free on iOS & Android.",
+			"Explore early learning, creative play and sports programmes for your child. Free on iOS & Android.",
 		url: "https://gobela.sg",
 		siteName: "GoBela",
 		images: [{ url: "/og.png", width: 1200, height: 630 }],
