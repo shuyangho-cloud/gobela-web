@@ -21,6 +21,7 @@ beforeAll(async()=>{
  await db.exec("create table public.enrichment_classes(id text primary key,name text,provider text,location text,trial_price float,is_active boolean);create table public.trial_bookings(id uuid primary key default gen_random_uuid(),profile_id uuid,status text,event_id text);");
  for(const name of ['20261023060000_superbrain_legacy_catalogue.sql','20261023061000_superbrain_family_consent.sql','20261023063000_superbrain_booking_attribution.sql']) await db.exec(readFileSync(resolve(dir,name),'utf8'));
  await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_explicit_booking_link.sql'))!),'utf8'));
+ await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_marketing_production_packet.sql'))!),'utf8'));
  for(const uid of [parent,other])await as(uid,"insert into public.gb_family_consent(owner_id,version,granted) values($1,'2026-10-23',true)",[uid]);
  await db.exec(`reset role; insert into public.gb_founders values('${founder}');`);
  campaign=(await as(founder,"insert into public.gb_campaigns(title,audience,category,objective) values('Weekend','Parents','play','Enquiries') returning id")).rows[0] as any;
@@ -128,4 +129,15 @@ it('direct booking writes cannot attribute an enquiry for a different listing',a
  await expect(as(parent,"insert into public.trial_bookings(profile_id,event_id,status,superbrain_enquiry_id) values($1,'different-source','pending',$2)",[parent,enquiry.id])).rejects.toThrow('same parent and listing');
  const booking=(await as(parent,"insert into public.trial_bookings(profile_id,event_id,status,superbrain_enquiry_id) values($1,'booking-source','pending',$2) returning id",[parent,enquiry.id])).rows[0] as {id:string};
  await as(parent,"update public.trial_bookings set status='completed' where id=$1",[booking.id]);
+});
+
+it('atomic marketing packet merge preserves founder edits and rejects parent or mismatched writes',async()=>{
+ await as(founder,"update public.gb_campaigns set draft='{\"caption\":\"Founder edit\"}' where id=$1",[campaign]);
+ const packet={strategy_id:'weekend-discovery',campaign_id:campaign,caption:'Production copy',storyboard:'x'.repeat(14000)};
+ for(let attempt=0;attempt<2;attempt++){
+  const result=(await as(founder,'select public.gb_save_marketing_packet($1,$2::jsonb) result',[campaign,JSON.stringify(packet)])).rows[0] as any;
+  expect(result.result.draft.caption).toBe('Founder edit');expect(result.result.draft.production_packet.storyboard).toHaveLength(14000);
+ }
+ await expect(as(parent,'select public.gb_save_marketing_packet($1,$2::jsonb)',[campaign,JSON.stringify(packet)])).rejects.toThrow('Founder required');
+ await expect(as(founder,'select public.gb_save_marketing_packet($1,$2::jsonb)',[campaign,JSON.stringify({...packet,campaign_id:parent})])).rejects.toThrow('Invalid production packet');
 });

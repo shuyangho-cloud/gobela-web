@@ -63,7 +63,7 @@ export async function handle(request: Request, path: string[]) {
           const saved=checked(await db.from('gb_campaigns').select('*').eq('id',proposal.campaignId).single());
           if(resource==='marketing-production') {
             const packet=productionPacket(proposal,saved);
-            result=checked(await db.from('gb_campaigns').update({draft:{...saved.draft,production_packet:packet}}).eq('id',saved.id).eq('draft',JSON.stringify(saved.draft)).select().single());
+            result=checked(await db.rpc('gb_save_marketing_packet',{target_campaign:saved.id,production_packet:packet}));
           } else result=saved;
         } else result={...briefing,assets,saved_packet:checked(campaigns).find(c=>c.id==='af240001-2026-4024-8024-000000000001')?.draft?.production_packet??null};
       } else if(resource==='results' && method==='GET') {

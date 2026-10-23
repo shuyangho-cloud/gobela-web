@@ -9,13 +9,14 @@ type Packet=ReturnType<typeof productionPacket>;
 type Briefing=ReturnType<typeof marketingBriefing>&{assets:{id:string;label:string;mime:string;available:boolean;usage:string;width:number;height:number}[]};
 export default function MarketingBrain({onPrepared}:{onPrepared:()=>Promise<void>}){
  const [briefing,setBriefing]=useState<Briefing|null>(null);
+ const [attempt,setAttempt]=useState(0);
  const [packet,setPacket]=useState<Packet|null>(null);
  const [error,setError]=useState('');const [busy,setBusy]=useState('');const [notice,setNotice]=useState('');
  useEffect(()=>{
   const controller=new AbortController();
   call('founder/marketing','GET',undefined,controller.signal).then(data=>{setBriefing(data);setPacket(data.saved_packet??null);}).catch(e=>{if(!controller.signal.aborted)setError(e.message);});
   return()=>controller.abort();
- },[]);
+ },[attempt]);
  async function prepareProduction(){
   setBusy('production');setError('');
   try{const saved=await call('founder/marketing-production/weekend-discovery','POST',{});setPacket(saved.draft.production_packet);setNotice('Production packet saved to the campaign. References are private; no generation or publishing occurred.');await onPrepared();}
@@ -31,7 +32,7 @@ export default function MarketingBrain({onPrepared}:{onPrepared:()=>Promise<void
    await onPrepared();
   }catch(e){setError(e instanceof Error?e.message:'Unable to prepare campaign');}finally{setBusy('');}
  }
- if(!briefing)return <section aria-busy={!error}><h2>Your marketing recommendation</h2><p role={error?'alert':'status'}>{error||'Reviewing source lessons, catalogue evidence and campaign outcomes…'}</p></section>;
+ if(!briefing)return <section aria-busy={!error}><h2>Your marketing recommendation</h2><p role={error?'alert':'status'}>{error||'Reviewing source lessons, catalogue evidence and campaign outcomes…'}</p>{error&&<button onClick={()=>{setError('');setAttempt(value=>value+1);}}>Retry connection</button>}</section>;
  return <section aria-label="Marketing recommendations">
   <div className={styles.recommendation}><p className={styles.eyebrow}>SUPERBRAIN RECOMMENDS</p><h2>{briefing.recommendation}</h2><p>{briefing.rationale}</p><p>Proposed spend: <strong>S$0</strong>. Prepare the work now; approve exact content and costs before external action.</p></div>
   {error&&<p role="alert" className={styles.alert}>{error}</p>}{notice&&<p role="status">{notice}</p>}

@@ -1,6 +1,6 @@
 # Campaign production connection
 
-The first recommendation can now prepare and persist a concrete production packet in `gb_campaigns.draft.production_packet`. It selects checked activities against current canonical listing identity/provider/active state, preserving existing campaign copy. A JSON equality check prevents overwriting concurrent founder draft changes. Packet preparation has no dispatch or generation calls.
+The first recommendation can now prepare and persist a concrete production packet in `gb_campaigns.draft.production_packet`. It selects checked activities against current canonical listing identity/provider/active state, preserving existing campaign copy. An invoker-rights database function atomically merges only the packet field, preserving concurrent founder draft changes and supporting large packets without URL filters. The function is authenticated-founder-only and validates packet size, strategy and campaign identity. Packet preparation has no dispatch or generation calls.
 
 Four public provider sources were reviewed on 24 October 2026 Singapore time. MiniSport Explorers ages 4–6, Bubbles KinderGym ages 3–5 and Elevate Foundation I/II ages 3–5 supply limited permissible activity claims. Their catalogue prices are not verified by those reviewed pages and are excluded from channel copy. Code Ninja advertises S$65 on its ages-9-to-12 page while GoBela lists S$57; this is held from selection pending reconciliation. No production catalogue prices were changed.
 
