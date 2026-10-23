@@ -1,0 +1,17 @@
+# Founder assistant review
+
+The Today screen recommends the next business action from current records, prepares concrete acknowledgement and partner follow-up drafts, and remembers founder decisions. It ranks uncertain executions, expired approvals, parent enquiries, price conflicts, moderation, partner follow-ups, catalogue freshness, approvals and organic production. Recommendations explain their evidence and limits. Founder chat answers next-step and provider-comparison questions without a strategy questionnaire.
+
+Decision memory is founder-only and persists in gb_decisions. Repeated preparation preserves the same task and founder edits. Dismissed/completed evidence stays suppressed until it changes; tomorrow deferral expires at the next Singapore 09:00. Restore is reversible. Checklist completion does not claim publication, delivery or a completed booking. Audit records are appended through a narrowly scoped private trigger; clients have no general audit insert permission.
+
+This is a deterministic, evidence-based decision engine, not a claim of continuous autonomous research or general self-learning. It reads at most 100 records per business collection, reports that limit, excludes private health/family memory, and discloses missing revenue evidence rather than inventing ROI. Local fixtures are explicitly labelled. Active, visible workspaces refresh read-only every five minutes and on focus; no server scheduler was installed. No external messages, paid generation, publishing, approval bypass or production changes are performed.
+
+Marketing retains the source-linked Singapore research library, adapted playbooks and activity-grounded production packet. Price conflicts stay on hold rather than overwriting potentially negotiated terms. Approved family identity and the cinematic production benchmark remain release requirements. The selected lead activity cannot silently substitute another partner for sports footage.
+
+Apply all eleven additive integration migrations before deploying the matching web code. The latest two add decision memory and consolidate overlapping read policies while preserving founder, public and owner boundaries. Consent remains writable only by its owner. No existing private family policies are changed.
+
+Validation on isolated local Supabase: 63 tests passed, with the opt-in journey separately executed and passed; TypeScript and webpack production build passed. Real API verification prepared three decisions, proved idempotency, restored a deferred decision, and denied parent API/direct-RPC access. The full journey exercised auth/RLS, real Storage, approval/claim races, uncertain outcomes, parent enquiry/booking attribution, moderation, health isolation, export/delete and consent. Final security and performance advisors reported no issues. Newly created test access was removed or disabled without changing existing founder membership.
+
+The earlier Marketing packet was reopened in Chrome. The new Today UI has not received a final visual check: Chrome reports cgWindowNotFound and no connected browser surface is available. This remains a review gate; API/build checks do not substitute for visual inspection.
+
+Production deployment remains pending review. Production founder bootstrap, Meta token recovery, the Instagram adapter, complete Circle consolidation and clinical feature gates retain their existing release requirements. No claim of finished campaign video or proven marketing conversion is made.

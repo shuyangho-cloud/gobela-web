@@ -22,6 +22,8 @@ beforeAll(async()=>{
  for(const name of ['20261023060000_superbrain_legacy_catalogue.sql','20261023061000_superbrain_family_consent.sql','20261023063000_superbrain_booking_attribution.sql']) await db.exec(readFileSync(resolve(dir,name),'utf8'));
  await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_explicit_booking_link.sql'))!),'utf8'));
  await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_marketing_production_packet.sql'))!),'utf8'));
+ await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_decision_memory.sql'))!),'utf8'));
+ await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_consolidate_read_policies.sql'))!),'utf8'));
  for(const uid of [parent,other])await as(uid,"insert into public.gb_family_consent(owner_id,version,granted) values($1,'2026-10-23',true)",[uid]);
  await db.exec(`reset role; insert into public.gb_founders values('${founder}');`);
  campaign=(await as(founder,"insert into public.gb_campaigns(title,audience,category,objective) values('Weekend','Parents','play','Enquiries') returning id")).rows[0] as any;
@@ -140,4 +142,19 @@ it('atomic marketing packet merge preserves founder edits and rejects parent or 
  }
  await expect(as(parent,'select public.gb_save_marketing_packet($1,$2::jsonb)',[campaign,JSON.stringify(packet)])).rejects.toThrow('Founder required');
  await expect(as(founder,'select public.gb_save_marketing_packet($1,$2::jsonb)',[campaign,JSON.stringify({...packet,campaign_id:parent})])).rejects.toThrow('Invalid production packet');
+});
+
+it('business decision preparation is idempotent, audited and isolated from parents and external actions',async()=>{
+ const proposal={id:'aaaaaaaa-1111-4111-8111-111111111111',key:'enquiries:stable',title:'Review existing enquiries',prepared_work:['Check the source'],evidence:[{source:'enquiries',id:'fixture'}]};
+ const call=(user:string,op:string)=>as(user,'select public.gb_record_brain_decision($1::jsonb,$2) result',[JSON.stringify(proposal),op]);
+ const before=(await as(founder,'select count(*) total from public.gb_actions')).rows;
+ await call(founder,'prepare');await as(founder,"update public.gb_tasks set title='Founder task edit' where id=$1",[proposal.id]);await call(founder,'prepare');
+ expect((await as(founder,'select title from public.gb_tasks where id=$1',[proposal.id])).rows).toEqual([{title:'Founder task edit'}]);
+ expect((await as(founder,"select count(*)::integer total from public.gb_audit where entity_id=$1 and event='brain_prepared'",[proposal.id])).rows).toEqual([{total:1}]);
+ expect((await as(parent,'select * from public.gb_decisions')).rows).toEqual([]);
+ await expect(call(parent,'prepare')).rejects.toThrow('Founder required');
+ await call(founder,'done');expect((await as(founder,'select status from public.gb_tasks where id=$1',[proposal.id])).rows).toEqual([{status:'done'}]);
+ await call(founder,'restore');expect((await as(founder,'select status from public.gb_tasks where id=$1',[proposal.id])).rows).toEqual([{status:'open'}]);
+ expect((await as(founder,'select count(*) total from public.gb_actions')).rows).toEqual(before);
+ expect((await db.query("select has_function_privilege('authenticated','gb_private.audit_brain_decision()','EXECUTE') allowed")).rows).toEqual([{allowed:false}]);
 });

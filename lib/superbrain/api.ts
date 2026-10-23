@@ -1,3 +1,5 @@
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {founderBrief,businessAnswer,type BusinessSnapshot} from './founder-brain';
 import { authenticate, checked, command, founder } from './db';
 import { actionPayload, campaignDraft, categories, choice, httpsUrl, integer, object, Problem, recommend, safeError, text, timestamp, uuid, type Listing } from './domain';
 import { dispatch } from './connector';
@@ -5,10 +7,24 @@ import {assetInventory,marketingAssetResponse} from './marketing-assets';
 import type {CanonicalMarketingRow} from './marketing-catalogue';
 import {productionPacket} from './marketing-production';
 import {marketingBriefing,campaignFromProposal,type MarketingListing} from './marketing';
-import { answerFounder, describeRecommendations } from './assistant';
+import { describeRecommendations } from './assistant';
 
-const founderTables = ['knowledge', 'catalogue', 'partners', 'tasks', 'campaigns', 'actions', 'audit', 'enquiries', 'control', 'reports', 'consents'] as const;
+const founderTables = ['knowledge', 'catalogue', 'partners', 'tasks', 'campaigns', 'actions', 'audit', 'enquiries', 'control', 'reports', 'consents', 'decisions'] as const;
 const familyTables = ['children', 'health', 'reminders', 'memory'] as const;
+async function businessContext(db:SupabaseClient){
+ const [collections,canonical,legacy]=await Promise.all([
+  Promise.all(founderTables.map(async table=>{
+   let query=db.from(`gb_${table}`).select('*');
+   if(table!=='control')query=query.order(table==='decisions'?'updated_at':['catalogue','knowledge'].includes(table)?'verified_at':'created_at',{ascending:false});
+   return [table,checked(await query.limit(100))] as const;
+  })),
+  db.from('enrichment_classes').select('id,name,provider,is_active,trial_price,location').in('id',['minisport-explorers-1','bubbles-preschool-1','elevate-ballet-1','codeninja-scratch-1']),
+  db.from('user_reports').select('id,review_id,status,created_at').eq('status','open').limit(100)
+ ]);
+ const records={...Object.fromEntries(collections),legacy_reports:checked(legacy)} as BusinessSnapshot;
+ return {records,canonical:checked(canonical) as CanonicalMarketingRow[],brain:founderBrief(records,checked(canonical) as CanonicalMarketingRow[],Date.now(),/^http:\/\/(127\.0\.0\.1|localhost)(:|\/)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL??'')?'Local development — business counts include test fixtures.':'Connected business records — coverage limits apply.')};
+}
+function nextSingaporeMorning(){const local=new Date(Date.now()+8*3600000);return new Date(Date.UTC(local.getUTCFullYear(),local.getUTCMonth(),local.getUTCDate()+1,1)).toISOString();}
 const circleFields = 'id,owner_id,category,title,body,visited_on,photo_path,status,verification_kind,created_at';
 function date(value: unknown) {
   const result = text(value, 'date', 10);
@@ -73,24 +89,31 @@ export async function handle(request: Request, path: string[]) {
         result=checked(await db.rpc('gb_moderate_legacy_review',{target_review:text(body.review_id,'legacy review id',200),hide:body.hidden}));
       } else if(resource==='legacy-circle' && method==='GET') {
         result={reviews:checked(await db.from('gobela_reviews').select('id,type,tip,is_hidden,posted_at').order('posted_at',{ascending:false}).limit(100)),reports:checked(await db.from('user_reports').select('id,review_id,reason,status,created_at').limit(100)),flags:checked(await db.from('review_flags').select('review_id,reason,flagged_at').limit(100))};
+      } else if(resource==='brain' && method==='POST') {
+        const operation=choice(body.operation,['prepare','dismiss','defer','done','restore'] as const,'decision operation');
+        const context=await businessContext(db);
+        const key=body.key===undefined?undefined:text(body.key,'priority key',100);
+        const restored=operation==='restore'&&key?context.records.decisions.find(d=>d.decision_key===key)?.proposal:undefined;
+        const priorities=restored?[restored]:key?context.brain.priorities.filter(p=>p.key===key):operation==='prepare'?context.brain.priorities.slice(0,3):[];
+        if(!priorities.length)throw new Problem(409,'This priority changed. Refresh the brief before preparing it.');
+        const decisions=[];
+        for(const priority of priorities){
+          decisions.push(checked(await db.rpc('gb_record_brain_decision',{proposal_json:priority,operation,decision_note:operation==='done'?'Internal checklist marked complete; underlying enquiry, channel and partner records were not changed.':typeof body.note==='string'?text(body.note,'decision note',1000):'',defer_to:operation==='defer'?nextSingaporeMorning():null})));
+        }
+        result={decisions,scope:'Internal business work only. No external action was requested.'};
       } else if (resource === 'ask' && method === 'POST') {
         await command(db,'consume',{});
         const question=text(body.question,'question',1000);
-        const rows=checked(await db.from('gb_knowledge').select('id,title,content,verified_at').order('verified_at',{ascending:false}).limit(200));
-        const words=question.toLowerCase().match(/[a-z0-9]{3,}/g) || [];
-        const sources=rows.map(row=>({...row,score:words.filter(word=>`${row.title} ${row.content}`.toLowerCase().includes(word)).length}))
-          .filter(row=>row.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
-        result={reply:await answerFounder(question,sources),sources,coverage:'Searches up to 200 latest knowledge records. Verify dated information before acting. No private family health records are queried.'};
+        const context=await businessContext(db);
+        result={...businessAnswer(question,context.brain,context.records.knowledge as Parameters<typeof businessAnswer>[2],context.canonical),coverage:context.brain.coverage};
       } else if (resource === 'summary' && method === 'GET') {
-        const results = await Promise.all(founderTables.map(async table => [table, checked(await db.from(`gb_${table}`).select('*').limit(100))] as const));
-        result = { records: Object.fromEntries(results), coverage: 'At most 100 records per collection. Enquiries are recorded interest, not paid bookings. No ad-channel or revenue totals are connected.' };
+        const context=await businessContext(db);
+        result={records:context.records,brain:context.brain,coverage:context.brain.coverage};
       } else if (resource === 'circle' && method === 'GET') {
         result = checked(await db.from('gb_circle').select(circleFields).order('created_at', { ascending: false }).limit(100));
       } else if (resource === 'briefing' && method === 'GET') {
-        const tasks = checked(await db.from('gb_tasks').select('*').neq('status', 'done').limit(50));
-        const approvals = checked(await db.from('gb_actions').select('id,status,created_at').eq('status', 'pending').limit(50));
-        const partners = checked(await db.from('gb_partners').select('id,name,next_action,due_at').not('due_at','is',null).lte('due_at',new Date().toISOString()).limit(50));
-        result = { tasks, approvals, overdue_partners: partners, generated_at: new Date().toISOString() };
+        const context=await businessContext(db);
+        result={tasks:context.records.tasks.filter(r=>r.status!=='done'),approvals:context.records.actions.filter(r=>r.status==='pending'),overdue_partners:context.records.partners.filter(r=>r.stage!=='closed'&&r.due_at&&Date.parse(r.due_at)<=Date.now()),brain:context.brain,generated_at:context.brain.generated_at};
       } else if (resource === 'controls' && method === 'POST') {
         if (typeof body.paused !== 'boolean' || typeof body.execution_enabled !== 'boolean') throw new Problem(400, 'Invalid controls');
         result = await command(db, 'controls', { paused: body.paused, execution_enabled: body.execution_enabled, daily_budget_cents: integer(body.daily_budget_cents,'budget') });

@@ -6,7 +6,7 @@ type Proposal=ReturnType<typeof marketingBriefing>['proposals'][number];
 export function productionPacket(proposal:Proposal,campaign:{id:string;tracking_code:string;draft?:Record<string,unknown>}){
  if(proposal.id!=='weekend-discovery')throw new Problem(400,'Production packet is currently prepared for the weekend discovery campaign');
  const activities=proposal.activity_candidates;
- const subject=activities[0];
+ const subject=activities.find(activity=>activity.legacy_id==='minisport-explorers-1');
  const destination=`/bela?campaign=${encodeURIComponent(campaign.tracking_code)}`;
  const activityCopy=activities.map(a=>a.verified_claim).join(' ');
  const caption=proposal.id==='weekend-discovery'?`One less weekend to plan. ${activityCopy||'Make room for a shared family activity.'} Explore family activities with GoBela. Confirm current fees, venue and availability with the provider before booking.`:proposal.caption;
