@@ -1,7 +1,7 @@
 import { it,expect } from 'vitest';
 import { handle } from '../../lib/superbrain/api';
 it('all API surfaces require a signed-in account before touching data',async()=>{
- for(const path of [['founder','summary'],['parent','health'],['parent','recommend'],['circle','posts']]) {
+ for(const path of [['founder','marketing'],['founder','summary'],['parent','health'],['parent','recommend'],['circle','posts']]) {
   const response=await handle(new Request('https://gobela.test/api/superbrain/'+path.join('/')),path);
   expect(response.status).toBe(401);expect(response.headers.get('cache-control')).toBe('no-store');
  }

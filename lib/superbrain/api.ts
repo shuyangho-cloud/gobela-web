@@ -1,6 +1,7 @@
 import { authenticate, checked, command, founder } from './db';
 import { actionPayload, campaignDraft, categories, choice, httpsUrl, integer, object, Problem, recommend, safeError, text, timestamp, uuid, type Listing } from './domain';
 import { dispatch } from './connector';
+import {marketingBriefing,campaignFromProposal,type MarketingListing} from './marketing';
 import { answerFounder, describeRecommendations } from './assistant';
 
 const founderTables = ['knowledge', 'catalogue', 'partners', 'tasks', 'campaigns', 'actions', 'audit', 'enquiries', 'control', 'reports', 'consents'] as const;
@@ -40,7 +41,22 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
-      if(resource==='results' && method==='GET') {
+      if(resource==='marketing' && (method==='GET'||method==='POST')) {
+        const [listings,outcomes,campaigns]=await Promise.all([
+          db.from('gb_catalogue_retrieval').select('id,title,provider,category,area,price_cents,source_url,verified_at,active').eq('active',true).order('verified_at',{ascending:false}).limit(1000),
+          db.rpc('gb_campaign_results'),
+          db.from('gb_campaigns').select('id,title,draft').order('created_at',{ascending:false}).limit(100)
+        ]);
+        const briefing=marketingBriefing({listings:checked(listings) as MarketingListing[],outcomes:checked(outcomes),campaigns:checked(campaigns)});
+        if(method==='POST') {
+          const proposal=briefing.proposals.find(p=>p.id===body.strategy_id);
+          if(!proposal)throw new Problem(400,'Unknown marketing recommendation');
+          // Stable UUID + ignoreDuplicates makes repeat/concurrent preparation safe.
+          // Never overwrite a founder-edited brief or create a channel action here.
+          checked(await db.from('gb_campaigns').upsert(campaignFromProposal(proposal),{onConflict:'id',ignoreDuplicates:true}).select());
+          result=checked(await db.from('gb_campaigns').select('*').eq('id',proposal.campaignId).single());
+        } else result=briefing;
+      } else if(resource==='results' && method==='GET') {
         result={campaigns:checked(await db.rpc('gb_campaign_results')),coverage:'Only explicitly linked enquiries and booking outcomes. Ad impressions, clicks and unlinked bookings are not attributed.'};
       } else if(resource==='legacy-moderate' && method==='POST') {
         if(typeof body.hidden!=='boolean')throw new Problem(400,'Moderation choice required');
