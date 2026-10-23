@@ -1,0 +1,11 @@
+# Campaign production connection
+
+The first recommendation can now prepare and persist a concrete production packet in `gb_campaigns.draft.production_packet`. It selects checked activities against current canonical listing identity/provider/active state, preserving existing campaign copy. A JSON equality check prevents overwriting concurrent founder draft changes. Packet preparation has no dispatch or generation calls.
+
+Four public provider sources were reviewed on 24 October 2026 Singapore time. MiniSport Explorers ages 4–6, Bubbles KinderGym ages 3–5 and Elevate Foundation I/II ages 3–5 supply limited permissible activity claims. Their catalogue prices are not verified by those reviewed pages and are excluded from channel copy. Code Ninja advertises S$65 on its ages-9-to-12 page while GoBela lists S$57; this is held from selection pending reconciliation. No production catalogue prices were changed.
+
+The packet contains 28-second vertical Reel shot prompts, timing, sound design, original copy for Instagram/Facebook, carousel copy, source-backed claims, an enquiry tracking destination, approved asset references and release checks. The packet is a production draft, not finished media or release approval. No additional cast, partner endorsement or actual-visit claim is implied by illustrative shots.
+
+Private reference media is provisioned separately with `SUPERBRAIN_MARKETING_ASSET_ROOT`, never in `public/`. The allowlisted asset endpoint requires current founder authentication, checks SHA-256 and returns private/no-store media. Client previews use authenticated fetch and temporary object URLs revoked on unmount. The manifest records native sizes and intended use. The square 1080×1080, 10.076-second backpack film is a benchmark only; the new delivery brief requires new 1080×1920 footage. Cast images are identity references, not redistribution assets. Provisioning media in production needs a private deployment storage plan.
+
+The campaign code in a `/bela?campaign=...` destination is carried into an enquiry only when the parent submits it. A visit does not create an enquiry or booking. Existing explicit booking linkage remains authoritative. The production endpoint is founder-only and only supports the completed weekend-discovery packet; other campaign production templates are not presented as finished.

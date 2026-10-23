@@ -1,6 +1,9 @@
 import { authenticate, checked, command, founder } from './db';
 import { actionPayload, campaignDraft, categories, choice, httpsUrl, integer, object, Problem, recommend, safeError, text, timestamp, uuid, type Listing } from './domain';
 import { dispatch } from './connector';
+import {assetInventory,marketingAssetResponse} from './marketing-assets';
+import type {CanonicalMarketingRow} from './marketing-catalogue';
+import {productionPacket} from './marketing-production';
 import {marketingBriefing,campaignFromProposal,type MarketingListing} from './marketing';
 import { answerFounder, describeRecommendations } from './assistant';
 
@@ -41,21 +44,28 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
-      if(resource==='marketing' && (method==='GET'||method==='POST')) {
-        const [listings,outcomes,campaigns]=await Promise.all([
+      if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id);
+      if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {
+        const [listings,outcomes,campaigns,canonical,assets]=await Promise.all([
           db.from('gb_catalogue_retrieval').select('id,title,provider,category,area,price_cents,source_url,verified_at,active').eq('active',true).order('verified_at',{ascending:false}).limit(1000),
           db.rpc('gb_campaign_results'),
-          db.from('gb_campaigns').select('id,title,draft').order('created_at',{ascending:false}).limit(100)
+          db.from('gb_campaigns').select('id,title,draft').order('created_at',{ascending:false}).limit(100),
+          db.from('enrichment_classes').select('id,name,provider,is_active,trial_price,location').in('id',['minisport-explorers-1','bubbles-preschool-1','elevate-ballet-1','codeninja-scratch-1']),
+          assetInventory()
         ]);
-        const briefing=marketingBriefing({listings:checked(listings) as MarketingListing[],outcomes:checked(outcomes),campaigns:checked(campaigns)});
+        const briefing=marketingBriefing({listings:checked(listings) as MarketingListing[],outcomes:checked(outcomes),campaigns:checked(campaigns),canonical:checked(canonical) as CanonicalMarketingRow[]});
         if(method==='POST') {
-          const proposal=briefing.proposals.find(p=>p.id===body.strategy_id);
+          const proposal=briefing.proposals.find(p=>p.id===(id||body.strategy_id));
           if(!proposal)throw new Problem(400,'Unknown marketing recommendation');
           // Stable UUID + ignoreDuplicates makes repeat/concurrent preparation safe.
           // Never overwrite a founder-edited brief or create a channel action here.
           checked(await db.from('gb_campaigns').upsert(campaignFromProposal(proposal),{onConflict:'id',ignoreDuplicates:true}).select());
-          result=checked(await db.from('gb_campaigns').select('*').eq('id',proposal.campaignId).single());
-        } else result=briefing;
+          const saved=checked(await db.from('gb_campaigns').select('*').eq('id',proposal.campaignId).single());
+          if(resource==='marketing-production') {
+            const packet=productionPacket(proposal,saved);
+            result=checked(await db.from('gb_campaigns').update({draft:{...saved.draft,production_packet:packet}}).eq('id',saved.id).eq('draft',JSON.stringify(saved.draft)).select().single());
+          } else result=saved;
+        } else result={...briefing,assets,saved_packet:checked(campaigns).find(c=>c.id==='af240001-2026-4024-8024-000000000001')?.draft?.production_packet??null};
       } else if(resource==='results' && method==='GET') {
         result={campaigns:checked(await db.rpc('gb_campaign_results')),coverage:'Only explicitly linked enquiries and booking outcomes. Ad impressions, clicks and unlinked bookings are not attributed.'};
       } else if(resource==='legacy-moderate' && method==='POST') {

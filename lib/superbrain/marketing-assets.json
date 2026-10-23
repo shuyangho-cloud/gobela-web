@@ -1,0 +1,67 @@
+[
+  {
+    "id": "benchmark",
+    "filename": "benchmark.mp4",
+    "label": "Production benchmark",
+    "usage": "reference only",
+    "source_path": "marketing/posts/week-2026-08-31/friday/friday-backpack-worlds-wan3-square-final.mp4",
+    "sha256": "092178ed99798a8808a9a52884bb729689995fda2b5defc5fea8500ffbedb2fb",
+    "bytes": 9092197,
+    "width": 1080,
+    "height": 1080,
+    "duration_seconds": 10.076009,
+    "mime": "video/mp4"
+  },
+  {
+    "id": "logo",
+    "filename": "logo.png",
+    "label": "Official transparent logo",
+    "usage": "approved brand asset",
+    "source_path": "marketing/carousels/gobelalogo-transparent-clean.png",
+    "sha256": "e41cfd3a9c7fb2ee242844d6793a3d4db013e7a20013b4f070607f5866860ca8",
+    "bytes": 912022,
+    "width": 1080,
+    "height": 1080,
+    "duration_seconds": 0.0,
+    "mime": "image/png"
+  },
+  {
+    "id": "mother",
+    "filename": "mother.jpeg",
+    "label": "Approved mother",
+    "usage": "identity reference only",
+    "source_path": "marketing/brand/family/mother-01.jpeg",
+    "sha256": "19c64d936cac0e708c48d8b2da6c789eef06bcc5f5b14ba2be1776a534433427",
+    "bytes": 812325,
+    "width": 1376,
+    "height": 768,
+    "duration_seconds": 0.04,
+    "mime": "image/jpeg"
+  },
+  {
+    "id": "father",
+    "filename": "father.jpeg",
+    "label": "Approved father",
+    "usage": "identity reference only",
+    "source_path": "marketing/brand/family/father-01.jpeg",
+    "sha256": "72213506fef1d4b5e887c98acf4a8fe6ffd9ef04564e080db7ea21225c2eb18c",
+    "bytes": 441410,
+    "width": 1376,
+    "height": 768,
+    "duration_seconds": 0.04,
+    "mime": "image/jpeg"
+  },
+  {
+    "id": "daughter",
+    "filename": "daughter.jpeg",
+    "label": "Approved daughter",
+    "usage": "identity reference only",
+    "source_path": "marketing/brand/family/daughter-01.jpeg",
+    "sha256": "7922aa13e4b4469063fcba7dea0bcc6cdd064b1fc6c622e169ac550b9c6c97b4",
+    "bytes": 428622,
+    "width": 1376,
+    "height": 768,
+    "duration_seconds": 0.04,
+    "mime": "image/jpeg"
+  }
+]

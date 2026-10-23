@@ -1,0 +1,34 @@
+[
+  {
+    "id": "codeninja-scratch-1",
+    "name": "Scratch Foundations",
+    "provider": "Code Ninja",
+    "location": "Tiong Bahru / Havelock MRT",
+    "trial_price": 57,
+    "is_active": true
+  },
+  {
+    "id": "bubbles-preschool-1",
+    "name": "Kindergym (3\u20135 yrs)",
+    "provider": "Bubbles Gym (Eastwood)",
+    "location": "Eastwood",
+    "trial_price": 33,
+    "is_active": true
+  },
+  {
+    "id": "minisport-explorers-1",
+    "name": "Explorers Multi-Sport (4\u20136 yrs)",
+    "provider": "MiniSport Singapore",
+    "location": "10 locations across Singapore",
+    "trial_price": 0,
+    "is_active": true
+  },
+  {
+    "id": "elevate-ballet-1",
+    "name": "Pre-Ballet & Creative Movement (3\u20135 yrs)",
+    "provider": "Elevate Dance Academie",
+    "location": "27 West Coast Highway #02-01/02, S117867",
+    "trial_price": 45,
+    "is_active": true
+  }
+]
