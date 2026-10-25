@@ -1,3 +1,7 @@
+## Latest release review follow-up — 25 October 2026
+
+67 tests pass after adding the captured-production-contract rehearsal and a regression for audited moderation. Twelve reviewed migrations apply successfully in both PGlite and a separate local PostgreSQL database. Actual PostgreSQL synthetic checks pass for founder/parent moderation boundaries, audit creation, unchanged parent text, legacy booking triggers and paused zero-budget controls. TypeScript passes. See SCHEMA_REHEARSAL_2026-10-25.md for the seven-table scope and explicit platform/project-wide limitations. This supersedes the earlier eleven-migration/63-test count below.
+
 # Current validation checkpoint — 25 October 2026
 
 The original package record below is historical and superseded for integrated development acceptance by the 24 October packet. That packet records 63 passing tests plus the separately enabled full local Auth/Storage journey, TypeScript and webpack production build, real decision-memory API verification, and clear local security/performance advisors. It does not prove production deployment or the complete actual-production-schema rehearsal. Evidence: childassist/outputs/superbrain-integration-2026-10-24/.

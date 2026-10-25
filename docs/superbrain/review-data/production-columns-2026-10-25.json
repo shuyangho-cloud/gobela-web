@@ -1,0 +1,959 @@
+{
+  "project": "mcyvyqieygpbtcheouzr",
+  "captured": "2026-10-25",
+  "scope": "Read-only column metadata only; no customer rows or full schema dump.",
+  "columns": [
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "provider",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "category",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "location",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "trial_price",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "monthly_price",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "age_range",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "rating",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "review_count",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "schedule",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "tags",
+      "data_type": "ARRAY",
+      "is_nullable": "NO",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "is_partner",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "credentials",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "100"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "free_trial_platform_fee",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "500"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "lat",
+      "data_type": "double precision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "lng",
+      "data_type": "double precision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "image_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "logo_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "whatsapp",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "duration_minutes",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "60"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "partner_email",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "booking_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "booking_mode",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'direct'::text"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "website_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "stripe_account_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "payout_enabled",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "is_islandwide",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "trial_label",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "enrichment_classes",
+      "column_name": "monthly_label",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "(gen_random_uuid())::text"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "profile_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "is_hidden",
+      "data_type": "boolean",
+      "is_nullable": "YES",
+      "column_default": "false"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "posted_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "dish_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "star_rating",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "kid_reaction",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "time_taken",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "difficulty",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "supplier_used",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "tip",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "tags",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "parent_label",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "parent_initials",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "place_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "kid_friendly",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "seating",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "what_to_order",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "wait_time",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "best_for_age",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "activity_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "age_group",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "skills_developed",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "enjoyment_rating",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "value_rating",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "class_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "provider_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "child_age",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "child_reaction",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "trial_experience",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "skills_supported",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "supplier_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "supplier_category",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "product_reviewed",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "freshness",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "price_level",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "delivery_experience",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "recommended_for",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "whats_good",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "gobela_reviews",
+      "column_name": "what_to_avoid",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "column_default": "'{}'::text[]"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "role",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'user'::text"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "partner_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "referral_credit",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "review_flags",
+      "column_name": "review_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "review_flags",
+      "column_name": "profile_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "review_flags",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": "'user_reported'::text"
+    },
+    {
+      "table_name": "review_flags",
+      "column_name": "flagged_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "review_helpful",
+      "column_name": "review_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "review_helpful",
+      "column_name": "profile_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "profile_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "class_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "class_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "provider",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "parent_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "trial_date",
+      "data_type": "date",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "trial_price",
+      "data_type": "numeric",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'pending'::text"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "event_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "partner_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "program",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "child_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "child_age",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "parent_phone",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "preferred_date",
+      "data_type": "date",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "preferred_time",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "no_show_agreed",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "rating",
+      "data_type": "smallint",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "review_text",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "reviewed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "platform_fee_cents",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "500"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "platform_fee_payer",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'user'::text"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "partner_invoice_status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'n/a'::text"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "rejected_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "voucher_code",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "stripe_session_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "cancelled_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "followup_sent_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "payout_amount_cents",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "payout_status",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": "'pending'::text"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "payout_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "initial_notifications_sent_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "initial_notification_attempts",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "initial_notification_error",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "decision_notifications_sent_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "trial_bookings",
+      "column_name": "decision_notification_error",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "reporter_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "reported_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "review_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'open'::text"
+    },
+    {
+      "table_name": "user_reports",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    }
+  ]
+}

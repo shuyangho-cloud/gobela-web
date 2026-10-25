@@ -1,5 +1,5 @@
 {
-  "reviewed_database_commit": "e33e9a52d56c2c101654120cf152cfb029817d4d",
+  "reviewed_database_commit": "4d3b55bd0ddecc53e5ab1b5709d0af4e9452343e",
   "migrations": [
     {
       "path": "supabase/migrations/20261023041139_gobela_superbrain.sql",
@@ -44,6 +44,11 @@
     {
       "path": "supabase/migrations/20261023191119_superbrain_consolidate_read_policies.sql",
       "sha256": "a19034a670e3a9a2c7d82ec8ee70bb78dc4f67bbb52d5dc0d8e899553b1d6d53"
+    },
+    {
+      "path": "supabase/migrations/20261025152024_superbrain_narrow_legacy_moderation.sql",
+      "sha256": "81d6445c0917acfbd35315612fcd2b714fc9cc9ee71960432f886d91a0c3f4df"
     }
-  ]
+  ],
+  "migration_count": 12
 }
