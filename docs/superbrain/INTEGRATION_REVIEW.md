@@ -1,3 +1,11 @@
+# Current integration checkpoint — 25 October 2026
+
+The following older narrative is retained as history. Its six-migration count, Auth timeout and 25-test summary are superseded by the eleven-migration integration and 63 tests plus separately passed full local journey in the 24 October packet. The broader Meta Page use case was subsequently explicitly approved and configured; token recovery remains open. No production deployment or live publishing occurred. Use DEPLOYMENT_SEQUENCE.md and deployment-migrations.json for the current ordered review.
+
+Founder Today prioritization and persistent decisions, source-linked marketing recommendations, private approved assets and the locally saved production packet are integrated. The deterministic assistant excludes private health/family memory and does not manufacture ROI. Today desktop Chrome visual review completed on 25 October after recovery, including prepared drafts, persisted history and a direct next-action answer. Actual-production-schema rehearsal remains an open deployment acceptance gate.
+
+## Historical integration narrative
+
 # Integration review
 
 Founder is the verified shuyangho@gmail.com Auth UUID 07aeee08-37ac-4c04-8078-18bc1fd776aa. The bootstrap script verifies both UUID and confirmed email, rejects additional founders, and has not run in production.

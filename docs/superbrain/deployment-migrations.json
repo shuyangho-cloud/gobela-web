@@ -1,0 +1,49 @@
+{
+  "reviewed_database_commit": "e33e9a52d56c2c101654120cf152cfb029817d4d",
+  "migrations": [
+    {
+      "path": "supabase/migrations/20261023041139_gobela_superbrain.sql",
+      "sha256": "e302de7b6142f3dadd98e73bceb2672d1e0ca5a193d96405ad4c2556aeee3a7c"
+    },
+    {
+      "path": "supabase/migrations/20261023042128_gobela_circle_photos.sql",
+      "sha256": "1fa7b5d012e2245bc0b3e1a916c99b2d2cbb3b973135ec416ade8b9ee70156d5"
+    },
+    {
+      "path": "supabase/migrations/20261023060000_superbrain_legacy_catalogue.sql",
+      "sha256": "d57967a0a2193e0afecd122cb95ecc6966cf7889326a8a67b84ee93227a26bb9"
+    },
+    {
+      "path": "supabase/migrations/20261023061000_superbrain_family_consent.sql",
+      "sha256": "6b0d83daa9e7bec0f53baa31be935ef64b93f24a35d8bf49d4a3e64fdecf009a"
+    },
+    {
+      "path": "supabase/migrations/20261023062000_superbrain_legacy_circle.sql",
+      "sha256": "2ca2507b5e8625b1bef5beb210075aa0a52019abe307c14d10d922c4bc1349f5"
+    },
+    {
+      "path": "supabase/migrations/20261023063000_superbrain_booking_attribution.sql",
+      "sha256": "289ebe1bed68ec9d13127c71d9761b81f65b393bb04a3ccf35b95361402a9c42"
+    },
+    {
+      "path": "supabase/migrations/20261023162656_superbrain_explicit_booking_link.sql",
+      "sha256": "1527b319f1802168a3bb74560f8e4fa72e9fb07f15f22768c7c3e8805052c84d"
+    },
+    {
+      "path": "supabase/migrations/20261023163107_superbrain_legacy_moderation.sql",
+      "sha256": "18347ce0df0d55da9baae19b7c83faacefacbd2f53536dc59bd63688fca42dfc"
+    },
+    {
+      "path": "supabase/migrations/20261023183654_superbrain_marketing_production_packet.sql",
+      "sha256": "9e210a4f278901778876c12d17c51d75dba6c914cba479b1a09f43b9571bda7e"
+    },
+    {
+      "path": "supabase/migrations/20261023185320_superbrain_decision_memory.sql",
+      "sha256": "f239ab4800b525d45f88df4354b69874a3df6764ada5649ad0fb50662c4e17e8"
+    },
+    {
+      "path": "supabase/migrations/20261023191119_superbrain_consolidate_read_policies.sql",
+      "sha256": "a19034a670e3a9a2c7d82ec8ee70bb78dc4f67bbb52d5dc0d8e899553b1d6d53"
+    }
+  ]
+}

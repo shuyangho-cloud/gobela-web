@@ -1,3 +1,11 @@
+# Current validation checkpoint — 25 October 2026
+
+The original package record below is historical and superseded for integrated development acceptance by the 24 October packet. That packet records 63 passing tests plus the separately enabled full local Auth/Storage journey, TypeScript and webpack production build, real decision-memory API verification, and clear local security/performance advisors. It does not prove production deployment or the complete actual-production-schema rehearsal. Evidence: childassist/outputs/superbrain-integration-2026-10-24/.
+
+On 25 October the temporary source directories were recovered from verified bundles. Existing Docker volumes retained three decisions and eight campaigns. Auth health responded, and database control remained paused=true, execution=false, budget=0. The read-only migration checksum check matched all eleven reviewed files. All 63 tests passed again on restored source. Signed-in desktop Chrome acceptance completed for Today headline, priorities, prepared drafts, three persisted decisions and a direct next-action answer. Founder summary/community/results and ask routes returned HTTP 200. No external actions were requested.
+
+## Historical package validation
+
 # Validation record — 23 October 2026
 
 Checks performed in the isolated package, not in production GoBela:
