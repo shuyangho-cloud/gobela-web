@@ -6,7 +6,7 @@ import styles from './workspace.module.css';
 import MarketingAssetPreview from './MarketingAssetPreview';
 import type {productionPacket} from '../../lib/superbrain/marketing-production';
 type Packet=ReturnType<typeof productionPacket>;
-type Briefing=ReturnType<typeof marketingBriefing>&{assets:{id:string;label:string;mime:string;available:boolean;usage:string;width:number;height:number}[]};
+type Briefing=ReturnType<typeof marketingBriefing>&{assets:{id:string;label:string;mime:string;available:boolean;usage:string;width:number;height:number;bytes:number}[]};
 export default function MarketingBrain({onPrepared}:{onPrepared:()=>Promise<void>}){
  const [briefing,setBriefing]=useState<Briefing|null>(null);
  const [attempt,setAttempt]=useState(0);

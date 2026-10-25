@@ -4,3 +4,9 @@ node_modules
 .env*
 supabase/.temp/
 *.tsbuildinfo
+.vercel
+.local-marketing-assets
+outputs
+output
+coverage
+*.log

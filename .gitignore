@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Private founder marketing reference media; provision separately from code
 /.local-marketing-assets/
+
+# Deployment-only approved private references; never commit binaries
+/.private-superbrain-assets/

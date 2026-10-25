@@ -1,0 +1,236 @@
+[
+  {
+    "schema": "public",
+    "name": "activity_discovery_claim",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "activity_discovery_publish",
+    "identity": "p_url text, p_row jsonb",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "activity_farmer_claim",
+    "identity": "p_kind text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "handle_new_user",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "handle_new_user_referral",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "handle_referral_reward",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "is_admin",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_business_domain",
+    "identity": "value text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_claim_farm_queries",
+    "identity": "p_source text, p_limit integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_claim_send",
+    "identity": "p_contact_id uuid, p_channel text, p_kind text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_domain",
+    "identity": "value text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_due_contacts",
+    "identity": "p_channel text, p_followup_days integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_due_contacts",
+    "identity": "p_channel text, p_followup_days integer, p_limit integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_due_counts",
+    "identity": "p_channel text, p_followup_days integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_is_partner",
+    "identity": "p_domain text, p_name text, p_email text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_name_key",
+    "identity": "value text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_review_candidates",
+    "identity": "p_limit integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_save_review",
+    "identity": "p_review jsonb, p_source text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "outreach_upsert_contact",
+    "identity": "p_business_name text, p_email text, p_category text, p_website text, p_district text, p_area text, p_address text, p_phone text, p_google_place_id text, p_google_rating numeric, p_review_count integer, p_source text, p_do_not_contact boolean",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "rls_auto_enable",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "set_booking_profile_id",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "update_sg_events_updated_at",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "enforce_one_trial_per_partner",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "sync_stripe_connect_status",
+    "identity": "p_account_id text, p_payouts boolean, p_charges boolean, p_details boolean, p_due_count integer, p_disabled_reason text, p_checked_at timestamp with time zone",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "guard_stripe_listing_fields",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "queue_partner_onboarding_email",
+    "identity": "p_user_id uuid, p_email text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "claim_partner_onboarding_messages",
+    "identity": "p_limit integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "private",
+    "name": "current_analytics_user_is_test",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "queue_paid_booking_analytics",
+    "identity": "",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "queue_checkout_failure",
+    "identity": "p_session_id text, p_event_id text, p_reason text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "flush_booking_analytics",
+    "identity": "p_limit integer",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "claim_booking_email",
+    "identity": "p_booking_id uuid, p_purpose text, p_body jsonb",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "finish_booking_email",
+    "identity": "p_booking_id uuid, p_purpose text, p_token uuid, p_state text, p_message_id text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "enqueue_booking_email",
+    "identity": "p_booking_id uuid, p_purpose text, p_body jsonb",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "begin_booking_notification",
+    "identity": "p_booking_id uuid",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "bind_paid_checkout_session",
+    "identity": "p_draft_id uuid, p_profile_id uuid, p_session_id text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "reserve_outreach_deliveries",
+    "identity": "p_run_id uuid, p_emails text[], p_kinds text[], p_channel text",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "mark_outreach_deliveries_logged",
+    "identity": "p_run_id uuid",
+    "owner": "postgres"
+  },
+  {
+    "schema": "public",
+    "name": "finish_outreach_reservation",
+    "identity": "",
+    "owner": "postgres"
+  }
+]

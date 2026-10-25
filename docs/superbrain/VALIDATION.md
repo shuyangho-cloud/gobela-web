@@ -1,3 +1,7 @@
+# Latest validation — 26 October 2026
+
+72 tests, TypeScript and webpack production build pass. Full application schema rehearsal covers 53 tables/39 functions/four views and preserves 81 original policies/135 constraints. The twelve-migration transaction plus guarded founder bootstrap and history registration passed locally in 0.270s; lock contention aborted and fully rolled back in 2.213s. Managed platform differences, synthetic data, deployment-only asset checks and pre-existing production advisor findings are detailed in PREDEPLOY_REVIEW_2026-10-26.md. No production schema/application release is claimed.
+
 ## Latest release review follow-up — 25 October 2026
 
 67 tests pass after adding the captured-production-contract rehearsal and a regression for audited moderation. Twelve reviewed migrations apply successfully in both PGlite and a separate local PostgreSQL database. Actual PostgreSQL synthetic checks pass for founder/parent moderation boundaries, audit creation, unchanged parent text, legacy booking triggers and paused zero-budget controls. TypeScript passes. See SCHEMA_REHEARSAL_2026-10-25.md for the seven-table scope and explicit platform/project-wide limitations. This supersedes the earlier eleven-migration/63-test count below.

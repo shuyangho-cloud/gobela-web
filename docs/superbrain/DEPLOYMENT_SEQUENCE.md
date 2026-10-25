@@ -1,3 +1,7 @@
+# Latest concrete deployment review — 26 October 2026
+
+Read PREDEPLOY_REVIEW_2026-10-26.md first. Full application public/private schema rehearsal, bounded-lock rollback, migration-history registration, founder identity and server-only private assets are now prepared. Seven production-scoped disabling/configuration entries are provisioned for the next deployment; no application or schema deployment occurred. Production advisors retain the explicitly recorded existing findings. The older sequence below is background; use the guarded release generator and current review packet for the concrete twelve-migration release.
+
 # Deployment sequence — review checkpoint 25 October 2026
 
 This is preparation for review, not authorization to deploy. Keep external execution, publishing and paid generation off. The verified founder remains shuyangho@gmail.com / 07aeee08-37ac-4c04-8078-18bc1fd776aa.

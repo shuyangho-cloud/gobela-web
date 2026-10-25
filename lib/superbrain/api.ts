@@ -60,7 +60,7 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
-      if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id);
+      if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'));
       if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {
         const [listings,outcomes,campaigns,canonical,assets]=await Promise.all([
           db.from('gb_catalogue_retrieval').select('id,title,provider,category,area,price_cents,source_url,verified_at,active').eq('active',true).order('verified_at',{ascending:false}).limit(1000),
