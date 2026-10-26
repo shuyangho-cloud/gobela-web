@@ -62,7 +62,14 @@ export function actionPayload(value: unknown) {
   const channel = choice(data.channel, ['instagram', 'facebook', 'email', 'push'] as const, 'channel');
   const content = text(data.content, 'content', 5000);
   const audience = text(data.audience, 'audience', 500);
-  return { channel, content, audience, campaign_id: uuid(data.campaign_id) };
+  let media;
+  if(data.media!==undefined){
+    if(channel!=='instagram')throw new Problem(400,'Media attachment is supported only for Instagram Reels');
+    const item=object(data.media),sha256=text(item.sha256,'media checksum',64);
+    if(!/^[0-9a-f]{64}$/.test(sha256)||typeof item.reuse_approved!=='boolean')throw new Problem(400,'Explicit media reuse review required');
+    media={asset_id:choice(item.asset_id,['backpack-reel-audio48k'] as const,'approved video asset'),sha256,reuse_approved:item.reuse_approved};
+  }
+  return { channel, content, audience, campaign_id: uuid(data.campaign_id),...(media?{media}:{}) };
 }
 export function safeError(error: unknown) {
   return error instanceof Problem ? { status: error.status, message: error.message } : { status: 500, message: 'Request failed. Try again or contact GoBela support.' };

@@ -3,7 +3,8 @@ import {founderBrief,businessAnswer,type BusinessSnapshot} from './founder-brain
 import { authenticate, checked, command, founder } from './db';
 import { actionPayload, campaignDraft, categories, choice, httpsUrl, integer, object, Problem, recommend, safeError, text, timestamp, uuid, type Listing } from './domain';
 import { dispatch } from './connector';
-import {assetInventory,marketingAssetResponse} from './marketing-assets';
+import {assetInventory,marketingAssetResponse,publishingAssetResponse,signPublishingVideo,publishingMediaInventory} from './marketing-assets';
+import {advanceInstagramReel,type InstagramAction,type InstagramCheckpoint} from './instagram';
 import type {CanonicalMarketingRow} from './marketing-catalogue';
 import {productionPacket} from './marketing-production';
 import {marketingBriefing,campaignFromProposal,type MarketingListing} from './marketing';
@@ -30,8 +31,14 @@ async function businessContext(db:SupabaseClient){
  const records={...Object.fromEntries(collections),legacy_reports:checked(legacy)} as BusinessSnapshot;
  return {records,canonical:checked(canonical) as CanonicalMarketingRow[],brain:founderBrief(records,checked(canonical) as CanonicalMarketingRow[],Date.now(),/^http:\/\/(127\.0\.0\.1|localhost)(:|\/)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL??'')?'Local development — business counts include test fixtures.':'Connected business records — coverage limits apply.')};
 }
+async function instagramStep(db:SupabaseClient,action:InstagramAction,start:boolean){
+ const checkpoint:InstagramCheckpoint=async(op,args)=>checked(await db.rpc('gb_instagram_checkpoint',{op,args}));
+ const progress=await advanceInstagramReel(action,start,checkpoint,(asset,sha)=>signPublishingVideo(asset,sha,db));
+ if('pending' in progress)return progress;
+ return command(db,action.status==='uncertain'?'reconcile':'complete',{id:action.id,...progress});
+}
 function nextSingaporeMorning(){const local=new Date(Date.now()+8*3600000);return new Date(Date.UTC(local.getUTCFullYear(),local.getUTCMonth(),local.getUTCDate()+1,1)).toISOString();}
-const circleFields = 'id,owner_id,category,title,body,visited_on,photo_path,status,verification_kind,created_at';
+const circleFields = ()=>'id,owner_id,category,title,body,visited_on,photo_path,status,verification_kind,created_at'+(canonicalCircle()?',legacy_details':'');
 function date(value: unknown) {
   const result = text(value, 'date', 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(result) || !Number.isFinite(Date.parse(result)) || new Date(result).toISOString().slice(0,10) !== result) throw new Problem(400, 'Invalid date');
@@ -67,13 +74,14 @@ export async function handle(request: Request, path: string[]) {
     if (area === 'founder') {
       await founder(db, user.id);
       if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'),db);
+      if(resource==='publishing-media'&&id&&method==='GET')return await publishingAssetResponse(id,request.headers.get('range'),db);
       if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {
-        const [listings,outcomes,campaigns,canonical,assets]=await Promise.all([
+        const [listings,outcomes,campaigns,canonical,assets,publishing_assets]=await Promise.all([
           db.from('gb_catalogue_retrieval').select('id,title,provider,category,area,price_cents,source_url,verified_at,active').eq('active',true).order('verified_at',{ascending:false}).limit(1000),
           db.rpc('gb_campaign_results'),
           db.from('gb_campaigns').select('id,title,draft').order('created_at',{ascending:false}).limit(100),
           db.from('enrichment_classes').select('id,name,provider,is_active,trial_price,location').in('id',['minisport-explorers-1','bubbles-preschool-1','elevate-ballet-1','codeninja-scratch-1']),
-          assetInventory(db)
+          assetInventory(db),publishingMediaInventory(db)
         ]);
         const briefing=marketingBriefing({listings:checked(listings) as MarketingListing[],outcomes:checked(outcomes),campaigns:checked(campaigns),canonical:checked(canonical) as CanonicalMarketingRow[]});
         if(method==='POST') {
@@ -87,7 +95,7 @@ export async function handle(request: Request, path: string[]) {
             const packet=productionPacket(proposal,saved);
             result=checked(await db.rpc('gb_save_marketing_packet',{target_campaign:saved.id,production_packet:packet}));
           } else result=saved;
-        } else result={...briefing,assets,saved_packet:checked(campaigns).find(c=>c.id==='af240001-2026-4024-8024-000000000001')?.draft?.production_packet??null};
+        } else result={...briefing,assets,publishing_assets,saved_packet:checked(campaigns).find(c=>c.id==='af240001-2026-4024-8024-000000000001')?.draft?.production_packet??null};
       } else if(resource==='results' && method==='GET') {
         result={campaigns:checked(await db.rpc('gb_campaign_results')),coverage:'Only explicitly linked enquiries and booking outcomes. Ad impressions, clicks and unlinked bookings are not attributed.'};
       } else if(resource==='legacy-moderate' && method==='POST') {
@@ -103,7 +111,7 @@ export async function handle(request: Request, path: string[]) {
         }
         result={cleaned,failed,remaining_at_least:Math.max(0,jobs.length-cleaned)};
       } else if(resource==='legacy-circle' && method==='GET') {
-        result={reviews:checked(await db.from('gobela_reviews').select('id,type,tip,is_hidden,posted_at').order('posted_at',{ascending:false}).limit(100)),reports:checked(await db.from('user_reports').select('id,review_id,reason,status,created_at').limit(100)),flags:checked(await db.from('review_flags').select('review_id,reason,flagged_at').limit(100))};
+        result={reviews:canonicalCircle()?[]:checked(await db.from('gobela_reviews').select('id,type,tip,is_hidden,posted_at').order('posted_at',{ascending:false}).limit(100)),reports:canonicalCircle()?[]:checked(await db.from('user_reports').select('id,review_id,reason,status,created_at').limit(100)),flags:checked(await db.from('review_flags').select('review_id,reason,flagged_at').limit(100))};
       } else if(resource==='brain' && method==='POST') {
         const operation=choice(body.operation,['prepare','dismiss','defer','done','restore'] as const,'decision operation');
         const context=await businessContext(db);
@@ -122,10 +130,10 @@ export async function handle(request: Request, path: string[]) {
         const context=await businessContext(db);
         result={...businessAnswer(question,context.brain,context.records.knowledge as Parameters<typeof businessAnswer>[2],context.canonical),coverage:context.brain.coverage};
       } else if (resource === 'summary' && method === 'GET') {
-        const context=await businessContext(db);
-        result={records:context.records,brain:context.brain,coverage:context.brain.coverage,circle_canonical:canonicalCircle()};
+        const [context,jobs]=await Promise.all([businessContext(db),process.env.SUPERBRAIN_INSTAGRAM_ADAPTER_ENABLED==='true'?db.from('gb_instagram_jobs').select('action_id,phase,next_check_at,checks,media_id').order('updated_at',{ascending:false}).limit(100):Promise.resolve({data:[],error:null})]);
+        result={records:{...context.records,instagram_jobs:checked(jobs)},brain:context.brain,coverage:context.brain.coverage,circle_canonical:canonicalCircle()};
       } else if (resource === 'circle' && method === 'GET') {
-        result = checked(await db.from(circleTable()).select(circleFields).order('created_at', { ascending: false }).limit(100));
+        result = checked(await db.from(circleTable()).select(circleFields()).order('created_at', { ascending: false }).limit(100));
       } else if (resource === 'briefing' && method === 'GET') {
         const context=await businessContext(db);
         result={tasks:context.records.tasks.filter(r=>r.status!=='done'),approvals:context.records.actions.filter(r=>r.status==='pending'),overdue_partners:context.records.partners.filter(r=>r.stage!=='closed'&&r.due_at&&Date.parse(r.due_at)<=Date.now()),brain:context.brain,generated_at:context.brain.generated_at};
@@ -135,11 +143,19 @@ export async function handle(request: Request, path: string[]) {
       } else if (resource === 'actions' && method === 'POST') {
         result = await command(db, 'request', { payload: actionPayload(body.payload), reserved_cents: integer(body.reserved_cents,'maximum cost') });
       } else if (resource === 'actions' && method === 'PATCH' && id) {
-        const op = choice(body.operation, ['approve','reject','execute','reconcile'] as const,'operation');
-        if (op === 'execute') {
+        const op = choice(body.operation, ['approve','reject','execute','reconcile','continue_instagram'] as const,'operation');
+        if(op==='continue_instagram'){
+          if(process.env.SUPERBRAIN_INSTAGRAM_ADAPTER_ENABLED!=='true')throw new Problem(503,'Instagram publication disabled');
+          const action=checked(await db.from('gb_actions').select('*').eq('id',uuid(id)).single());
+          result=await instagramStep(db,action,false);
+        } else if (op === 'execute') {
           if (process.env.SUPERBRAIN_EXECUTION_ENABLED !== 'true' || (!['test','meta'].includes(process.env.SUPERBRAIN_ADAPTER_MODE || '') && (!process.env.SUPERBRAIN_DISPATCH_URL || !process.env.SUPERBRAIN_DISPATCH_SECRET))) throw new Problem(503, 'Execution disabled');
+          const candidate=checked(await db.from('gb_actions').select('*').eq('id',uuid(id)).single());
+          const instagram=process.env.SUPERBRAIN_ADAPTER_MODE==='meta'&&candidate.payload?.channel==='instagram';
+          if(instagram&&(process.env.SUPERBRAIN_INSTAGRAM_ADAPTER_ENABLED!=='true'||!actionPayload(candidate.payload).media?.reuse_approved))throw new Problem(503,'Reviewed Instagram media and adapter configuration required');
           const action = await command(db, 'claim', { id: uuid(id) });
-          try {
+          if(instagram){try{result=await instagramStep(db,action,true);}catch(error){await command(db,'uncertain',{id}).catch(()=>undefined);throw error;}}
+          else try {
             const receipt = await dispatch(action);
             result = await command(db, 'complete', { id, ...receipt });
           } catch {
@@ -256,14 +272,14 @@ export async function handle(request: Request, path: string[]) {
       } else if (resource === 'photo' && method === 'POST') {
         const path=text(body.path,'photo path',300);
         result=checked(await db.storage.from('gb-circle').createSignedUrl(path,60));
-      } else if (resource === 'posts' && method === 'GET') result={posts:checked(await db.from(circleTable()).select(circleFields).order('created_at',{ascending:false}).limit(100)),votes:canonicalCircle()?await circleCommand(db,'counts'):await command(db,'vote_counts',{}),canonical:canonicalCircle()};
+      } else if (resource === 'posts' && method === 'GET') result={posts:checked(await db.from(circleTable()).select(circleFields()).order('created_at',{ascending:false}).limit(100)),votes:canonicalCircle()?await circleCommand(db,'counts'):await command(db,'vote_counts',{}),canonical:canonicalCircle()};
       else if (resource === 'posts' && method === 'POST') {
         await command(db,'consume',{});
         // Photos use the separate authenticated upload endpoint; arbitrary URLs are rejected.
         const photo = body.photo_path ? text(body.photo_path,'photo path',300) : null;
         if (photo && !new RegExp(`^${user.id}/[0-9a-f-]+\\.(jpg|png|webp)$`).test(photo)) throw new Problem(400,'Invalid photo path');
         const row={category:choice(body.category,categories,'category'),title:text(body.title,'title',200),body:text(body.body,'review',3000),visited_on:body.visited_on ? date(body.visited_on) : null,photo_path:photo};
-        result=canonicalCircle()?await circleCommand(db,'create',row):checked(await db.from('gb_circle').insert({...row,owner_id:user.id,status:'pending'}).select(circleFields).single());
+        result=canonicalCircle()?await circleCommand(db,'create',row):checked(await db.from('gb_circle').insert({...row,owner_id:user.id,status:'pending'}).select(circleFields()).single());
       } else if (resource === 'posts' && id && method === 'DELETE') {
         const target=uuid(id);
         const own=checked(await db.from(circleTable()).select('id,photo_path').eq('id',target).eq('owner_id',user.id).single());

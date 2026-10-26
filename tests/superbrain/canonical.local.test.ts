@@ -1,4 +1,5 @@
 import {readFileSync} from 'node:fs';
+import {spawn} from 'node:child_process';
 import {createClient} from '@supabase/supabase-js';
 import {expect,it} from 'vitest';
 import {handle} from '../../lib/superbrain/api';
@@ -26,9 +27,16 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('canonical Circle rea
   const json=await response.json();if(!response.ok)throw new Error(`${path}: ${response.status} ${json.error}`);return json.data;
  }
  const legacy=crypto.randomUUID();
- ok(await p.client.from('gobela_reviews').insert({id:legacy,profile_id:p.id,type:'play',tip:'Original body',is_hidden:false}));
+ ok(await p.client.from('gobela_reviews').insert({id:legacy,profile_id:p.id,type:'play',tip:'Original body',class_name:'Original class',trial_experience:'Full legacy experience',child_reaction:'Loved the activity',star_rating:5,is_hidden:false}));
  const mapping=ok(await p.client.from('gb_circle_meta').select('id').eq('review_id',legacy).single());
- expect((await call(o,'circle/posts')).posts.some((r:any)=>r.id===mapping.id&&r.body==='Original body')).toBe(true);
+ const anon=createClient(cfg.API_URL,cfg.ANON_KEY,{auth:{persistSession:false}});
+ expect(ok(await anon.from('gobela_reviews').select('id').eq('id',legacy))).toHaveLength(1);
+ expect(ok(await o.client.from('gobela_reviews').update({tip:'Forged edit'}).eq('id',legacy).select('id'))).toHaveLength(0);
+ expect((await p.client.from('gobela_reviews').update({profile_id:o.id}).eq('id',legacy)).error).not.toBeNull();
+ const initial=(await call(o,'circle/posts')).posts.find((r:any)=>r.id===mapping.id);
+ expect(initial.body).toBe('Original body');expect(initial.legacy_details.trial_experience).toBe('Full legacy experience');expect(initial.legacy_details.child_reaction).toBe('Loved the activity');expect(initial.legacy_details.star_rating).toBe(5);
+ ok(await p.client.from('gobela_reviews').update({class_name:'Updated legacy class'}).eq('id',legacy));
+ expect((await call(o,'circle/posts')).posts.find((r:any)=>r.id===mapping.id).title).toBe('Updated legacy class');
  ok(await p.client.from('gobela_reviews').update({is_hidden:true}).eq('id',legacy));
  ok(await p.client.from('gobela_reviews').update({is_hidden:false}).eq('id',legacy));
  await call(o,`circle/votes/${mapping.id}`,'POST',{});
@@ -37,7 +45,20 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('canonical Circle rea
  await call(o,`circle/reports/${mapping.id}`,'POST',{reason:'Please review'});
  await call(o,`circle/reports/${mapping.id}`,'POST',{reason:'Please review again'});
  expect(ok(await admin.from('user_reports').select('id').eq('review_id',legacy))).toHaveLength(1);
- await call(f,'founder/moderate','POST',{id:mapping.id,status:'hidden'});
+ // Deterministically hold the primary legacy row, then overlap a new-client
+ // moderation request. Reversed metadata/primary lock order deadlocks here.
+ const worker=spawn('docker',['exec','-i','supabase_db_gobela-canonical-live-review','sh','-c','PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U supabase_admin -d postgres -qAt -v ON_ERROR_STOP=1'],{stdio:['pipe','pipe','pipe']});
+ let output='',errors='';
+ const locked=new Promise<void>((resolve,reject)=>{
+  const timeout=setTimeout(()=>{worker.kill();reject(new Error('Local lock fixture did not start'));},10000);
+  worker.stdout.on('data',chunk=>{output+=String(chunk);if(output.includes('GOBELA_ROW_LOCKED')){clearTimeout(timeout);resolve();}});
+  worker.on('error',error=>{clearTimeout(timeout);reject(error);});
+ });
+ worker.stderr.on('data',chunk=>{errors+=String(chunk);});
+ const ended=new Promise<void>((resolve,reject)=>worker.on('close',code=>code===0?resolve():reject(new Error('Local legacy lock transaction failed: '+errors))));
+ worker.stdin.end(`begin;set local statement_timeout='5s';set local role authenticated;set local request.jwt.claim.sub='${p.id}';select id from public.gobela_reviews where id='${legacy}' for update;select 'GOBELA_ROW_LOCKED';select pg_sleep(0.5);update public.gobela_reviews set class_name='Concurrent legacy edit' where id='${legacy}';commit;`);
+ await locked;
+ await Promise.all([ended,call(f,'founder/moderate','POST',{id:mapping.id,status:'hidden'})]);
  expect((await p.client.from('gobela_reviews').update({is_hidden:false}).eq('id',legacy)).error).not.toBeNull();
  expect(ok(await admin.from('user_reports').select('status').eq('review_id',legacy))[0].status).toBe('reviewed');
  await call(f,'founder/moderate','POST',{id:mapping.id,status:'published'});

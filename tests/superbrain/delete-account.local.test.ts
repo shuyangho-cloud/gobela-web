@@ -25,8 +25,12 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('account deletion aut
  }
  const [f,p,o]=users;
  ok(await admin.from('gb_founders').insert({user_id:f.id}));
- const invoke=(token?:string,method='POST',body?:unknown)=>handler!(new Request('http://local/delete-account',{method,headers:token?{Authorization:`Bearer ${token}`,'Content-Type':'application/json'}:{},body:body===undefined?undefined:JSON.stringify(body)}));
- expect((await invoke(undefined,'GET')).status).toBe(405);
+ const runtime=process.env.RUN_SUPERBRAIN_EDGE_RUNTIME==='1';
+ const invoke=(token?:string,method='POST',body?:unknown)=>{
+  const init={method,headers:{apikey:cfg.ANON_KEY,...(token?{Authorization:`Bearer ${token}`}:{ }), 'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)};
+  return runtime?fetch(`${cfg.API_URL}/functions/v1/delete-account`,init):handler!(new Request('http://local/delete-account',init));
+ };
+ expect((await invoke(cfg.ANON_KEY,'GET')).status).toBe(405);
  expect((await invoke()).status).toBe(401);
  expect((await invoke('invalid')).status).toBe(401);
  expect((await invoke(f.token)).status).toBe(409);
@@ -34,6 +38,10 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('account deletion aut
  const review=crypto.randomUUID();
  ok(await admin.from('gobela_reviews').insert({id:review,profile_id:p.id,type:'play',tip:'Delete owned review'}));
  ok(await admin.from('child_profiles').insert({user_id:p.id,name:'Synthetic child'}));
+ const child=ok(await admin.from('gb_children').insert({owner_id:p.id,name:'Synthetic private child',birth_date:'2020-01-01'}).select('id').single());
+ ok(await admin.from('gb_health').insert({owner_id:p.id,child_id:child.id,kind:'note',value:'Synthetic private note',recorded_at:new Date().toISOString()}));
+ ok(await admin.from('gb_reminders').insert({owner_id:p.id,child_id:child.id,kind:'appointment',title:'Synthetic reminder',due_at:new Date(Date.now()+86400000).toISOString()}));
+ ok(await admin.from('gb_memory').insert({owner_id:p.id,fact:'Synthetic preference'}));
  const file=Buffer.from('private synthetic fixture');
  for(const path of [`${p.id}/top.png`,`${p.id}/nested/deeper/photo.png`,`${o.id}/retained.png`])ok(await admin.storage.from('gb-circle').upload(path,file,{contentType:'image/png'}));
  // Body is untrusted; only the verified JWT can select the account for deletion.
@@ -43,6 +51,7 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('account deletion aut
  expect(ok(await admin.auth.admin.getUserById(o.id)).user.id).toBe(o.id);
  expect(ok(await admin.from('gobela_reviews').select('id').eq('id',review))).toHaveLength(0);
  expect(ok(await admin.from('child_profiles').select('id').eq('user_id',p.id))).toHaveLength(0);
+ for(const table of ['gb_children','gb_health','gb_reminders','gb_memory'])expect(ok(await admin.from(table).select('id').eq('owner_id',p.id))).toHaveLength(0);
  expect((await admin.storage.from('gb-circle').download(`${p.id}/nested/deeper/photo.png`)).error).not.toBeNull();
  ok(await admin.storage.from('gb-circle').download(`${o.id}/retained.png`));
  }finally{

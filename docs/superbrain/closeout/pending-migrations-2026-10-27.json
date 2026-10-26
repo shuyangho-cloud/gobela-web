@@ -1,0 +1,19 @@
+{
+  "requires_production_head": "20261026161203",
+  "migrations": [
+    {
+      "path": "supabase/migrations/20261026164716_superbrain_circle_canonical.sql",
+      "version": "20261026164716",
+      "name": "superbrain_circle_canonical",
+      "sha256": "3d317f5314eecc789d9b1df6564e959e81ff211a25a47a76d73ebe85ae5b06a7",
+      "state": "prepared_not_deployed"
+    },
+    {
+      "path": "supabase/migrations/20261026180020_superbrain_instagram_checkpoint.sql",
+      "version": "20261026180020",
+      "name": "superbrain_instagram_checkpoint",
+      "sha256": "052e33a36d10df45defd42f24719cc7a01ab124e983a6efcf29c254ab9fdea93",
+      "state": "prepared_not_deployed"
+    }
+  ]
+}

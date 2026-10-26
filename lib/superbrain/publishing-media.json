@@ -1,0 +1,19 @@
+[
+  {
+    "id": "backpack-reel-audio48k",
+    "filename": "reel.mp4",
+    "label": "Backpack Reel audio-compatible reuse review",
+    "usage": "review draft; exact new-context founder approval required",
+    "source_path": "outputs/superbrain-deployment-2026-10-26/campaign-review/backpack-instagram-audio48k-review.mp4",
+    "sha256": "cf8fbd6b90522a251ec407fa8d724b31859240e15d0e1c2cf288e3c87041ce7d",
+    "bytes": 8999028,
+    "width": 1080,
+    "height": 1080,
+    "duration_seconds": 10.077,
+    "mime": "video/mp4",
+    "source_sha256": "092178ed99798a8808a9a52884bb729689995fda2b5defc5fea8500ffbedb2fb",
+    "audio_sample_rate": 48000,
+    "audio_bit_rate": 120449,
+    "video_stream_copied": true
+  }
+]
