@@ -12,6 +12,8 @@ export async function call(path:string,method='GET',body?:unknown,signal?:AbortS
   if (!data.session) throw new Error('Please sign in.');
   const response=await fetch(`/api/superbrain/${path}`,{method,cache:'no-store',signal,headers:{Authorization:`Bearer ${data.session.access_token}`,...(body ? {'Content-Type':'application/json'} : {})},body:body ? JSON.stringify(body) : undefined});
   const result=await response.json();
+  const current=await browserClient().auth.getSession();
+  if(!current.data.session || current.data.session.user.id!==data.session.user.id)throw new Error('Account changed. Please refresh.');
   if (!response.ok) throw new Error(result.error || 'Request failed');
   return result.data;
 }

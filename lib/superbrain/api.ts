@@ -11,15 +11,21 @@ import { describeRecommendations } from './assistant';
 
 const founderTables = ['knowledge', 'catalogue', 'partners', 'tasks', 'campaigns', 'actions', 'audit', 'enquiries', 'control', 'reports', 'consents', 'decisions'] as const;
 const familyTables = ['children', 'health', 'reminders', 'memory'] as const;
+const canonicalCircle=()=>process.env.SUPERBRAIN_CIRCLE_CANONICAL_ENABLED==='true';
+const circleTable=()=>canonicalCircle()?'gb_circle_feed':'gb_circle';
+async function circleCommand(db:SupabaseClient,op:string,args:Record<string,unknown>={}){
+ return checked(await db.rpc('gb_circle_command',{op,args}));
+}
 async function businessContext(db:SupabaseClient){
  const [collections,canonical,legacy]=await Promise.all([
   Promise.all(founderTables.map(async table=>{
-   let query=db.from(`gb_${table}`).select('*');
+   const source=canonicalCircle()&&table==='reports'?'gb_circle_report_feed':canonicalCircle()&&table==='consents'?'gb_circle_consent_feed':`gb_${table}`;
+   let query=db.from(source).select('*');
    if(table!=='control')query=query.order(table==='decisions'?'updated_at':['catalogue','knowledge'].includes(table)?'verified_at':'created_at',{ascending:false});
    return [table,checked(await query.limit(100))] as const;
   })),
   db.from('enrichment_classes').select('id,name,provider,is_active,trial_price,location').in('id',['minisport-explorers-1','bubbles-preschool-1','elevate-ballet-1','codeninja-scratch-1']),
-  db.from('user_reports').select('id,review_id,status,created_at').eq('status','open').limit(100)
+  canonicalCircle()?Promise.resolve({data:[],error:null}):db.from('user_reports').select('id,review_id,status,created_at').eq('status','open').limit(100)
  ]);
  const records={...Object.fromEntries(collections),legacy_reports:checked(legacy)} as BusinessSnapshot;
  return {records,canonical:checked(canonical) as CanonicalMarketingRow[],brain:founderBrief(records,checked(canonical) as CanonicalMarketingRow[],Date.now(),/^http:\/\/(127\.0\.0\.1|localhost)(:|\/)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL??'')?'Local development — business counts include test fixtures.':'Connected business records — coverage limits apply.')};
@@ -43,7 +49,7 @@ export async function handle(request: Request, path: string[]) {
     const method = request.method;
     if (path.length > 3) throw new Problem(404, 'Route not found');
     let body: Record<string, unknown> = {};
-    if (method === 'POST' || method === 'PATCH') {
+    if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
       // Check actual streamed bytes, not only the optional Content-Length header.
       const reader = request.body?.getReader();
       let size = 0; const chunks: Uint8Array[] = [];
@@ -55,7 +61,7 @@ export async function handle(request: Request, path: string[]) {
       }
       const bytes = new Uint8Array(size); let offset = 0;
       for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
-      try { body = object(JSON.parse(new TextDecoder().decode(bytes))); } catch (e) { if (e instanceof Problem) throw e; throw new Problem(400, 'Invalid JSON'); }
+      try { body = object(JSON.parse(size===0&&method==='DELETE'?'{}':new TextDecoder().decode(bytes))); } catch (e) { if (e instanceof Problem) throw e; throw new Problem(400, 'Invalid JSON'); }
     }
     let result: unknown;
     if (area === 'founder') {
@@ -87,6 +93,15 @@ export async function handle(request: Request, path: string[]) {
       } else if(resource==='legacy-moderate' && method==='POST') {
         if(typeof body.hidden!=='boolean')throw new Problem(400,'Moderation choice required');
         result=checked(await db.rpc('gb_moderate_legacy_review',{target_review:text(body.review_id,'legacy review id',200),hide:body.hidden}));
+      } else if(resource==='circle-cleanup'&&method==='POST') {
+        if(!canonicalCircle())throw new Problem(503,'Canonical Circle is not enabled');
+        const jobs=await circleCommand(db,'cleanup_list') as {id:string;photo_path:string}[];
+        let cleaned=0,failed=0;
+        for(const job of jobs.slice(0,25)){
+          try{checked(await db.storage.from('gb-circle').remove([job.photo_path]));await circleCommand(db,'cleanup_complete',{id:job.id});cleaned++;}
+          catch{failed++;}
+        }
+        result={cleaned,failed,remaining_at_least:Math.max(0,jobs.length-cleaned)};
       } else if(resource==='legacy-circle' && method==='GET') {
         result={reviews:checked(await db.from('gobela_reviews').select('id,type,tip,is_hidden,posted_at').order('posted_at',{ascending:false}).limit(100)),reports:checked(await db.from('user_reports').select('id,review_id,reason,status,created_at').limit(100)),flags:checked(await db.from('review_flags').select('review_id,reason,flagged_at').limit(100))};
       } else if(resource==='brain' && method==='POST') {
@@ -108,9 +123,9 @@ export async function handle(request: Request, path: string[]) {
         result={...businessAnswer(question,context.brain,context.records.knowledge as Parameters<typeof businessAnswer>[2],context.canonical),coverage:context.brain.coverage};
       } else if (resource === 'summary' && method === 'GET') {
         const context=await businessContext(db);
-        result={records:context.records,brain:context.brain,coverage:context.brain.coverage};
+        result={records:context.records,brain:context.brain,coverage:context.brain.coverage,circle_canonical:canonicalCircle()};
       } else if (resource === 'circle' && method === 'GET') {
-        result = checked(await db.from('gb_circle').select(circleFields).order('created_at', { ascending: false }).limit(100));
+        result = checked(await db.from(circleTable()).select(circleFields).order('created_at', { ascending: false }).limit(100));
       } else if (resource === 'briefing' && method === 'GET') {
         const context=await businessContext(db);
         result={tasks:context.records.tasks.filter(r=>r.status!=='done'),approvals:context.records.actions.filter(r=>r.status==='pending'),overdue_partners:context.records.partners.filter(r=>r.stage!=='closed'&&r.due_at&&Date.parse(r.due_at)<=Date.now()),brain:context.brain,generated_at:context.brain.generated_at};
@@ -134,9 +149,11 @@ export async function handle(request: Request, path: string[]) {
           }
         } else result = await command(db, op, { id: uuid(id), ...(op === 'reconcile' ? { receipt_id: text(body.receipt_id,'receipt',500), actual_cost_cents: integer(body.actual_cost_cents,'actual cost') } : {}) });
       } else if (resource === 'moderate' && method === 'POST') {
-        result = await command(db, 'moderate', { id: uuid(body.id), status: choice(body.status,['published','hidden'] as const,'moderation status') });
+        const args={id:uuid(body.id),status:choice(body.status,['published','hidden'] as const,'moderation status')};
+        result=canonicalCircle()?await circleCommand(db,'moderate',args):await command(db,'moderate',args);
       } else if (resource === 'verify-review' && method === 'POST') {
-        result = await command(db, 'verify_review', { id: uuid(body.id), kind: choice(body.kind,['booking','attendance'] as const,'evidence type'), evidence: text(body.evidence,'evidence',1000) });
+        const args={id:uuid(body.id),kind:choice(body.kind,['booking','attendance'] as const,'evidence type'),evidence:text(body.evidence,'evidence',1000)};
+        result=canonicalCircle()?await circleCommand(db,'verify',args):await command(db,'verify_review',args);
       } else if (resource && ['knowledge','catalogue','partners','tasks','campaigns','clinics'].includes(resource) && (method === 'POST' || (method === 'PATCH' && !!id && !['partners','tasks'].includes(resource)))) {
         let row: Record<string, unknown>;
         if (resource === 'knowledge') row = { title: text(body.title,'title',200), content: text(body.content,'content',10000), scope: choice(body.scope,['public','business'] as const,'scope'), source_url: httpsUrl(body.source_url), verified_at: timestamp(body.verified_at,'verification time') };
@@ -226,27 +243,40 @@ export async function handle(request: Request, path: string[]) {
     } else if (area === 'circle') {
       if(process.env.SUPERBRAIN_CIRCLE_PREVIEW_ENABLED!=='true')throw new Problem(503,'Use the existing GoBela Circle while the new experience is under review');
       if (resource === 'upload' && method === 'POST') {
-        await command(db,'consume',{});
         const extension=choice(body.extension,['jpg','png','webp'] as const,'image format');
-        const path=`${user.id}/${crypto.randomUUID()}.${extension}`;
-        result=checked(await db.storage.from('gb-circle').createSignedUploadUrl(path));
+        if(canonicalCircle())result=await circleCommand(db,'upload',{extension});
+        else{await command(db,'consume',{});const path=`${user.id}/${crypto.randomUUID()}.${extension}`;result=checked(await db.storage.from('gb-circle').createSignedUploadUrl(path));}
+      } else if(resource==='upload'&&method==='DELETE') {
+        const path=text(body.path,'photo path',300);
+        if(!new RegExp(`^${user.id}/[0-9a-f-]+\\.(jpg|png|webp)$`).test(path))throw new Problem(403,'Own upload required');
+        const attached=checked(await db.from(circleTable()).select('id').eq('photo_path',path).limit(1));
+        if(attached.length)throw new Problem(409,'Delete the attached post to remove this photo');
+        checked(await db.storage.from('gb-circle').remove([path]));
+        result=canonicalCircle()?await circleCommand(db,'discard_upload',{path}):{deleted:true};
       } else if (resource === 'photo' && method === 'POST') {
         const path=text(body.path,'photo path',300);
         result=checked(await db.storage.from('gb-circle').createSignedUrl(path,60));
-      } else if (resource === 'posts' && method === 'GET') result={posts:checked(await db.from('gb_circle').select(circleFields).order('created_at',{ascending:false}).limit(100)),votes:await command(db,'vote_counts',{})};
+      } else if (resource === 'posts' && method === 'GET') result={posts:checked(await db.from(circleTable()).select(circleFields).order('created_at',{ascending:false}).limit(100)),votes:canonicalCircle()?await circleCommand(db,'counts'):await command(db,'vote_counts',{}),canonical:canonicalCircle()};
       else if (resource === 'posts' && method === 'POST') {
         await command(db,'consume',{});
         // Photos use the separate authenticated upload endpoint; arbitrary URLs are rejected.
         const photo = body.photo_path ? text(body.photo_path,'photo path',300) : null;
         if (photo && !new RegExp(`^${user.id}/[0-9a-f-]+\\.(jpg|png|webp)$`).test(photo)) throw new Problem(400,'Invalid photo path');
-        result=checked(await db.from('gb_circle').insert({owner_id:user.id,category:choice(body.category,categories,'category'),title:text(body.title,'title',200),body:text(body.body,'review',3000),visited_on:body.visited_on ? date(body.visited_on) : null,photo_path:photo,status:'pending'}).select(circleFields).single());
-      } else if (resource === 'posts' && id && method === 'DELETE') { checked(await db.from('gb_circle').delete().eq('id',uuid(id)).eq('owner_id',user.id).select('id').single()); result={deleted:true}; }
-      else if (resource === 'votes' && id && method === 'POST') result=checked(await db.from('gb_votes').upsert({post_id:uuid(id),owner_id:user.id},{onConflict:'post_id,owner_id',ignoreDuplicates:true}).select());
-      else if (resource === 'votes' && id && method === 'DELETE') { checked(await db.from('gb_votes').delete().eq('post_id',uuid(id)).eq('owner_id',user.id).select()); result={deleted:true}; }
-      else if (resource === 'reports' && id && method === 'POST') result=checked(await db.from('gb_reports').insert({post_id:uuid(id),owner_id:user.id,reason:text(body.reason,'reason',1000)}).select().single());
+        const row={category:choice(body.category,categories,'category'),title:text(body.title,'title',200),body:text(body.body,'review',3000),visited_on:body.visited_on ? date(body.visited_on) : null,photo_path:photo};
+        result=canonicalCircle()?await circleCommand(db,'create',row):checked(await db.from('gb_circle').insert({...row,owner_id:user.id,status:'pending'}).select(circleFields).single());
+      } else if (resource === 'posts' && id && method === 'DELETE') {
+        const target=uuid(id);
+        const own=checked(await db.from(circleTable()).select('id,photo_path').eq('id',target).eq('owner_id',user.id).single());
+        if(own.photo_path)checked(await db.storage.from('gb-circle').remove([own.photo_path]));
+        if(canonicalCircle())result=await circleCommand(db,'delete',{id:target});
+        else {checked(await db.from('gb_circle').delete().eq('id',target).eq('owner_id',user.id).select('id').single());result={deleted:true};}
+      }
+      else if (resource === 'votes' && id && method === 'POST') result=canonicalCircle()?await circleCommand(db,'vote',{id:uuid(id),helpful:true}):checked(await db.from('gb_votes').upsert({post_id:uuid(id),owner_id:user.id},{onConflict:'post_id,owner_id',ignoreDuplicates:true}).select());
+      else if (resource === 'votes' && id && method === 'DELETE') {if(canonicalCircle())result=await circleCommand(db,'vote',{id:uuid(id),helpful:false});else{checked(await db.from('gb_votes').delete().eq('post_id',uuid(id)).eq('owner_id',user.id).select());result={deleted:true};}}
+      else if (resource === 'reports' && id && method === 'POST') result=canonicalCircle()?await circleCommand(db,'report',{id:uuid(id),reason:text(body.reason,'reason',1000)}):checked(await db.from('gb_reports').insert({post_id:uuid(id),owner_id:user.id,reason:text(body.reason,'reason',1000)}).select().single());
       else if (resource === 'consents' && id && method === 'POST') {
         if (typeof body.granted !== 'boolean') throw new Problem(400,'Invalid consent');
-        result=checked(await db.from('gb_consents').upsert({post_id:uuid(id),owner_id:user.id,purpose:text(body.purpose,'specific marketing use',300),granted:body.granted},{onConflict:'post_id,owner_id,purpose'}).select().single());
+        result=canonicalCircle()?await circleCommand(db,'consent',{id:uuid(id),purpose:text(body.purpose,'specific marketing use',300),granted:body.granted}):checked(await db.from('gb_consents').upsert({post_id:uuid(id),owner_id:user.id,purpose:text(body.purpose,'specific marketing use',300),granted:body.granted},{onConflict:'post_id,owner_id,purpose'}).select().single());
       } else throw new Problem(404,'Route not found');
     } else throw new Problem(404,'Route not found');
     return Response.json({data:result},{headers:{'Cache-Control':'no-store'}});
