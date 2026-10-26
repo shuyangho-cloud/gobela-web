@@ -16,3 +16,9 @@ Outstanding evidence is narrow: confirm the existing negotiated offer applies to
 ## Code Ninja follow-up draft — not sent
 
 Hi Jin, we are reviewing GoBela's Scratch Foundations trial listing. Our current agreed listing is S$57, while your current public trial and booking pages show S$65. Could you confirm whether S$57 remains the GoBela partner offer, the applicable ages and trial duration, whether GST/fees are included, how GoBela parents redeem it, and its validity/end date? We have held price-based promotion while reconciling this and have not changed the existing listing. Thank you.
+
+## Booking-route readiness follow-up —27 October,04:09
+
+A read-only production catalogue check shows MiniSport's three active listings use voucher booking and payout_enabled=false; Bubbles' five active direct listings have payout_enabled=true; Code Ninja's four and Elevate's three active direct listings have payout_enabled=false. Connected-account-ID presence alone does not prove current Stripe capabilities, completed onboarding, payout readiness or a valid offer. Likewise, false payout readiness does not by itself invalidate a voucher route that does not take payment.
+
+An owner-mailbox search found a14October Stripe notice about MiniSport outstanding requirements. This historical email is not evidence that the restriction persists today. No Code Ninja agreement was found in this connected mailbox. The connected Stripe tool exposes an account whose GoBela ownership is not verified; no further account query or change was made. Keep current price/offer holds, verify each exact booking route before a conversion campaign, and do not present the email or cached catalogue flag as a fresh Stripe capability check. No provider/parent contact, payment, payout or configuration change occurred.
