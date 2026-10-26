@@ -1,3 +1,5 @@
+> Core database/web release completed on 26 October 2026. Read DEPLOYED_2026-10-26.md first. Earlier pending-approval/deployment statements below describe preparation and are superseded for this release. Execution/publishing/clinical/Circle/mobile gates remain in force.
+
 # Latest validation — 26 October 2026
 
 72 tests, TypeScript and webpack production build pass. Full application schema rehearsal covers 53 tables/39 functions/four views and preserves 81 original policies/135 constraints. The twelve-migration transaction plus guarded founder bootstrap and history registration passed locally in 0.270s; lock contention aborted and fully rolled back in 2.213s. Managed platform differences, synthetic data, deployment-only asset checks and pre-existing production advisor findings are detailed in PREDEPLOY_REVIEW_2026-10-26.md. No production schema/application release is claimed.

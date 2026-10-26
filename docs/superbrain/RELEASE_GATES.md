@@ -1,3 +1,5 @@
+> Core database/web release completed on 26 October 2026. Read DEPLOYED_2026-10-26.md first. Earlier pending-approval/deployment statements below describe preparation and are superseded for this release. Execution/publishing/clinical/Circle/mobile gates remain in force.
+
 # Release gates
 
 Production is not authorized. Server execution and legacy admin mutations default off. Mobile SUPERBRAIN_ENABLED defaults false. Family records do not provide clinical interpretation or delivered notifications.

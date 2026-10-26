@@ -1,3 +1,5 @@
+> Core database/web release completed on 26 October 2026. Read DEPLOYED_2026-10-26.md first. Earlier pending-approval/deployment statements below describe preparation and are superseded for this release. Execution/publishing/clinical/Circle/mobile gates remain in force.
+
 # Latest concrete deployment review — 26 October 2026
 
 Read PREDEPLOY_REVIEW_2026-10-26.md first. Full application public/private schema rehearsal, bounded-lock rollback, migration-history registration, founder identity and server-only private assets are now prepared. Seven production-scoped disabling/configuration entries are provisioned for the next deployment; no application or schema deployment occurred. Production advisors retain the explicitly recorded existing findings. The older sequence below is background; use the guarded release generator and current review packet for the concrete twelve-migration release.
