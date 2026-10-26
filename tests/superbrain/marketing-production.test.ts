@@ -17,6 +17,9 @@ it('produces a concrete native vertical packet from approved assets and checked 
  expect(packet.channels[0].caption).not.toMatch(/free|S\$0|S\$57|S\$65/i);expect(packet.channels[0].caption).toContain('Explorers');
  expect(packet.attribution.destination).toBe('/bela?campaign=a%26b');expect(packet.assets.map(a=>a.id)).toEqual(['benchmark','logo','mother','father','daughter']);
  expect(packet.delivery_checks[0]).toContain('1080×1080');expect(packet.spend_cents).toBe(0);expect(packet.revision).toBe(productionPacket(proposal,campaign).revision);
+ expect(packet.reuse_review.new_generation_budget_cents).toBe(0);expect(packet.reuse_review.asset_id).toBe('benchmark');
+ expect(packet.reuse_review.status).toContain('founder must approve');expect(packet.reuse_review.caption).not.toMatch(/free|S\$0|S\$57|S\$65/i);
+ expect(packet.reuse_review.source_sha256).toHaveLength(64);expect(packet.reuse_review.destination).toBe('/bela?campaign=a%26b');
  expect(()=>productionPacket(brief.proposals[1],campaign)).toThrow('currently prepared');
 });
 it('asset lookup is allowlisted and fails closed without private media provisioning',async()=>{
