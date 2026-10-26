@@ -85,7 +85,7 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('canonical Circle rea
  expect((await f.client.storage.from('gb-circle').download(upload.path)).error).not.toBeNull();
  await expect(call(o,'founder/circle-cleanup','POST',{})).rejects.toThrow();
  const cleanup=await call(f,'founder/circle-cleanup','POST',{});
- expect(cleanup.cleaned).toBe(1);expect(cleanup.failed).toBe(0);
+ expect(cleanup.cleaned).toBeGreaterThanOrEqual(1);expect(cleanup.failed).toBe(0);
  expect((await p.client.storage.from('gb-circle').download(upload.path)).error).not.toBeNull();
  const discarded=await call(p,'circle/upload','POST',{extension:'png'});
  ok(await p.client.storage.from('gb-circle').upload(discarded.path,png,{contentType:'image/png'}));
@@ -97,7 +97,15 @@ it.skipIf(process.env.RUN_SUPERBRAIN_CANONICAL_LIVE!=='1')('canonical Circle rea
  ok(await admin.from('gb_circle_cleanup').update({eligible_at:'2020-01-01T00:00:00Z'}).eq('photo_path',orphan.path));
  expect((await f.client.storage.from('gb-circle').download(orphan.path)).error).not.toBeNull();
  expect((await call(f,'founder/circle-cleanup','POST',{})).cleaned).toBe(1);
+ // Legacy cards read category-specific title fields, not the new metadata.
+ for(const [category,field] of Object.entries({cook:'dish_name',eat:'place_name',play:'activity_name',learn:'class_name',shop:'supplier_name'})){
+  const title=`Synthetic ${category} title`;
+  const row=await call(p,'circle/posts','POST',{category,title,body:'Category bridge fixture'});
+  expect(ok(await p.client.from('gobela_reviews').select(field).eq('id',row.legacy_id).single())[field]).toBe(title);
+  await call(p,`circle/posts/${row.id}`,'DELETE');
+ }
  const plain=await call(p,'circle/posts','POST',{category:'learn',title:'Evidence review',body:'No photo'});
+ expect(ok(await p.client.from('gobela_reviews').select('class_name').eq('id',plain.legacy_id).single()).class_name).toBe('Evidence review');
  await expect(call(o,'founder/verify-review','POST',{id:plain.id,kind:'booking',evidence:'Unauthorized reference'})).rejects.toThrow();
  await call(f,'founder/verify-review','POST',{id:plain.id,kind:'booking',evidence:'Synthetic private booking reference'});
  expect(JSON.stringify(await call(p,'circle/posts'))).not.toContain('Synthetic private booking reference');

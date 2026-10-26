@@ -5,7 +5,7 @@
       "path": "supabase/migrations/20261026164716_superbrain_circle_canonical.sql",
       "version": "20261026164716",
       "name": "superbrain_circle_canonical",
-      "sha256": "3d317f5314eecc789d9b1df6564e959e81ff211a25a47a76d73ebe85ae5b06a7",
+      "sha256": "98d5a3d203f9bf7bb2cdd48118e8c5dd9c23e3e17f061edeac6e4c870112ae3d",
       "state": "prepared_not_deployed"
     },
     {
