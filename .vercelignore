@@ -6,6 +6,7 @@ supabase/.temp/
 *.tsbuildinfo
 .vercel
 .local-marketing-assets
+.private-superbrain-assets
 outputs
 output
 coverage

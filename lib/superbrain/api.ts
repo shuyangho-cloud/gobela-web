@@ -60,14 +60,14 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
-      if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'));
+      if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'),db);
       if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {
         const [listings,outcomes,campaigns,canonical,assets]=await Promise.all([
           db.from('gb_catalogue_retrieval').select('id,title,provider,category,area,price_cents,source_url,verified_at,active').eq('active',true).order('verified_at',{ascending:false}).limit(1000),
           db.rpc('gb_campaign_results'),
           db.from('gb_campaigns').select('id,title,draft').order('created_at',{ascending:false}).limit(100),
           db.from('enrichment_classes').select('id,name,provider,is_active,trial_price,location').in('id',['minisport-explorers-1','bubbles-preschool-1','elevate-ballet-1','codeninja-scratch-1']),
-          assetInventory()
+          assetInventory(db)
         ]);
         const briefing=marketingBriefing({listings:checked(listings) as MarketingListing[],outcomes:checked(outcomes),campaigns:checked(campaigns),canonical:checked(canonical) as CanonicalMarketingRow[]});
         if(method==='POST') {

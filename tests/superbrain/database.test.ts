@@ -25,6 +25,7 @@ beforeAll(async()=>{
  await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_decision_memory.sql'))!),'utf8'));
  await db.exec(readFileSync(resolve(dir,readdirSync(dir).find(f=>f.endsWith('_superbrain_consolidate_read_policies.sql'))!),'utf8'));
  for(const uid of [parent,other])await as(uid,"insert into public.gb_family_consent(owner_id,version,granted) values($1,'2026-10-23',true)",[uid]);
+ await db.exec('reset role');await db.exec(readFileSync(resolve(dir,'20261026150038_superbrain_private_reference_storage.sql'),'utf8'));
  await db.exec(`reset role; insert into public.gb_founders values('${founder}');`);
  campaign=(await as(founder,"insert into public.gb_campaigns(title,audience,category,objective) values('Weekend','Parents','play','Enquiries') returning id")).rows[0] as any;
  campaign=(campaign as any).id;
@@ -157,4 +158,12 @@ it('business decision preparation is idempotent, audited and isolated from paren
  await call(founder,'restore');expect((await as(founder,'select status from public.gb_tasks where id=$1',[proposal.id])).rows).toEqual([{status:'open'}]);
  expect((await as(founder,'select count(*) total from public.gb_actions')).rows).toEqual(before);
  expect((await db.query("select has_function_privilege('authenticated','gb_private.audit_brain_decision()','EXECUTE') allowed")).rows).toEqual([{allowed:false}]);
+});
+
+it('private brand storage is founder-readable only for approved content-addressed objects, with no client writes',async()=>{
+ const name='e41cfd3a9c7fb2ee242844d6793a3d4db013e7a20013b4f070607f5866860ca8/logo.png';
+ await db.exec('reset role');await db.query("insert into storage.objects(bucket_id,name) values('gb-marketing-references',$1),('gb-marketing-references','unapproved.png')",[name]);
+ expect((await as(parent,"select name from storage.objects where bucket_id='gb-marketing-references'")).rows).toHaveLength(0);
+ expect((await as(founder,"select name from storage.objects where bucket_id='gb-marketing-references'")).rows).toEqual([{name}]);
+ await expect(as(founder,"insert into storage.objects(bucket_id,name) values('gb-marketing-references',$1)",[name])).rejects.toThrow();
 });
