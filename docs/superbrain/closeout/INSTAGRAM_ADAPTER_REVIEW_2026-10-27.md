@@ -1,0 +1,23 @@
+# Instagram organic Reel adapter — prepared, not enabled
+
+The new adapter separates one-shot container creation, bounded status checks, one-shot publication and actual media verification. A server-side checkpoint is committed before each external POST. Concurrent callers cannot create another container or publish twice. A timeout/interrupted mutation becomes uncertain and is never retried automatically. A saved container or FINISHED status never counts as publication success. Only the exact configured account, caption, Reel media type, post timestamp and Instagram permalink can produce a verified receipt.
+
+The foundation is [Meta’s official collection](https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api) and [Meta’s media SDK field definitions](https://github.com/facebook/facebook-nodejs-business-sdk/blob/main/src/objects/ig-media.js). The Facebook Login path uses a Page token linked to the exact professional account. Live scopes and API behavior must still be verified against the actual GoBela account before enabling.
+
+Migration17 adds a founder-readable checkpoint table and a public invoker/private privileged RPC with explicit founder checks and consistent controls/action/job lock order. Checkpoints bind the immutable approved payload. It allows five processing checks, at least sixty seconds apart, and no recurring worker. Pause/expiry prevents new upload/publish steps; a verified receipt can still finish an already dispatched action through the reviewed reconciliation path. Manual owner receipt attestation remains a separately audited capability; it is not represented as Graph verification by this adapter.
+
+Eight mock-transport unit tests pass. The real local RPC journey also passes: owner/parent permissions, concurrent upload/publish attempts, deferred processing, pause-before-publish, actual receipt completion and uncertain no-resend. Every Meta request in these tests is an in-process mock; no content or token was sent to Meta. Local advisors have zero security ERRORs and no new unindexed FK warning for the checkpoint.
+
+## Exact review media
+
+Original approved square benchmark has44.1kHz/~194kbps audio, outside the collection’s documented48kHz/128kbps audio specification. A local zero-cost derivative copies the original H.264 video stream and encodes AAC48kHz/~120kbps. Video bitstream hash is identical:7f857bb41251cfe7d3a5fec8f32fbfe76ad4e366341626b4fb65dc044d34614a. Full decode passes. File hashcf8fbd6b90522a251ec407fa8d724b31859240e15d0e1c2cf288e3c87041ce7d;8999028bytes;1080x1080;30fps;10.077s. It is a square reuse review draft, not newly generated vertical footage.
+
+publishing-media.json fixes that exact derivative and excludes the family identity stills from publishing. Founder review uses authenticated bounded ranges. A separate exact-path Storage SELECT policy grants only founder reads; no client upload or public policy is added. The publishing path fresh-checks file bytes/hash before issuing a ten-minute read capability for server-to-server Meta ingestion. Capability URLs/tokens are never persisted in jobs or returned as receipts. Real local Storage checks passed for founder preview, full signed download hash, parent/anonymous denial, forbidden client upload and denied signing under parent credentials even after a founder cache hit.
+
+## Enablement gates
+
+Production remains on fifteen migrations;16/17, the derivative upload and this source are prepared for review only. The operator provisioning script supports --publishing-review to verify/upload only the fixed derivative, with no overwrite. No production upload occurred. Keep SUPERBRAIN_INSTAGRAM_ADAPTER_ENABLED, META and execution false. Existing ADAPTER_MODE remains test; controls remain paused/zero-budget.
+
+Required before live use: fresh owner-controlled Page token; exact GoBela Page1105312236002694/linked gobelaapp identity; actual Instagram professional ID; API version; verified current permissions including separately authorized instagram_content_publish; exact final clip/caption/context approval and media rights; cloud signed-URL accessibility and non-sending identity/permission preflight. Earlier pages_manage_posts/instagram_basic/broader Page-use-case approvals persist, but do not imply approval of additional Instagram publishing permissions or actual publishing.
+
+Use the dedicated Continue approved Reel / verify receipt action after the displayed check time. The browser does not poll or publish automatically. For an uncertain mutation with no saved actual media ID, inspect the channel and use the owner-controlled reconciliation process; never recreate/re-publish blindly. No ad, DM, email, push, paid generation or scheduled publishing is introduced.
