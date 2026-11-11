@@ -1,3 +1,4 @@
+import {paymentSnapshot} from './payments';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {founderBrief,businessAnswer,type BusinessSnapshot} from './founder-brain';
 import { authenticate, checked, command, founder } from './db';
@@ -73,6 +74,10 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
+      if(resource==='payments') {
+        if(method!=='GET' || id) throw new Problem(404,'Route not found');
+        return Response.json({data:await paymentSnapshot(user.id)},{headers:{'Cache-Control':'no-store'}});
+      }
       if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'),db);
       if(resource==='publishing-media'&&id&&method==='GET')return await publishingAssetResponse(id,request.headers.get('range'),db);
       if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {

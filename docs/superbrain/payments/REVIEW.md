@@ -1,0 +1,17 @@
+# Founder payment monitor — disabled review
+
+Adds a read-only Payments tab to Superbrain. Existing signed-in account verification plus gb_founders membership run before any Stripe access. No editable user metadata grants access. The view is mounted only in the founder workspace and keyed to account identity; the shared browser client fences account changes, and unmount aborts late updates. Responses are no-store and do not persist locally.
+
+Configuration remains OFF. To review live reads later, provision SUPERBRAIN_STRIPE_READ_KEY as a dedicated rk_live_ restricted key with PaymentIntents, expanded Charges and the current-account read permissions, verify SUPERBRAIN_STRIPE_ACCOUNT_ID, then explicitly enable SUPERBRAIN_PAYMENTS_READ_ENABLED=true. No general checkout secret fallback. No credentials are committed or provisioned by this change. If required account access is unavailable under a least-privilege key, keep disabled; do not widen permissions silently.
+
+Read flow: fixed Stripe host, GET only, redirects refused, shared20second deadline; current account identity checked first. Latest two pages (up to200PaymentIntents) are scanned, duplicates/malformed records cause explicit unavailable errors, further pages produce visible partial coverage. Metadata is only a founder-origin hint; no attempts or errors are suppressed. Awaiting-method records are never equated to declines, revenue loss or payout debt. Succeeded records explicitly lack booking-fulfilment verification. Snapshot time is shown; no continuous monitoring claim.
+
+The browser receives only allowlisted payment ID/amount/currency/created/status/assessment/partner/founder-origin hint and account enabled flags/requirement counts. No customer/card/receipt details, raw Stripe objects, client_secret, API errors or keys. Currency values use currency-specific minor units, including Stripe's legacy ISK/UGX representation. Account method-specific restrictions are not inventoried by this read.
+
+This is the first manual read-only view, not completed operational alerting. Signed webhook ingestion, expired Checkout sessions, historical failed attempts that later succeeded, booking reconciliation, independent refund/dispute inventory, rate limits and out-of-band alert delivery remain separate. No webhook endpoint changed. No charge/cancel/refund/retry/contact, cron or notification is added. Existing execution budget/control remains unchanged. No deployment or production activation performed.
+
+Review source against current main5c1e4b7. Requirements/evidence: childassist outputs/superbrain-closeout-2026-11-11. Retain separate mobile/native approval gates.
+
+References: https://docs.stripe.com/api/payment_intents/list ; https://docs.stripe.com/api/accounts/retrieve ; local Next16.4.2 route-handler documentation. API version2026-10-28.endive verified against current official reference.
+
+Read-only live webhook inventory on12November: three enabled destinations; Connect stripe-webhooks already subscribes to payment_intent.payment_failed and checkout.session.expired as well as account/success/transfer events. Checkout fulfillment destination subscribes to completed and async_payment_succeeded. Current local Connect code records non-account events as observed only. Deployed function source/event delivery still must be independently verified; subscriptions alone do not prove alerting or delivery health. No endpoint changed.
