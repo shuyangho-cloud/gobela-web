@@ -6,8 +6,8 @@ founder=str(uuid.UUID(a.founder_id));root=Path(__file__).resolve().parents[2];db
 manifest=json.loads((root/'docs/superbrain/budget/release-migrations.json').read_text())
 files=[]
 for m in manifest['migrations']:
- source=(db/m['path']).read_text()
- if hashlib.sha256(source.encode()).hexdigest()!=m['sha256']:raise SystemExit('Migration hash differs: '+m['path'])
+ raw=(db/m['path']).read_bytes();source=raw.decode('utf-8')
+ if hashlib.sha256(raw).hexdigest()!=m['sha256']:raise SystemExit('Migration hash differs: '+m['path'])
  files.append((m,source))
 versions=','.join("'"+m['version']+"'" for m,_ in files)
 prologue=f'''-- GENERATED REVIEW ONLY; not a deployment authorization. Never use against an unreviewed project.
