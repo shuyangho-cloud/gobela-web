@@ -19,6 +19,7 @@ beforeAll(async()=>{
  `);
  await db.exec(readFileSync(resolve('../childassist/supabase/migrations/20261123012648_superbrain_weekly_budget.sql'),'utf8'));
  await db.exec(readFileSync(resolve('../childassist/supabase/migrations/20261123025456_superbrain_ai_billing_receipts.sql'),'utf8'));
+ await db.exec(readFileSync(resolve('../childassist/supabase/migrations/20261123052714_superbrain_ai_cost_evidence.sql'),'utf8'));
 },120000);
 beforeEach(async()=>{await db.exec(`reset role; truncate gb_private.budget_reservations,public.gb_actions;
  update gb_private.budget_policy set enabled=true,halted=false;
@@ -154,6 +155,45 @@ it('denies parents and anonymous callers the receipt RPC',async()=>{
  for(const role of ['anon','authenticated']){
   await db.exec(`set role ${role}`);
   await expect(db.query('select gb_budget_note_receipt($1,$2)',[id(1),'gateway:gen_test'])).rejects.toThrow('permission denied');
+  await db.exec('reset role');
+ }
+});
+function quote(){return {version:1,model:'provider/model',provider:'provider',evidence:'reviewed test fixture, not live configuration',reviewedAt:new Date(Date.now()-1000).toISOString(),expiresAt:new Date(Date.now()+3600000).toISOString(),maximumUsdMicros:4000000,sgdCentsPerUsdCeiling:150,maximumInputBytes:1000,maximumOutputTokens:600};}
+const reserveAi=(n:number,q:unknown=quote())=>db.query<{r:any}>('select gb_budget_reserve_ai($1,$2::jsonb) r',[id(n),JSON.stringify(q)]);
+const settleAi=(n:number,micros:number,time:string)=>db.query('select gb_budget_settle_ai($1,$2,$3,$4::timestamptz)',[id(n),micros,`gateway:gen_${n}`,time]);
+it('atomically retains the exact quote and detects replay with different pricing evidence',async()=>{
+ const q=quote();const result=await reserveAi(1,q);expect(result.rows[0].r.reserved_cents).toBe(600);
+ expect((await reserveAi(1,q)).rows[0].r.acquired).toBe(false);
+ await expect(reserveAi(1,{...q,evidence:'different review'})).rejects.toThrow('Cost evidence conflict');
+ expect((await db.query('select cost_contract from gb_private.budget_reservations')).rows[0]).toEqual({cost_contract:q});
+});
+it('rejects missing, extra, expired and over-budget quote evidence without creating a hold',async()=>{
+ for(const q of [null,{}, {...quote(),prompt:'Private words'}, {...quote(),provider:null}, {...quote(),expiresAt:'2020-01-01T00:00:00Z'}, {...quote(),maximumUsdMicros:1000000000}])await expect(reserveAi(1,q)).rejects.toThrow();
+ expect((await db.query('select count(*)::int n from gb_private.budget_reservations')).rows[0]).toEqual({n:0});
+});
+it('attributes a late Monday charge to its billed week and retains USD/FX evidence',async()=>{
+ await reserveAi(1);
+ await db.exec(`update gb_private.budget_reservations set created_at=(gb_private.budget_week(now())::timestamp at time zone 'Asia/Singapore')-interval '1 second',week_start=gb_private.budget_week(now())-7`);
+ const billed=(await db.query<{t:string}>("select clock_timestamp()::text t")).rows[0].t;
+ await db.query('select gb_budget_note_receipt($1,$2)',[id(1),'gateway:gen_1']);
+ await settleAi(1,4000000,billed); // S$6 must remain in this week's S$10 allocation.
+ await expect(reserve(2,'ai',401)).rejects.toThrow('Weekly budget exceeded');
+ await reserve(2,'ai',400);
+ const row=(await db.query<any>('select week_start::text,charged_at is not null has_time,billed_usd_micros::text usd,cost_contract->>\'sgdCentsPerUsdCeiling\' fx from gb_private.budget_reservations where id=$1',[id(1)])).rows[0];
+ expect(row).toEqual({week_start:(await db.query<{w:string}>('select gb_private.budget_week(now())::text w')).rows[0].w,has_time:true,usd:'4000000',fx:'150'});
+ await settleAi(1,4000000,billed);
+ await expect(settleAi(1,3000000,billed)).rejects.toThrow('Billing evidence conflict');
+});
+it('does not accept future or unrelated billing times and keeps the reservation held',async()=>{
+ await reserveAi(1);await db.query('select gb_budget_note_receipt($1,$2)',[id(1),'gateway:gen_1']);
+ for(const time of [new Date(Date.now()+3600000).toISOString(),'2020-01-01T00:00:00Z'])await expect(settleAi(1,1,time)).rejects.toThrow('Invalid billed cost or time');
+ expect((await db.query('select actual_cents from gb_private.budget_reservations')).rows[0]).toEqual({actual_cents:null});
+});
+it('denies anonymous and parent access to quote reservation and billed settlement',async()=>{
+ for(const role of ['anon','authenticated']){
+  await db.exec(`set role ${role}`);
+  await expect(reserveAi(1)).rejects.toThrow('permission denied');
+  await expect(settleAi(1,1,new Date().toISOString())).rejects.toThrow('permission denied');
   await db.exec('reset role');
  }
 });

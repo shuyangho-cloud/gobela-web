@@ -4,16 +4,16 @@ const contract=():AiCostContract=>({version:1,model:'provider/model',provider:'p
 const input={system:'Guide',prompt:'Find an activity',maxOutputTokens:250};
 function dependencies(){
  const calls:string[]=[];
- const deps:PaidAiDependencies={reserve:vi.fn(async()=>{calls.push('reserve');return true;}),noteReceipt:vi.fn(async()=>{calls.push('note');}),settle:vi.fn(async()=>{calls.push('settle');}),generate:vi.fn(async()=>{calls.push('generate');return {text:'Verified summary',generationId:'gen_test'};}),billing:vi.fn(async()=>{calls.push('billing');return {id:'gen_test',model:'provider/model',providerName:'provider',totalCost:0.002,isByok:false};})};
+ const deps:PaidAiDependencies={reserve:vi.fn(async()=>{calls.push('reserve');return true;}),noteReceipt:vi.fn(async()=>{calls.push('note');}),settle:vi.fn(async()=>{calls.push('settle');}),generate:vi.fn(async()=>{calls.push('generate');return {text:'Verified summary',generationId:'gen_test'};}),billing:vi.fn(async()=>{calls.push('billing');return {id:'gen_test',model:'provider/model',providerName:'provider',totalCost:0.002,isByok:false,createdAt:new Date().toISOString()};})};
  return {deps,calls};
 }
-afterEach(()=>{vi.unstubAllEnvs();});
+afterEach(()=>{vi.unstubAllEnvs();vi.restoreAllMocks();});
 it('reserves before calling, saves billing identifier before lookup and settles rounded-up SGD cost',async()=>{
  const {deps,calls}=dependencies();
  expect(await runBudgetedAi(input,contract(),deps)).toBe('Verified summary');
  expect(calls).toEqual(['reserve','generate','note','billing','settle']);
- expect(deps.reserve).toHaveBeenCalledWith(expect.any(String),2);
- expect(deps.settle).toHaveBeenCalledWith(expect.any(String),1,'gateway:gen_test');
+ expect(deps.reserve).toHaveBeenCalledWith(expect.any(String),2,expect.objectContaining({model:'provider/model'}));
+ expect(deps.settle).toHaveBeenCalledWith(expect.any(String),2000,'gateway:gen_test',expect.any(String));
 });
 it('never contacts provider for a denied, duplicate or ambiguous reservation',async()=>{
  for(const response of [false,new Error('DB timeout')]){
@@ -28,7 +28,7 @@ it('keeps unknown provider outcomes held, without retry or zero-cost settlement'
  expect(deps.generate).toHaveBeenCalledTimes(1);expect(deps.settle).not.toHaveBeenCalled();
 });
 it('keeps missing, delayed, mismatched and malformed billing evidence held',async()=>{
- const variants=[{}, {id:'gen_other'}, {model:'other/model'}, {providerName:'unexpected'}, {totalCost:NaN}, {totalCost:-1}, {isByok:true}];
+ const variants=[{}, {id:'gen_other'}, {model:'other/model'}, {providerName:'unexpected'}, {totalCost:NaN}, {totalCost:-1}, {isByok:true}, {createdAt:'bad'}, {createdAt:new Date(Date.now()+100000).toISOString()}];
  for(const change of variants){
   const {deps}=dependencies();const real=deps.billing;
   deps.billing=vi.fn(async(id)=>{if(!Object.keys(change).length)throw new Error('Billing not ingested');return {...await real(id),...change};});
@@ -43,9 +43,9 @@ it('does not free holds if receipt recording or settlement fails',async()=>{
  }
 });
 it('records true overrun before discarding generated output',async()=>{
- const {deps}=dependencies();deps.billing=vi.fn(async()=>({id:'gen_test',model:'provider/model',providerName:'provider',totalCost:0.05,isByok:false}));
+ const {deps}=dependencies();deps.billing=vi.fn(async()=>({id:'gen_test',model:'provider/model',providerName:'provider',totalCost:0.05,isByok:false,createdAt:new Date().toISOString()}));
  expect(await runBudgetedAi(input,contract(),deps)).toBeUndefined();
- expect(deps.settle).toHaveBeenCalledWith(expect.any(String),8,'gateway:gen_test');
+ expect(deps.settle).toHaveBeenCalledWith(expect.any(String),50000,'gateway:gen_test',expect.any(String));
 });
 it('blocks stale, wrong-model, oversized, future-reviewed and malformed contracts',()=>{
  const c=contract();
@@ -61,4 +61,11 @@ it('rejects oversized UTF8 input and excessive output before reserving',async()=
 it('cannot activate from the legacy AI environment flag alone',async()=>{
  vi.stubEnv('SUPERBRAIN_AI_ENABLED','true');vi.stubEnv('SUPERBRAIN_AI_MODEL','provider/model');vi.stubEnv('SUPERBRAIN_AI_COST_CONTRACT','');
  expect(await budgetedAiText(input)).toBeUndefined();
+});
+
+it('does not spend if the quote expires while waiting for the database permit',async()=>{
+ const {deps}=dependencies(),c=contract();
+ deps.reserve=vi.fn(async()=>{vi.spyOn(Date,'now').mockReturnValue(Date.parse(c.expiresAt)+1);return true;});
+ expect(await runBudgetedAi(input,c,deps)).toBeUndefined();
+ expect(deps.generate).not.toHaveBeenCalled();
 });
