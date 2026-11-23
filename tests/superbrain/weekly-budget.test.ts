@@ -18,6 +18,7 @@ beforeAll(async()=>{
  alter default privileges in schema public grant all on tables to anon,authenticated;
  `);
  await db.exec(readFileSync(resolve('../childassist/supabase/migrations/20261123012648_superbrain_weekly_budget.sql'),'utf8'));
+ await db.exec(readFileSync(resolve('../childassist/supabase/migrations/20261123025456_superbrain_ai_billing_receipts.sql'),'utf8'));
 },120000);
 beforeEach(async()=>{await db.exec(`reset role; truncate gb_private.budget_reservations,public.gb_actions;
  update gb_private.budget_policy set enabled=true,halted=false;
@@ -129,3 +130,30 @@ it('integrates with the actual founder command and additive production schema',a
   expect((await command('claim',{id:action.id})).status).toBe('executing');
  }finally{await integrated.close();}
 },120000);
+
+it('persists pending billing identifiers without releasing an unresolved hold',async()=>{
+ await reserve(1,'ai',1000);
+ await db.exec('set role service_role');
+ await db.query('select gb_budget_note_receipt($1,$2)',[id(1),'gateway:gen_test']);
+ await expect(reserve(2,'ai',1)).rejects.toThrow('Weekly budget exceeded');
+ await expect(settle(1,1,'gateway:gen_other')).rejects.toThrow('Receipt conflict');
+ await settle(1,1,'gateway:gen_test');
+ await db.exec('reset role');
+ expect((await db.query('select pending_receipt,actual_cents from gb_private.budget_reservations')).rows[0]).toEqual({pending_receipt:'gateway:gen_test',actual_cents:1});
+});
+it('rejects duplicate, changing, invalid or non-AI billing identifiers',async()=>{
+ await reserve(1);await reserve(2);await reserve(3,'ads');
+ const note=(n:number,receipt:string)=>db.query('select gb_budget_note_receipt($1,$2)',[id(n),receipt]);
+ await note(1,'gateway:gen_test');await note(1,'gateway:gen_test');
+ await expect(note(1,'gateway:gen_other')).rejects.toThrow('Receipt conflict');
+ await expect(note(2,'gateway:gen_test')).rejects.toThrow('duplicate key');
+ await expect(note(2,'prompt text')).rejects.toThrow('Invalid provider receipt');
+ await expect(note(3,'gateway:gen_ads')).rejects.toThrow('AI reservation required');
+});
+it('denies parents and anonymous callers the receipt RPC',async()=>{
+ for(const role of ['anon','authenticated']){
+  await db.exec(`set role ${role}`);
+  await expect(db.query('select gb_budget_note_receipt($1,$2)',[id(1),'gateway:gen_test'])).rejects.toThrow('permission denied');
+  await db.exec('reset role');
+ }
+});
