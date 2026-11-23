@@ -1,0 +1,20 @@
+{
+  "database_source_commit": "f8d11ed",
+  "migrations": [
+    {
+      "path": "supabase/migrations/20261123012648_superbrain_weekly_budget.sql",
+      "version": "20261123012648",
+      "sha256": "71bc119320f6b81f79f65b40ca94ebd11e295568b959a682e615817bc52844f6"
+    },
+    {
+      "path": "supabase/migrations/20261123025456_superbrain_ai_billing_receipts.sql",
+      "version": "20261123025456",
+      "sha256": "7076ff663697724cb016766d0a35bdb4e780d53c6652754f45964605cc446dc0"
+    },
+    {
+      "path": "supabase/migrations/20261123052714_superbrain_ai_cost_evidence.sql",
+      "version": "20261123052714",
+      "sha256": "d9aeac3293696ccda72416076b377eb4d0374c0c6dc98c1d5e979e2ae7056af7"
+    }
+  ]
+}
