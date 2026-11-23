@@ -10,11 +10,11 @@ export type AiCostContract = {
   maximumInputBytes: number; maximumOutputTokens: number;
 };
 type Input = { system: string; prompt: string; maxOutputTokens: number };
-type Billing = { id: string; model: string; providerName: string; totalCost: number; isByok: boolean };
+type Billing = { id: string; model: string; providerName: string; totalCost: number; isByok: boolean; createdAt: string };
 export type PaidAiDependencies = {
-  reserve(id: string, cents: number): Promise<boolean>;
+  reserve(id: string, cents: number, contract: AiCostContract): Promise<boolean>;
   noteReceipt(id: string, receipt: string): Promise<void>;
-  settle(id: string, cents: number, receipt: string): Promise<void>;
+  settle(id: string, usdMicros: number, receipt: string, billedAt: string): Promise<void>;
   generate(input: Input, contract: AiCostContract): Promise<{text: string; generationId?: string}>;
   billing(generationId: string): Promise<Billing>;
 };
@@ -45,7 +45,9 @@ export async function runBudgetedAi(input: Input, contract: AiCostContract, deps
     !positiveInt(input.maxOutputTokens, contract.maximumOutputTokens)) return;
   const reserved = Math.ceil(contract.maximumUsdMicros * contract.sgdCentsPerUsdCeiling / 1000000);
   try {
-    if (!await deps.reserve(id, reserved)) return;
+    if (!await deps.reserve(id, reserved, contract)) return;
+    // Reservation may have waited on another transaction until evidence expired.
+    if (!parseAiCostContract(JSON.stringify(contract), contract.model)) return;
     const generated = await deps.generate(input, contract);
     const generationId = generated.generationId;
     if (!generationId || !/^gen_[A-Za-z0-9_-]{1,120}$/.test(generationId)) return;
@@ -54,13 +56,13 @@ export async function runBudgetedAi(input: Input, contract: AiCostContract, deps
     await deps.noteReceipt(id, receipt);
     const bill = await deps.billing(generationId);
     if (bill.id !== generationId || bill.model !== contract.model || bill.providerName !== contract.provider ||
-      bill.isByok !== false || !Number.isFinite(bill.totalCost) || bill.totalCost < 0) return;
+      bill.isByok !== false || !Number.isFinite(bill.totalCost) || bill.totalCost < 0 || !Number.isFinite(Date.parse(bill.createdAt)) || Date.parse(bill.createdAt) > Date.now()) return;
     // Ceil both USD micros and SGD cents; fractional cents never become free calls.
     // FX/fee ceiling is a conservative accounting charge, not a final bank-settlement claim.
     const micros = Math.ceil(bill.totalCost * 1000000);
     const cost = Math.ceil(micros * contract.sgdCentsPerUsdCeiling / 1000000);
     if (!Number.isSafeInteger(micros * contract.sgdCentsPerUsdCeiling) || !Number.isSafeInteger(cost) || cost > 2147483647) return;
-    await deps.settle(id, cost, receipt); // DB preserves actual overruns and halts further permits.
+    await deps.settle(id, micros, receipt, bill.createdAt); // DB preserves actual overruns and halts further permits.
     if (cost > reserved) return;
     return generated.text.trim() || undefined;
   } catch {
@@ -81,12 +83,15 @@ function productionDependencies(): PaidAiDependencies | undefined {
   };
   const boundedGateway = createGateway({fetch: (url, init) => fetch(url, {
     ...init, cache:'no-store', redirect:'error',
-    signal:AbortSignal.any([...(init?.signal ? [init.signal] : []), AbortSignal.timeout(20000)]),
+    signal:AbortSignal.any([...(init?.signal ? [init.signal] : []), AbortSignal.timeout(8000)]),
   })});
   return {
-    reserve: async (id, cents) => (await rpc('gb_budget_reserve', {request_id:id, bucket:'ai', maximum_cents:cents})).acquired === true,
+    reserve: async (id, cents, contract) => {
+      const result = await rpc('gb_budget_reserve_ai', {request_id:id, contract});
+      return result.acquired === true && result.reserved_cents === cents;
+    },
     noteReceipt: async (id, receipt) => { await rpc('gb_budget_note_receipt', {request_id:id, provider_receipt:receipt}); },
-    settle: async (id, cents, receipt) => { await rpc('gb_budget_settle', {request_id:id, cost_cents:cents, provider_receipt:receipt}); },
+    settle: async (id, usdMicros, receipt, billedAt) => { await rpc('gb_budget_settle_ai', {request_id:id, usd_micros:usdMicros, provider_receipt:receipt, billed_at:billedAt}); },
     generate: async (input, contract) => {
       const result = await generateText({
         model: boundedGateway(contract.model), ...input,

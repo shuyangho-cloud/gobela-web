@@ -12,7 +12,7 @@ if len(sys.argv)==2 and sys.argv[1]=='--fixture':
   subprocess.run([sys.executable,str(root/'scripts/superbrain/build-contract-rehearsal.py'),str(root.parent/'childassist'),str(target)],check=True,capture_output=True,text=True)
   print('create role anon;create role authenticated;create role service_role bypassrls;')
   print(target.read_text())
- for name in ['20261123012648_superbrain_weekly_budget.sql','20261123025456_superbrain_ai_billing_receipts.sql']:
+ for name in ['20261123012648_superbrain_weekly_budget.sql','20261123025456_superbrain_ai_billing_receipts.sql','20261123052714_superbrain_ai_cost_evidence.sql']:
   print((root.parent/'childassist/supabase/migrations'/name).read_text())
  sys.exit(0)
 if len(sys.argv)!=3 or sys.argv[1]!='--container' or not re.fullmatch(r'gobela-weekly-rehearsal-[0-9]+',sys.argv[2]):
