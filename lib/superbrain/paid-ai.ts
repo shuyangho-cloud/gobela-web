@@ -96,10 +96,13 @@ function productionDependencies(): PaidAiDependencies | undefined {
       const result = await generateText({
         model: boundedGateway(contract.model), ...input,
         maxRetries: 0, abortSignal: AbortSignal.timeout(12000),
-        providerOptions: {gateway: {only:[contract.provider], models:[]}},
+        providerOptions: {gateway: {only:[contract.provider], models:[], zeroDataRetention:true, disallowPromptTraining:true}},
       });
       const generationId = result.providerMetadata?.gateway?.generationId;
-      return {text:result.text, generationId:typeof generationId === 'string' ? generationId : undefined};
+      // Missing privacy confirmation must not expose generated content. Keep the
+      // receipt path intact: a billed response is still a cost, even if withheld.
+      const privacyConfirmed = result.providerMetadata?.gateway?.enabledZeroDataRetention === true;
+      return {text:privacyConfirmed ? result.text : '', generationId:typeof generationId === 'string' ? generationId : undefined};
     },
     billing: generationId => boundedGateway.getGenerationInfo({id:generationId}),
   };
