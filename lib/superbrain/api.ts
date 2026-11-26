@@ -76,8 +76,9 @@ export async function handle(request: Request, path: string[]) {
       await founder(db, user.id);
       if(resource==='billing-reconciliation') {
         if(method!=='POST' || id)throw new Problem(404,'Route not found');
-        if(Object.keys(body).length)throw new Problem(400,'Reconciliation uses stored receipts only');
-        try { return Response.json({data:await reconcileStoredAiBilling()},{headers:{'Cache-Control':'no-store'}}); }
+        if(Object.keys(body).some(key=>key!=='cursor'))throw new Problem(400,'Reconciliation uses stored receipts only');
+        const cursor=body.cursor===undefined?undefined:uuid(body.cursor);
+        try { return Response.json({data:await reconcileStoredAiBilling(cursor)},{headers:{'Cache-Control':'no-store'}}); }
         catch { throw new Problem(503,'Billing reconciliation unavailable. Existing holds remain reserved.'); }
       }
       if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'),db);

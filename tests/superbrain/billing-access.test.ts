@@ -17,5 +17,8 @@ it('accepts only an empty founder POST and sanitizes backend failures',async()=>
  expect((await handle(new Request('https://fixture'),['founder','billing-reconciliation'])).status).toBe(404);
  expect((await handle(post({receipt:'caller-supplied'}),['founder','billing-reconciliation'])).status).toBe(400);expect(mocks.reconcile).not.toHaveBeenCalled();
  mocks.reconcile.mockResolvedValue({settled:0});const response=await handle(post({}),['founder','billing-reconciliation']);expect(response.status).toBe(200);expect(response.headers.get('Cache-Control')).toBe('no-store');
+ expect((await handle(post({cursor:'not-a-uuid'}),['founder','billing-reconciliation'])).status).toBe(400);
+ const cursor='00000000-0000-4000-8000-000000000001';
+ expect((await handle(post({cursor}),['founder','billing-reconciliation'])).status).toBe(200);expect(mocks.reconcile).toHaveBeenLastCalledWith(cursor);
  mocks.reconcile.mockRejectedValue(new Error('secret backend details'));const failed=await handle(post({}),['founder','billing-reconciliation']);expect(failed.status).toBe(503);expect(await failed.text()).not.toContain('secret backend');
 });

@@ -72,13 +72,13 @@ export async function runBudgetedAi(input: Input, contract: AiCostContract, deps
 }
 
 type PendingAi = { id:string; pending_receipt:string; created_at:string; cost_contract:AiCostContract };
-type PendingBatch = { rows:PendingAi[]; pending:number; manual_review:number };
-type ReconciliationDependencies = Pick<PaidAiDependencies,'billing'|'settle'> & { pending():Promise<PendingBatch> };
+type PendingBatch = { rows:PendingAi[]; pending:number; manual_review:number; has_more:boolean };
+type ReconciliationDependencies = Pick<PaidAiDependencies,'billing'|'settle'> & { pending(cursor?:string):Promise<PendingBatch> };
 
 /** Retry billing lookup only. Never retry generation, release unknown holds, or renew quotes. */
-export async function reconcileAiBilling(deps:ReconciliationDependencies) {
-  const batch=await deps.pending();
-  if (!Array.isArray(batch.rows) || batch.rows.length>2 || !Number.isSafeInteger(batch.pending) || batch.pending<0 ||
+export async function reconcileAiBilling(deps:ReconciliationDependencies,cursor?:string) {
+  const batch=await deps.pending(cursor);
+  if (!Array.isArray(batch.rows) || batch.rows.length>2 || typeof batch.has_more!=='boolean' || (batch.has_more&&!batch.rows.length) || !Number.isSafeInteger(batch.pending) || batch.pending<0 ||
     !Number.isSafeInteger(batch.manual_review) || batch.manual_review<0) throw new Error('Billing reconciliation unavailable');
   let settled=0, unresolved=0, overruns=0;
   for (const row of batch.rows) {
@@ -98,12 +98,12 @@ export async function reconcileAiBilling(deps:ReconciliationDependencies) {
       if(cents>Math.ceil(c.maximumUsdMicros*c.sgdCentsPerUsdCeiling/1000000))overruns++;
     } catch { unresolved++; }
   }
-  return {settled,unresolved,overruns,pendingAtStart:batch.pending,manualReview:batch.manual_review};
+  return {settled,unresolved,overruns,pendingAtStart:batch.pending,manualReview:batch.manual_review,nextCursor:batch.has_more?batch.rows.at(-1)!.id:null};
 }
-export async function reconcileStoredAiBilling() {
+export async function reconcileStoredAiBilling(cursor?:string) {
   const deps=productionDependencies();
   if(!deps)throw new Error('Billing reconciliation unavailable');
-  return reconcileAiBilling(deps);
+  return reconcileAiBilling(deps,cursor);
 }
 
 function productionDependencies(): (PaidAiDependencies & ReconciliationDependencies) | undefined {
@@ -121,7 +121,7 @@ function productionDependencies(): (PaidAiDependencies & ReconciliationDependenc
     signal:AbortSignal.any([...(init?.signal ? [init.signal] : []), AbortSignal.timeout(8000)]),
   })});
   return {
-    pending: async()=>rpc('gb_budget_pending_ai',{}),
+    pending: async(cursor)=>rpc('gb_budget_pending_ai',{after_id:cursor??null}),
     reserve: async (id, cents, contract) => {
       const result = await rpc('gb_budget_reserve_ai', {request_id:id, contract});
       return result.acquired === true && result.reserved_cents === cents;

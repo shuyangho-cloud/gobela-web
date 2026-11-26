@@ -207,7 +207,14 @@ it('pending billing inventory is service-only and bounded, with unknown receipts
  await db.exec('set role service_role');
  const {rows}=await db.query<{result:any}>('select public.gb_budget_pending_ai() result');
  expect(rows[0].result.rows).toHaveLength(2);expect(rows[0].result.pending).toBe(4);expect(rows[0].result.manual_review).toBe(1);
+ expect(rows[0].result.has_more).toBe(true);
+ const next=await db.query<{result:any}>('select public.gb_budget_pending_ai($1) result',[rows[0].result.rows[1].id]);
+ expect(next.rows[0].result.rows).toHaveLength(1);expect(next.rows[0].result.has_more).toBe(false);
+ await expect(db.query('select public.gb_budget_pending_ai($1)',[id(999)])).rejects.toThrow('Unknown billing cursor');
  expect(Object.keys(rows[0].result.rows[0]).sort()).toEqual(['cost_contract','created_at','id','pending_receipt']);
  await db.exec('reset role');
  expect((await db.query<{n:number}>('select count(*)::int n from gb_private.budget_reservations where actual_cents is null')).rows[0].n).toBe(4);
+ await settle(2,50,'gateway:gen_fixture2');
+ const afterSettlement=await db.query<{result:any}>('select public.gb_budget_pending_ai($1) result',[id(2)]);
+ expect(afterSettlement.rows[0].result.rows).toHaveLength(1);
 });

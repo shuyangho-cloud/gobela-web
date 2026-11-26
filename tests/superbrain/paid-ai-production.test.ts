@@ -27,7 +27,7 @@ it('reconciles stored receipts with AI off, without reserving or generating agai
  const created=new Date(Date.now()-7200000).toISOString();
  const c={version:1,model:'provider/model',provider:'provider',evidence:'Historical test quote',reviewedAt:new Date(Date.now()-7201000).toISOString(),expiresAt:new Date(Date.now()-3600000).toISOString(),maximumUsdMicros:10000,sgdCentsPerUsdCeiling:150,maximumInputBytes:1000,maximumOutputTokens:600};
  vi.stubEnv('SUPERBRAIN_AI_ENABLED','false');vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL','https://fixture.supabase.co');vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY','fixture-only');
- mocks.rpc.mockImplementation((name:string)=>({abortSignal:async()=>({data:name==='gb_budget_pending_ai'?{rows:[{id:'00000000-0000-4000-8000-000000000001',pending_receipt:'gateway:gen_delayed',created_at:created,cost_contract:c}],pending:1,manual_review:0}:{settled:true},error:null})}));
+ mocks.rpc.mockImplementation((name:string)=>({abortSignal:async()=>({data:name==='gb_budget_pending_ai'?{rows:[{id:'00000000-0000-4000-8000-000000000001',pending_receipt:'gateway:gen_delayed',created_at:created,cost_contract:c}],pending:1,manual_review:0,has_more:false}:{settled:true},error:null})}));
  mocks.billing.mockResolvedValue({id:'gen_delayed',model:c.model,providerName:c.provider,totalCost:0.001,isByok:false,createdAt:created});
  expect((await reconcileStoredAiBilling()).settled).toBe(1);
  expect(mocks.generate).not.toHaveBeenCalled();
