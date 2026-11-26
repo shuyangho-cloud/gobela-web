@@ -11,7 +11,7 @@ it('requires verified founder authorization before reading billing receipts',asy
  mocks.auth.mockResolvedValue({db:{},user:{id:'parent',user_metadata:{founder:true}}});mocks.founder.mockRejectedValue(new Problem(403,'Founder required'));
  expect((await handle(new Request('https://fixture'),['founder','billing-reconciliation'])).status).toBe(403);expect(mocks.reconcile).not.toHaveBeenCalled();
 });
-it('accepts only an empty founder POST and sanitizes backend failures',async()=>{
+it('accepts only founder POSTs with an optional validated cursor and sanitizes failures',async()=>{
  mocks.auth.mockResolvedValue({db:{},user:{id:'founder'}});mocks.founder.mockResolvedValue(undefined);
  const post=(body:unknown)=>new Request('https://fixture',{method:'POST',body:JSON.stringify(body)});
  expect((await handle(new Request('https://fixture'),['founder','billing-reconciliation'])).status).toBe(404);
