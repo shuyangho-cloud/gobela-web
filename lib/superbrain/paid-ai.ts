@@ -71,7 +71,42 @@ export async function runBudgetedAi(input: Input, contract: AiCostContract, deps
   }
 }
 
-function productionDependencies(): PaidAiDependencies | undefined {
+type PendingAi = { id:string; pending_receipt:string; created_at:string; cost_contract:AiCostContract };
+type PendingBatch = { rows:PendingAi[]; pending:number; manual_review:number; has_more:boolean };
+type ReconciliationDependencies = Pick<PaidAiDependencies,'billing'|'settle'> & { pending(cursor?:string):Promise<PendingBatch> };
+
+/** Retry billing lookup only. Never retry generation, release unknown holds, or renew quotes. */
+export async function reconcileAiBilling(deps:ReconciliationDependencies,cursor?:string) {
+  const batch=await deps.pending(cursor);
+  if (!Array.isArray(batch.rows) || batch.rows.length>2 || typeof batch.has_more!=='boolean' || (batch.has_more&&!batch.rows.length) || !Number.isSafeInteger(batch.pending) || batch.pending<0 ||
+    !Number.isSafeInteger(batch.manual_review) || batch.manual_review<0) throw new Error('Billing reconciliation unavailable');
+  let settled=0, unresolved=0, overruns=0;
+  for (const row of batch.rows) {
+    try {
+      const created=Date.parse(row.created_at);
+      // Stored evidence is checked at reservation time, not renewed at reconciliation.
+      const c=Number.isFinite(created) && created<=Date.now() && parseAiCostContract(JSON.stringify(row.cost_contract),row.cost_contract?.model,created);
+      if (!c || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.id) || !/^gateway:gen_[A-Za-z0-9_-]{1,120}$/.test(row.pending_receipt)) throw new Error('Unverified reservation');
+      const receipt=row.pending_receipt, id=receipt.slice('gateway:'.length);
+      const bill=await deps.billing(id), billed=Date.parse(bill.createdAt);
+      if (bill.id!==id || bill.model!==c.model || bill.providerName!==c.provider || bill.isByok!==false ||
+        !Number.isFinite(bill.totalCost) || bill.totalCost<0 || !Number.isFinite(billed) || billed> Date.now() || billed<created-60000) throw new Error('Unverified billing');
+      const micros=Math.ceil(bill.totalCost*1000000), cents=Math.ceil(micros*c.sgdCentsPerUsdCeiling/1000000);
+      if (!Number.isSafeInteger(micros*c.sgdCentsPerUsdCeiling) || !Number.isSafeInteger(cents) || cents>2147483647) throw new Error('Manual reconciliation required');
+      // Existing DB settlement enforces receipt/replay conflicts and halts on overruns.
+      await deps.settle(row.id,micros,receipt,bill.createdAt); settled++;
+      if(cents>Math.ceil(c.maximumUsdMicros*c.sgdCentsPerUsdCeiling/1000000))overruns++;
+    } catch { unresolved++; }
+  }
+  return {settled,unresolved,overruns,pendingAtStart:batch.pending,manualReview:batch.manual_review,nextCursor:batch.has_more?batch.rows.at(-1)!.id:null};
+}
+export async function reconcileStoredAiBilling(cursor?:string) {
+  const deps=productionDependencies();
+  if(!deps)throw new Error('Billing reconciliation unavailable');
+  return reconcileAiBilling(deps,cursor);
+}
+
+function productionDependencies(): (PaidAiDependencies & ReconciliationDependencies) | undefined {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key || typeof window !== 'undefined') return;
@@ -86,6 +121,7 @@ function productionDependencies(): PaidAiDependencies | undefined {
     signal:AbortSignal.any([...(init?.signal ? [init.signal] : []), AbortSignal.timeout(8000)]),
   })});
   return {
+    pending: async(cursor)=>rpc('gb_budget_pending_ai',{after_id:cursor??null}),
     reserve: async (id, cents, contract) => {
       const result = await rpc('gb_budget_reserve_ai', {request_id:id, contract});
       return result.acquired === true && result.reserved_cents === cents;

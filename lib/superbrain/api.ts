@@ -1,4 +1,5 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
+import {reconcileStoredAiBilling} from './paid-ai';
 import {founderBrief,businessAnswer,type BusinessSnapshot} from './founder-brain';
 import { authenticate, checked, command, founder } from './db';
 import { actionPayload, campaignDraft, categories, choice, httpsUrl, integer, object, Problem, recommend, safeError, text, timestamp, uuid, type Listing } from './domain';
@@ -73,6 +74,13 @@ export async function handle(request: Request, path: string[]) {
     let result: unknown;
     if (area === 'founder') {
       await founder(db, user.id);
+      if(resource==='billing-reconciliation') {
+        if(method!=='POST' || id)throw new Problem(404,'Route not found');
+        if(Object.keys(body).some(key=>key!=='cursor'))throw new Problem(400,'Reconciliation uses stored receipts only');
+        const cursor=body.cursor===undefined?undefined:uuid(body.cursor);
+        try { return Response.json({data:await reconcileStoredAiBilling(cursor)},{headers:{'Cache-Control':'no-store'}}); }
+        catch { throw new Problem(503,'Billing reconciliation unavailable. Existing holds remain reserved.'); }
+      }
       if(resource==='marketing-assets' && id && method==='GET')return await marketingAssetResponse(id,request.headers.get('range'),db);
       if(resource==='publishing-media'&&id&&method==='GET')return await publishingAssetResponse(id,request.headers.get('range'),db);
       if((resource==='marketing' && (method==='GET'||method==='POST'))||(resource==='marketing-production'&&method==='POST'&&id)) {
