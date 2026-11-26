@@ -27,6 +27,7 @@ beforeAll(async()=>{
  for(const g of captured.grants)await db.exec(`grant ${g.privilege_type} on public.${ident(g.table_name)} to ${ident(g.grantee)};`);
  for(const p of captured.policies)await db.exec(`create policy ${ident(p.policyname)} on public.${ident(p.tablename)} as ${p.permissive} for ${p.cmd} to ${p.roles.map(ident).join(',')}${p.qual?' using ('+p.qual+')':''}${p.with_check?' with check ('+p.with_check+')':''};`);
  for(const m of manifest.migrations)await db.exec(readFileSync(resolve('../childassist',m.path),'utf8'));
+ for(const migration of ['20261123012648_superbrain_weekly_budget.sql','20261123025456_superbrain_ai_billing_receipts.sql','20261123052714_superbrain_ai_cost_evidence.sql'])await db.exec(readFileSync(resolve('../childassist/supabase/migrations',migration),'utf8'));
  await db.exec(`insert into auth.users values('${founder}'),('${parent}'),('${other}');insert into public.profiles(id) values('${founder}'),('${parent}'),('${other}');insert into public.gb_founders values('${founder}');insert into public.gobela_reviews(id,profile_id,type,tip) values('parent-review','${parent}','play','Original parent words');`);
 },120000);
 afterAll(async()=>{await db.close();});

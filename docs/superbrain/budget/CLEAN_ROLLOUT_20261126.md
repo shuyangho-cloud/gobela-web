@@ -1,0 +1,15 @@
+# Budget-only review —26November2026
+
+This branch is rebuilt from current web main4c085b1 rather than stacking on Payments PR6. Only Superbrain AI budgeting runtime, its tests and review/rehearsal tooling are included. No Payments tab/Stripe adapter, mobile/native source, partner listing update, private asset change or feature activation is introduced. Existing Next16.4.6 security patch remains intact.
+
+Companion database branch is rebuilt from mainbd000fe and contains exactly the three previously rehearsed budget migrations. No Flutter/native files are included. File bytes match the earlier reviewed/rehearsed migrations; the immutable manifest still validates them. The earlier combined branch/PR25 is historical context, not a branch to merge wholesale into main.
+
+Cost evidence: get_ai_gateway_model confirms GPT-4.1 mini served by openai/azure, context1047576, standard input0.40USD/M and output1.60USD/M; openai priority input0.70USD/M/output2.80USD/M. Cache-write/internal-reasoning prices0. OpenAI is proposed for initial evidence-grounded text summaries, with no tools/images/files. COST_PROPOSAL_20261126.json uses the whole model context plus600output at higher listed rates (0.7349832USD), rounded to a proposed0.80USD bound. Proposed200SGDcents/USD is an unverified conservative policy ceiling, not an actual exchange-rate assertion. Nothing is configured or activated. Provider ZDR/no-training flags do not establish Gateway logs/processor acceptance or inference residency.
+
+The connected account returns403 for project-scoped Gateway usage, project budget and team routing reads. A local Vercel CLI executable is unavailable, so the mapped read-only fallback cannot be used here. No unchanged retry, blind reauthentication, broader key creation, plan upgrade, budget mutation or routing change attempted. These account reads remain unresolved; do not infer zero spend or no routing rules.
+
+Keep production AI/Meta/execution off and budget policy disabled. The atomic SQL generator preserves founder and disabled controls, verifies exact migration hashes and registers all3versions in one transaction. Only a separately approved disabled rollout is proposed; live billing acceptance/activation is a later gated step. Publishing/ads/mobile/pg_net repair are not part of it.
+
+Fresh clean-branch suite:117tests passed/5live-environment tests skipped. Eleven Payments-specific tests are intentionally absent because that feature is excluded; this is not a reduction in budget coverage. The ordinary locked dependencies were fully installed before the valid run; an earlier dependency-race attempt was invalid and not counted.
+
+Read-only Supabase CLI preflight succeeded through the explicitly verified linked projectmcyvyqieygpbtcheouzr: rolepostgres, expected sole foundertrue, budget tableabsent. It did not apply migrations. prepare-budget-release.py now emits plain SQL by default for the Management-API route; --psql optionally adds ON_ERROR_STOP for a psql operator. Never send a psql metacommand through the SQL HTTP API. No database passwords/tokens are included in generated files.
