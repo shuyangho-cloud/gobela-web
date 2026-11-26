@@ -1,0 +1,48 @@
+{
+  "status": "DRAFT_NOT_CONFIGURED_NOT_ACTIVATED",
+  "checked_date": "2026-11-26",
+  "candidate_model": "openai/gpt-4.1-mini",
+  "candidate_provider": "openai",
+  "purpose": "initial text-only evidence-grounded summaries; not clinical interpretation or tool execution",
+  "metadata_source": "Vercel get_ai_gateway_model read26November2026",
+  "verified_endpoint_metadata": {
+    "context_tokens": 1047576,
+    "max_completion_tokens": 32768,
+    "standard_usd_per_input_token": "0.0000004",
+    "standard_usd_per_output_token": "0.0000016",
+    "priority_usd_per_input_token": "0.0000007",
+    "priority_usd_per_output_token": "0.0000028",
+    "cache_write_usd": "0",
+    "internal_reasoning_usd": "0",
+    "has_zdr": true,
+    "has_no_training": true,
+    "headquarters_country": "US"
+  },
+  "bounded_application_envelope": {
+    "input_bytes": 32000,
+    "output_tokens": 600,
+    "SDK_retries": 0,
+    "tools": false,
+    "images_or_files": false,
+    "provider_only": "openai",
+    "model_fallbacks": []
+  },
+  "conservative_calculation": {
+    "whole_context_plus600output_usd": "0.7349832",
+    "candidate_maximum_usd_micros": 800000,
+    "candidate_sgd_cents_per_usd_ceiling": 200,
+    "candidate_reserved_sgd_cents": 160,
+    "fx_ceiling_is_policy_proposal_not_a_verified_exchange_rate": true,
+    "pricing_refresh_required_before_use": true,
+    "service_tier": "higher currently listed priority prices used conservatively; no priority tier requested"
+  },
+  "not_verified": [
+    "team routing rules (403)",
+    "project attributed usage (403)",
+    "account/project Gateway budgets (403)",
+    "FX/fees/tax ceiling and processor acceptance",
+    "live model quality/billing receipt",
+    "continuous quote refresh policy"
+  ],
+  "limitations": "Endpoint metadata is not acceptance of processor terms, proof of inference residency or a guarantee of all future charges. Current read permissions are blocked; no key/permissions/plan/budget changed. No deployment cost contract generated."
+}
