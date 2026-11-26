@@ -1,7 +1,7 @@
 """Generate only; never connects to a database. Reviewed owner execution required."""
 import argparse,hashlib,json,uuid
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('childassist');p.add_argument('output');p.add_argument('--founder-id',required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('childassist');p.add_argument('output');p.add_argument('--founder-id',required=True);p.add_argument('--psql',action='store_true',help='Include psql metacommand; omit for Management API');a=p.parse_args()
 founder=str(uuid.UUID(a.founder_id));root=Path(__file__).resolve().parents[2];db=Path(a.childassist).resolve()
 manifest=json.loads((root/'docs/superbrain/budget/release-migrations.json').read_text())
 files=[]
@@ -10,8 +10,9 @@ for m in manifest['migrations']:
  if hashlib.sha256(raw).hexdigest()!=m['sha256']:raise SystemExit('Migration hash differs: '+m['path'])
  files.append((m,source))
 versions=','.join("'"+m['version']+"'" for m,_ in files)
+psql_guard='\\set ON_ERROR_STOP on' if a.psql else ''
 prologue=f'''-- GENERATED REVIEW ONLY; not a deployment authorization. Never use against an unreviewed project.
-\\set ON_ERROR_STOP on
+{psql_guard}
 begin;
 set local lock_timeout='2s';
 set local statement_timeout='30s';
