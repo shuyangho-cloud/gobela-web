@@ -33,7 +33,7 @@ export async function checkRateLimit(
       .maybeSingle();
 
     if (selectErr) {
-      console.error("Rate limit select error:", selectErr.message);
+      console.error(`Rate limit select error (failing open, route=${route}):`, selectErr.message);
       return true;
     }
 
@@ -67,7 +67,7 @@ export async function checkRateLimit(
 
     return true;
   } catch (err) {
-    console.error("Rate limit check failed:", err instanceof Error ? err.message : err);
+    console.error(`Rate limit check failed (failing open, route=${route}):`, err instanceof Error ? err.message : err);
     return true;
   }
 }

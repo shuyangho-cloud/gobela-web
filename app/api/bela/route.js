@@ -1,52 +1,23 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { SEARCH_CLASSES_TOOL, searchClasses } from "@/lib/bela/classSearch";
+import { buildSystemPrompt, MODE_CONFIG } from "@/lib/bela/prompts";
+import {
+	isAllowedOrigin,
+	isBelaEnabled,
+	MAX_BODY_BYTES,
+	validateBelaRequest,
+} from "@/lib/bela/request";
+import { pickMood, selectCards } from "@/lib/bela/response";
+import { checkRateLimit, clientIdentifier } from "@/lib/rateLimit";
 
-// Worst case is 3 sequential provider attempts at PROVIDER_TIMEOUT_MS each
-// (36s) plus request overhead -- give the function room for that instead
-// of relying on the platform default, which can be lower.
+// Worst case is a few sequential provider/tool calls; TOTAL_BUDGET_MS keeps
+// the whole request inside this limit instead of relying on the platform
+// default, which can be lower.
 export const maxDuration = 45;
-
-const BELA_SYSTEM = `You are Bela — GoBela's warm, helpful AI companion for Singapore families. You live on the GoBela website and inside the GoBela app.
-
-ABOUT GOBELA:
-GoBela is a family weekend planner built for Singapore parents. The app is available on iOS (App Store) and Android (Google Play). Here is what GoBela does:
-
-• Discover tab: Browse curated enrichment classes and kids' activities in Singapore — Sports, Music, Art, Dance, Drama, Swimming, Martial Arts, and more. Filter by category, distance, and price. Tap any class to see details, reviews, and pricing, then tap "Book Trial" to book a trial session.
-• Dine tab: Find family-friendly restaurants nearby. Shows Google ratings, Street View previews, Open Now status, and Near Me sorting.
-• GoBela Circle tab: A parent community feed for sharing weekend tips, discoveries, and recommendations.
-• Profile tab: Set up your child's profile (name, age, gender, interests), view My Bookings, and manage Saved Classes.
-• Weekend Mode: Tap the Weekend button on Discover for a curated weekend plan combining classes, dining, and activities.
-• Pass / Subscription: Monthly trial pass — one trial class per month at any partner school. Upgrade in the Profile tab.
-• Booking flow: Browse Discover → tap a class → choose a time slot → confirm → pay via card. Booking confirmation sent instantly.
-• Saved Classes: Tap the bookmark icon on any class to save it. View all in Profile → Saved Classes.
-• Recipes: Family-friendly meal ideas tailored to the child's mood (hungry, picky, sick, adventurous).
-• Bela AI (that's you!): In the app, available via the chat icon in Discover. On the website, you're the chat widget helping families before they download.
-
-HOW TO GUIDE USERS:
-- If asked "how do I find classes?" → open the GoBela app → Discover tab → browse or filter by category.
-- If asked "how do I book a class?" → tap any class in Discover → tap "Book Trial" → choose a slot → pay.
-- If asked "where are my bookings?" → Profile tab → My Bookings.
-- If asked about the pass → Profile tab → upgrade for the monthly trial pass.
-- If asked "how do I save a class?" → tap the bookmark icon on any class card.
-- If asked how to download → App Store (iOS) or Google Play (Android), search "GoBela".
-
-YOUR ROLE ON THE WEBSITE:
-You are a preview of the full Bela experience. Help visitors understand what GoBela does, answer parenting and weekend planning questions, and encourage them to download the app. If someone asks something better answered inside the app (like specific class availability or booking), tell them to download GoBela.
-
-CONTENT:
-Help parents with:
-- What to cook (meal ideas, recipes, Singapore-friendly ingredients)
-- Where to dine (family-friendly restaurants, hawker centres, cafés)
-- What enrichment classes or activities to book for their child
-- How to plan weekends (personalised to kids' ages, mood, weather, budget)
-
-Singapore context to reference:
-- Places: East Coast Park, Gardens by the Bay, Sentosa, VivoCity, Polliwogs, KidZania, Science Centre, hawker centres (Old Airport Road, Maxwell, Lau Pa Sat)
-- Food: chicken rice, char kway teow, nasi lemak, laksa, roti prata, bak kut teh
-- Local context: HDB estates, MRT lines, NTUC FairPrice, school holidays, rainy season
-
-TONE: Warm, practical, Singapore-specific, concise (2–4 sentences max). Always end with a helpful next step or follow-up question.`;
+const TOTAL_BUDGET_MS = 40000;
 
 const anthropic = process.env.ANTHROPIC_API_KEY
 	? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -56,13 +27,9 @@ const openai = process.env.OPENAI_API_KEY
 	: null;
 const geminiApiKey = process.env.GEMINI_API_KEY || null;
 
-// claude-sonnet-4-20250514 (a dated snapshot) carries an active Anthropic
-// deprecation warning with an end-of-life of 2026-06-15 -- already past as
-// of this fix -- so it was silently one bad-model-ID away from failing
-// even after the account-level usage cap lifts. claude-sonnet-4-6 is the
-// current, non-deprecated rolling alias and was the confirmed-working
-// value before this file's model IDs were last touched.
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
+// Haiku is plenty for short, grounded chat replies and much cheaper than
+// Sonnet; ANTHROPIC_MODEL still overrides it.
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 // gemini-2.5-flash returns a live 404 ("no longer available to new users")
 // -- confirmed by forcing it to the front of the provider chain and
@@ -74,25 +41,29 @@ const PROVIDER_PRIORITY = (process.env.BELA_PROVIDER_PRIORITY || "anthropic,open
 	.map((value) => value.trim().toLowerCase())
 	.filter(Boolean);
 
-function sanitizeMaxTokens(value) {
-	const parsed = Number(value);
-	if (!Number.isFinite(parsed)) return 400;
-	return Math.max(64, Math.min(1200, Math.floor(parsed)));
-}
+// Per-IP limits. The limiter fails open (see lib/rateLimit.ts), so a
+// Supabase hiccup never takes Bela down — it only logs.
+const RATE_LIMITS = [
+	{ route: "bela", max: 20, windowSeconds: 60 },
+	{ route: "bela-day", max: 100, windowSeconds: 86400 },
+];
 
-function normalizeMessages(messages) {
-	if (!Array.isArray(messages) || messages.length === 0) return null;
-	const allowedRoles = new Set(["user", "assistant"]);
-	const normalized = [];
-	for (const message of messages) {
-		if (!message || typeof message !== "object") return null;
-		const role = typeof message.role === "string" ? message.role.trim().toLowerCase() : "";
-		const content = typeof message.content === "string" ? message.content.trim() : "";
-		if (!allowedRoles.has(role) || !content) return null;
-		normalized.push({ role, content });
-	}
-	return normalized.length ? normalized : null;
-}
+// Gemini isn't given the class-search tool, so it runs with the
+// "can't look up classes" prompt instead.
+const TOOL_PROVIDERS = new Set(["anthropic", "openai"]);
+const MAX_TOOL_ROUNDS = 4;
+const MAX_SEARCHES_PER_REQUEST = 6;
+
+const OPENAI_SEARCH_TOOL = {
+	type: "function",
+	function: {
+		name: SEARCH_CLASSES_TOOL.name,
+		description: SEARCH_CLASSES_TOOL.description,
+		parameters: SEARCH_CLASSES_TOOL.input_schema,
+	},
+};
+
+const FALLBACK_REPLY = "Sorry, I got a little muddled there — could you ask me that again?";
 
 function getAvailableProviders() {
 	const configured = {
@@ -110,12 +81,29 @@ function getAvailableProviders() {
 	return ordered;
 }
 
-// Bounds each provider attempt so a hung/slow provider can't burn the
-// whole Vercel function's execution budget before the loop ever reaches a
-// working fallback tier -- previously unbounded (SDK defaults are ~10 min).
+function getSupabase() {
+	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+	const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+	if (!url || !key) return null;
+	return createClient(url, key);
+}
+
+// Bounds each provider call so a hung/slow provider can't burn the whole
+// function's execution budget before the loop reaches a working fallback
+// tier -- SDK defaults are ~10 min.
 const PROVIDER_TIMEOUT_MS = 12000;
 
-async function callGemini(messages, system, maxTokens) {
+function callTimeout(deadline) {
+	const remaining = deadline - Date.now();
+	if (remaining < 1500) {
+		const err = new Error("Bela time budget exhausted");
+		err.code = "budget_exhausted";
+		throw err;
+	}
+	return Math.min(PROVIDER_TIMEOUT_MS, remaining);
+}
+
+async function callGemini(ctx) {
 	const res = await fetch(
 		`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
 		{
@@ -125,15 +113,15 @@ async function callGemini(messages, system, maxTokens) {
 				"X-goog-api-key": geminiApiKey,
 			},
 			body: JSON.stringify({
-				systemInstruction: { parts: [{ text: system || BELA_SYSTEM }] },
+				systemInstruction: { parts: [{ text: ctx.system }] },
 				// Gemini uses "model" where Anthropic/OpenAI use "assistant".
-				contents: messages.map((m) => ({
+				contents: ctx.messages.map((m) => ({
 					role: m.role === "assistant" ? "model" : "user",
 					parts: [{ text: m.content }],
 				})),
-				generationConfig: { maxOutputTokens: maxTokens },
+				generationConfig: { maxOutputTokens: ctx.maxTokens },
 			}),
-			signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+			signal: AbortSignal.timeout(callTimeout(ctx.deadline)),
 		},
 	);
 	if (!res.ok) {
@@ -154,35 +142,75 @@ async function callGemini(messages, system, maxTokens) {
 		.join("");
 }
 
-async function callAnthropic(messages, system, maxTokens) {
-	const response = await anthropic.messages.create(
-		{
-			model: ANTHROPIC_MODEL,
-			max_tokens: maxTokens,
-			system: system || BELA_SYSTEM,
-			messages,
-		},
-		{ timeout: PROVIDER_TIMEOUT_MS },
-	);
-	return response.content
-		.filter((block) => block.type === "text")
-		.map((block) => block.text)
-		.join("");
+async function callAnthropic(ctx) {
+	const tools = ctx.useTools ? [SEARCH_CLASSES_TOOL] : undefined;
+	const convo = ctx.messages.map((m) => ({ role: m.role, content: m.content }));
+	for (let round = 0; ; round += 1) {
+		// After MAX_TOOL_ROUNDS the tools stay declared (earlier turns
+		// reference them) but tool_choice "none" forces a text answer.
+		const canSearch = Boolean(tools) && round < MAX_TOOL_ROUNDS;
+		const response = await anthropic.messages.create(
+			{
+				model: ANTHROPIC_MODEL,
+				max_tokens: ctx.maxTokens,
+				system: ctx.system,
+				messages: convo,
+				...(tools ? { tools, tool_choice: { type: canSearch ? "auto" : "none" } } : {}),
+			},
+			{ timeout: callTimeout(ctx.deadline) },
+		);
+		const toolUses = response.content.filter((block) => block.type === "tool_use");
+		if (!canSearch || toolUses.length === 0) {
+			return response.content
+				.filter((block) => block.type === "text")
+				.map((block) => block.text)
+				.join("");
+		}
+		convo.push({ role: "assistant", content: response.content });
+		const results = [];
+		for (const use of toolUses) {
+			results.push({
+				type: "tool_result",
+				tool_use_id: use.id,
+				content: await ctx.runTool(use.name, use.input),
+			});
+		}
+		convo.push({ role: "user", content: results });
+	}
 }
 
-async function callOpenAI(messages, system, maxTokens) {
-	const completion = await openai.chat.completions.create(
-		{
-			model: OPENAI_MODEL,
-			max_tokens: maxTokens,
-			messages: [
-				{ role: "system", content: system || BELA_SYSTEM },
-				...messages,
-			],
-		},
-		{ timeout: PROVIDER_TIMEOUT_MS },
-	);
-	return completion.choices[0]?.message?.content ?? "";
+async function callOpenAI(ctx) {
+	const tools = ctx.useTools ? [OPENAI_SEARCH_TOOL] : undefined;
+	const convo = [{ role: "system", content: ctx.system }, ...ctx.messages];
+	for (let round = 0; ; round += 1) {
+		const canSearch = Boolean(tools) && round < MAX_TOOL_ROUNDS;
+		const completion = await openai.chat.completions.create(
+			{
+				model: OPENAI_MODEL,
+				max_tokens: ctx.maxTokens,
+				messages: convo,
+				...(tools ? { tools, tool_choice: canSearch ? "auto" : "none" } : {}),
+			},
+			{ timeout: callTimeout(ctx.deadline) },
+		);
+		const message = completion.choices[0]?.message;
+		const calls = (message?.tool_calls ?? []).filter((call) => call.type === "function");
+		if (!canSearch || calls.length === 0) return message?.content ?? "";
+		convo.push(message);
+		for (const call of calls) {
+			let input = {};
+			try {
+				input = JSON.parse(call.function.arguments || "{}");
+			} catch {
+				// Malformed arguments: search with no filters rather than fail.
+			}
+			convo.push({
+				role: "tool",
+				tool_call_id: call.id,
+				content: await ctx.runTool(call.function.name, input),
+			});
+		}
+	}
 }
 
 function classifyGenericProviderError(error) {
@@ -201,14 +229,17 @@ function classifyGenericProviderError(error) {
 }
 
 function classifyProviderError(provider, error) {
+	if (error?.code === "budget_exhausted") {
+		return { status: 503, code: "upstream_unavailable", message: "Bela is temporarily unavailable — try again in a moment." };
+	}
 	if (provider === "anthropic") return classifyAnthropicError(error);
 	return classifyGenericProviderError(error);
 }
 
-async function callProvider(provider, messages, system, maxTokens) {
-	if (provider === "anthropic") return callAnthropic(messages, system, maxTokens);
-	if (provider === "openai") return callOpenAI(messages, system, maxTokens);
-	if (provider === "gemini") return callGemini(messages, system, maxTokens);
+async function callProvider(provider, ctx) {
+	if (provider === "anthropic") return callAnthropic(ctx);
+	if (provider === "openai") return callOpenAI(ctx);
+	if (provider === "gemini") return callGemini(ctx);
 	throw new Error(`Unsupported provider: ${provider}`);
 }
 
@@ -246,63 +277,140 @@ function classifyAnthropicError(error) {
 	return { status: 502, code: "upstream_unknown", message: "Bela couldn't respond right now — try again in a moment." };
 }
 
+function errorResponse(status, code, error, mood = "Sad") {
+	return NextResponse.json({ error, code, mood }, { status });
+}
+
+async function checkLimits(supabase, request) {
+	if (!supabase) {
+		console.error("[Bela API] Rate limit skipped (Supabase not configured) — failing open");
+		return true;
+	}
+	const identifier = clientIdentifier(request);
+	for (const limit of RATE_LIMITS) {
+		const allowed = await checkRateLimit(supabase, { ...limit, identifier });
+		if (!allowed) return false;
+	}
+	return true;
+}
+
 export async function POST(request) {
+	if (!isBelaEnabled()) {
+		return errorResponse(503, "bela_disabled", "Bela is taking a short break — please try again later.", "Tired");
+	}
+
+	if (!isAllowedOrigin(request.headers.get("origin"))) {
+		return errorResponse(403, "forbidden_origin", "This origin is not allowed to use Bela.");
+	}
+
+	const declaredLength = Number(request.headers.get("content-length"));
+	if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+		return errorResponse(413, "payload_too_large", "That request is too large.");
+	}
+
 	let body;
 	try {
-		body = await request.json();
+		const raw = await request.text();
+		if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+			return errorResponse(413, "payload_too_large", "That request is too large.");
+		}
+		body = JSON.parse(raw);
 	} catch (error) {
 		console.error("[Bela API] Invalid JSON body:", error.message);
 		return NextResponse.json({ error: "Invalid JSON body", code: "bad_request" }, { status: 400 });
 	}
 
-	const messages = normalizeMessages(body?.messages);
-	const system = typeof body?.system === "string" && body.system.trim()
-		? body.system.trim()
-		: BELA_SYSTEM;
-	const maxTokens = sanitizeMaxTokens(body?.max_tokens);
+	// Any caller-supplied `system` / `max_tokens` is ignored; old app builds
+	// still send `system`, which is only used to pick a server-side mode.
+	const validated = validateBelaRequest(body);
+	if (!validated.ok) {
+		return NextResponse.json({ error: validated.error, code: validated.code }, { status: validated.status });
+	}
+	const { mode, legacy, messages } = validated;
+	const config = MODE_CONFIG[mode];
 
-	if (!messages) {
-		return NextResponse.json(
-			{ error: "messages must be a non-empty array of { role, content } objects", code: "bad_request" },
-			{ status: 400 },
-		);
+	const supabase = getSupabase();
+	if (!(await checkLimits(supabase, request))) {
+		return errorResponse(429, "rate_limited", "You've been chatting a lot! Please take a short break and try again soon.", "Tired");
 	}
 
 	const providers = getAvailableProviders();
 	if (providers.length === 0) {
 		console.error("[Bela API] No AI providers configured for Bela route");
-		return NextResponse.json(
-			{ error: "Bela is not configured on the server right now.", code: "server_unconfigured" },
-			{ status: 503 },
-		);
+		return errorResponse(503, "server_unconfigured", "Bela is not configured on the server right now.");
 	}
 
 	const startTs = Date.now();
+	const deadline = startTs + TOTAL_BUDGET_MS;
 	let firstFailure = null;
 	for (let index = 0; index < providers.length; index += 1) {
 		const provider = providers[index];
 		const providerStart = Date.now();
+		// Fresh per attempt so a failed provider's searches never leak into
+		// the cards of the one that answers.
+		const searches = [];
+		const useTools = config.classSearch && TOOL_PROVIDERS.has(provider);
+		const ctx = {
+			messages,
+			maxTokens: config.maxTokens,
+			deadline,
+			useTools,
+			system: buildSystemPrompt(mode, { toolsAvailable: useTools }),
+			runTool: async (name, input) => {
+				if (name !== SEARCH_CLASSES_TOOL.name) return JSON.stringify({ error: `Unknown tool ${name}` });
+				if (searches.length >= MAX_SEARCHES_PER_REQUEST) {
+					return JSON.stringify({ error: "Search limit reached for this message. Answer with what you have." });
+				}
+				if (!supabase) {
+					return JSON.stringify({ error: "Class search is unavailable right now. Don't name any classes; suggest browsing Explore in the GoBela app." });
+				}
+				try {
+					const { outcome, payload } = await searchClasses(supabase, input);
+					searches.push(outcome.results.map((r) => r.row));
+					return JSON.stringify(payload);
+				} catch (error) {
+					console.error(`[Bela API] search_classes failed: ${error.message}`);
+					searches.push([]);
+					return JSON.stringify({ error: "Class search is unavailable right now. Don't name any classes; suggest browsing Explore in the GoBela app." });
+				}
+			},
+		};
 		try {
-			const reply = await callProvider(provider, messages, system, maxTokens);
+			let reply = await callProvider(provider, ctx);
+			if (!config.json && !reply.trim()) reply = FALLBACK_REPLY;
+			const cards = config.classSearch ? selectCards(reply, searches) : [];
+			const mood = pickMood({
+				mode,
+				userMessage: messages[messages.length - 1].content,
+				cards,
+				searched: searches.length > 0,
+			});
 			console.log(
-				`[Bela API] success provider=${provider} model=${provider === "anthropic" ? ANTHROPIC_MODEL : provider === "openai" ? OPENAI_MODEL : GEMINI_MODEL} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${maxTokens} fallback_count=${index}`,
+				`[Bela API] success provider=${provider} model=${provider === "anthropic" ? ANTHROPIC_MODEL : provider === "openai" ? OPENAI_MODEL : GEMINI_MODEL} mode=${mode} legacy=${legacy} searches=${searches.length} cards=${cards.length} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${config.maxTokens} fallback_count=${index}`,
 			);
-			return NextResponse.json(
-				index === 0
-					? { reply }
-					: { reply, provider_used: provider, fallback_count: index },
-			);
+			// `reply` (+ provider_used/fallback_count on fallback) is the
+			// original response shape; mode/mood/cards are additive.
+			return NextResponse.json({
+				reply,
+				...(index === 0 ? {} : { provider_used: provider, fallback_count: index }),
+				mode,
+				mood,
+				cards,
+			});
 		} catch (error) {
 			const classified = classifyProviderError(provider, error);
 			if (!firstFailure) firstFailure = classified;
 			console.error(
-				`[Bela API] provider_failed provider=${provider} code=${classified.code} status=${classified.status} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${maxTokens} detail=${error.message}`,
+				`[Bela API] provider_failed provider=${provider} code=${classified.code} status=${classified.status} mode=${mode} took=${Date.now() - providerStart}ms total=${Date.now() - startTs}ms messages=${messages.length} max_tokens=${config.maxTokens} detail=${error.message}`,
 			);
+			if (error?.code === "budget_exhausted") break;
 		}
 	}
 
-	return NextResponse.json(
-		{ error: firstFailure?.message || "Failed to get a response from Bela", code: firstFailure?.code || "upstream_unknown" },
-		{ status: firstFailure?.status || 502 },
+	return errorResponse(
+		firstFailure?.status || 502,
+		firstFailure?.code || "upstream_unknown",
+		firstFailure?.message || "Failed to get a response from Bela",
+		firstFailure?.status === 429 ? "Tired" : "Sad",
 	);
 }
